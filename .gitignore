@@ -25,3 +25,6 @@ Thumbs.db
 
 # Claude local config (machine/permission-specific)
 .claude/settings.local.json
+
+# Local scratch directory (never committed)
+local/
