@@ -190,6 +190,21 @@ def test_remove_category_via_api(client):
     assert client.get(f"/checklists/{cid}").json()["children"] == []
 
 
+def test_validate_import_is_public(client):
+    # Dry-run validation needs no token and writes nothing.
+    valid = client.post("/import/validate", json={"text": VALID_FIXTURE})
+    assert valid.status_code == 200
+    body = valid.json()
+    assert body["valid"] is True
+    assert body["summary"]["items"] > 0
+
+    bad = client.post("/import/validate", json={"text": "- [ ] Top\n\t- [ ] Leaf {Photoshop}\n"})
+    assert bad.json()["valid"] is False
+    assert any(e["kind"] == "tool" for e in bad.json()["errors"])
+    # Nothing was created.
+    assert client.get("/checklists").json() == []
+
+
 def test_clone_via_api(client):
     cid = _blank(client, "Source")
     cat = client.post(f"/checklists/{cid}/categories", json={"name": "Cat"}, headers=AUTH).json()
