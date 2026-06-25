@@ -9,6 +9,7 @@ scope (see [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) §2).
 
 ## End-user docs (German)
 
+- **Download (Windows)** — [Releases](https://github.com/automatix/receipt-board/releases) → `receipt-board-vX.Y.Z-windows.zip` (private repo: access required)
 - **Installation** — [`docs/INSTALL.md`](docs/INSTALL.md)
 - **Bedienungsanleitung** (user guide) — [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
 
