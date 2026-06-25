@@ -6,7 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Ilya Khanataev" }]
-dependencies = []
+dependencies = [
+    "alembic>=1.13",
+    "sqlalchemy>=2.0",
+]
 
 [dependency-groups]
 dev = [
