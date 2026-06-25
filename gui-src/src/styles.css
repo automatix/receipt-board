@@ -55,6 +55,19 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-size: 14px;
+  /* Content text is selectable/copyable (window opened with text_select=True). */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Controls themselves stay non-selectable for a native feel. */
+.btn,
+.toggle,
+.toolbar-group,
+.actions,
+.checkbox {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 header {
