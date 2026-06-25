@@ -111,6 +111,10 @@ Drei Wege (alle in der GUI):
 - **Alles-oder-nichts:** Bei **irgendeinem** Fehler wird **nichts** importiert; du erhältst
   einen genauen Bericht (Zeile + Wert). Behebe die Werte oder erweitere das Vokabular und
   importiere erneut.
+- **Vorab prüfen (Dry-Run):** Der Knopf **„Prüfen"** im Import-Dialog testet die Datei
+  **ohne** zu importieren — er zeigt entweder „✓ Importierbar: N Kategorien, M Einträge"
+  oder die genaue Fehlerliste (Zeile · Wert · Meldung). Erst **„Importieren"** schreibt.
+  Dasselbe geht per CLI: `receipt-board validate DATEI` (Exit 0 = importierbar, sonst 1).
 
 **Gültiges Beispiel** (Einrückung = Tabs):
 

@@ -201,6 +201,7 @@ notations-konforme Fixture getestet.
 | `GET /checklists/{id}` | public | **nested** Export (§Export) |
 | `GET /search?q=` | public | flache Treffer |
 | `POST /items/{id}/done` | public | `{done: bool}` — einzige öffentliche Schreib-Op |
+| `POST /import/validate` | public | `{text}` → Dry-Run-Report `{valid,errors,warnings,summary}` (schreibt nichts) |
 | `POST /checklists` (blank/import/clone) | privileged | anlegen |
 | `DELETE /checklists/{id}` | privileged | löschen |
 | `POST/PATCH/DELETE /categories…`, `…/items…` | privileged | CRUD |
@@ -216,9 +217,9 @@ notations-konforme Fixture getestet.
 
 - HTTP-Client gegen den laufenden Server (Public-Surface); Port aus `runtime.json`.
 - Befehle (F1): `receipt-board export [--checklist ID]`, `search QUERY`,
-  `item done ID`, `item undone ID`; Ausgabe `--json`.
-- Exit-Code `0` ok, `≠0` bei Fehler. **Voraussetzung:** App läuft (sonst Fehler;
-  Headless-Modus → Backlog).
+  `item done ID`, `item undone ID`, `validate PATH` (Dry-Run-Importprüfung); Ausgabe `--json`.
+- Exit-Code `0` ok, `≠0` bei Fehler (`validate` → `1`, wenn die Datei nicht importierbar ist).
+  **Voraussetzung:** App läuft (sonst Fehler; Headless-Modus → Backlog).
 
 ---
 

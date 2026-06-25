@@ -74,6 +74,7 @@ uv run receipt-board export [--checklist ID] [--json]
 uv run receipt-board search "QUERY" [--json]
 uv run receipt-board item done ID
 uv run receipt-board item undone ID
+uv run receipt-board validate PATH [--json]   # dry-run: is a Markdown file importable?
 ```
 
 Exit code `0` on success, non-zero on error (e.g. the app is not running).
