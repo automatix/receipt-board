@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, sessionmaker
 
 from receipt_board import __version__
@@ -15,6 +18,7 @@ def create_app(
     *,
     session_token: str,
     app_version: str = __version__,
+    gui_dir: str | Path | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Receipt Board", version=app_version)
     app.state.session_factory = session_factory
@@ -24,4 +28,9 @@ def create_app(
     register_error_handlers(app)
     app.include_router(public_router)
     app.include_router(privileged_router)
+
+    # Serve the bundled GUI same-origin at /app (only when it has been built).
+    if gui_dir is not None and (Path(gui_dir) / "index.html").exists():
+        app.mount("/app", StaticFiles(directory=str(gui_dir), html=True), name="gui")
+
     return app
