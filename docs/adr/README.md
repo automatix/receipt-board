@@ -24,5 +24,6 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 | [0004](./0004-audit-logs-one-entry-per-action-with-affected-ids.md) | Audit logs one entry per action, with cascade-affected node ids | Accepted |
 | [0005](./0005-import-is-atomic-and-validates-controlled-vocabularies.md) | Import is atomic and validates against the controlled vocabularies | Accepted |
 | [0006](./0006-node-type-is-explicit-inferred-only-at-import.md) | Node type (Category vs Expense Item) is explicit, inferred only at import | Accepted |
+| [0007](./0007-checklist-aggregate-with-separate-category-and-item-tables.md) | Checklist aggregate with separate Category and Expense Item tables | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).
