@@ -80,8 +80,8 @@ explizit.
 
 ### Felder
 
-Jeder `Node` trägt: eine global eindeutige `id` (UUID), `name` (nicht eindeutig),
-`position` (bedeutsame Reihenfolge, darf Kategorien und Items mischen) und `done`.
+Jeder `Node` trägt: eine `id` (pro Tabelle eindeutige Integer — [`ADR-0010`](./adr/0010-integer-primary-keys-instead-of-uuids.md); Referenzen tragen daher zusätzlich `kind`),
+`name` (nicht eindeutig), `position` (bedeutsame Reihenfolge, darf Kategorien und Items mischen) und `done`.
 
 **`done`** sitzt auf **jedem** `Node` ([`ADR-0002`](./adr/0002-done-stored-on-every-node-with-symmetric-cascade.md)).
 Das Tool ist **semantik-agnostisch** — es kennt nur Häkchen; die Bedeutung („Beleg
@@ -279,7 +279,7 @@ Klammer-Typ** (keine Heuristik), **atomar / all-or-nothing**
 | Blatt-Begriff               | **`Expense Item`**                                                        | `ADR-0001` |
 | `done`                      | Auf **jedem** Node; semantik-agnostisch; symmetrische Cascade            | `ADR-0002` |
 | Externer Schreib-Scope      | **Nur** `Expense-Item`-`done`-Toggle + Lesen; Rest GUI-only              | `ADR-0003` |
-| Adressierung                | Global eindeutige `id` (UUID)                                            | —   |
+| Adressierung                | Pro-Tabelle Integer-`id` + `kind` (supersedes UUID)                      | `ADR-0010` |
 | Action-Felder               | Typisiert: `Resource{type,value?}`, `Tool`; `data`/`instructions` Freitext; nur auf Items; **kein** `tools`-Default | — |
 | Vokabulare                  | App-weit, GUI-verwaltet; Rename per id, Remove nur ungenutzt              | `ADR-0005` |
 | Import                      | Strikt nach Klammer-Typ; **atomar**; Vocab-Validierung                   | `ADR-0005` |
