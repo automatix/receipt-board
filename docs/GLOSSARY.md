@@ -19,7 +19,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **Resource Type** | The kind of a Resource, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `URL`, `Email`). | — | `pinned` |
 | **`tools`** | The Tools of an Expense Item (zero or more) used to obtain its receipt(s). May be empty; there is **no implicit default** — `Browser` is an ordinary value like any other. | — | `pinned` |
 | **Tool** | An instrument used to obtain a receipt, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `Browser`, `Thunderbird`). | — | `pinned` |
-| **Controlled Vocabulary** | An **application-wide** (shared across all Checklists), user-extensible set of allowed values (e.g. the Tools, the Resource Types) managed via the GUI. Import validates typed tokens against these and aborts on unknown values (see ADR-0005). | — | `pinned` |
+| **Controlled Vocabulary** | An **application-wide** (shared across all Checklists), user-extensible set of allowed values (e.g. the Tools, the Resource Types) managed via the GUI. Each entry has a stable `id`; items reference it by `id`, so renaming propagates everywhere. An entry can be removed only when **no item uses it** (otherwise removal is blocked with the list of affected items). Import validates typed tokens against these and aborts on unknown values (see ADR-0005). | — | `pinned` |
 | **`data`** | Free-text auxiliary data needed to obtain the receipt (e.g. a login identifier). Attribute of an Expense Item. | — | `pinned` |
 | **`instructions`** | Free-text note on how to obtain the receipt. Attribute of an Expense Item. | — | `pinned` |
 | **Import** | Seeding a new Checklist from the Markdown checklist format. | — | `provisional` |
