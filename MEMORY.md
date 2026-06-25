@@ -45,4 +45,10 @@
 
 - **Request** — Answer the technical-session agenda en bloc (a `Question:Option` map); digest into a spec.
 - **Done** — Resolved blocks A–I. Wrote `docs/TECH_SPEC.md`, `docs/BACKLOG.md` (+ project convention in `CLAUDE.md` that deferred work goes there), and ADRs `0010`/`0011`. Reconciled three conflicts explicitly: integer PKs (override of UUID — ADR-0010, supersedes that note in 0007; ids unique per table, not globally); TypeScript GUI ⇒ a minimal `esbuild` build step (resolves the "no build" vs "TS" conflict, adds Node as a build dep); CLI over local HTTP needs the app running (ADR-0011).
-- **Result** — Stack: `Python 3.12+`, `uv`, `ruff` (no `mypy`), `FastAPI`, `SQLite`/`Alembic`, `TypeScript` GUI (no framework, `esbuild`), `pywebview`, `PyInstaller` (`onedir`). Two node tables with integer PKs; minimal indexes in `v1` (FK/`name` indexes + `FTS5` deferred to BACKLOG); audit schema extended with `app_version`/`session_id`; CI coverage gate ≥ `90 %` in GitHub Actions. `TECH_SPEC.md` ends with a 10-item task breakdown. Now 11 ADRs total. Next: turn the task breakdown into tickets and start implementation.
+- **Result** — Stack: `Python 3.12+`, `uv`, `ruff` (no `mypy`), `FastAPI`, `SQLite`/`Alembic`, `TypeScript` GUI (no framework, `esbuild`), `pywebview`, `PyInstaller` (`onedir`). Two node tables with integer PKs; minimal indexes in `v1` (FK/`name` indexes + `FTS5` deferred to BACKLOG); audit schema extended with `app_version`/`session_id`; CI coverage gate ≥ `90 %` in GitHub Actions. `TECH_SPEC.md` ends with a task breakdown. Now 11 ADRs total.
+
+## Task breakdown + GitHub issues — `2026-06-25`
+
+- **Request** — Produce the task breakdown and create GitHub issues; implementation in a separate session.
+- **Done** — Created milestone `v1` and `area:*` labels; opened **11 issues** (`#1`–`#11`) with scope/acceptance/refs/dependencies. Added `docs/TASKS.md` (issue map + recommended order) and pointed `TECH_SPEC.md` §13 to it.
+- **Result** — Issues `automatix/receipt-board#1`–`#11`: bootstrap, CI, persistence, core/cascade/audit, importer, REST API, CLI, GUI build, GUI features, packaging, docs. Order: `#1` → (`#2`∥`#3`) → `#4` → `#5` → `#6` → (`#7`∥`#8`→`#9`) → `#10` → `#11`. No GitHub Project/board (issues only). Implementation to follow in a separate session via the branch/ticket workflow.

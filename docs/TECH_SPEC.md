@@ -222,9 +222,10 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
 
 ---
 
-## 13. Task-Breakdown (Entwurf)
+## 13. Task-Breakdown
 
-> Reihenfolge ~ Abhängigkeiten. Aus dieser Liste werden im nächsten Schritt Tickets/Tasks.
+> Als GitHub Issues (Milestone `v1`) angelegt — siehe [`TASKS.md`](./TASKS.md) für die
+> Issue-Verweise und die empfohlene Reihenfolge. Reihenfolge ~ Abhängigkeiten:
 
 1. **Projekt-Bootstrap** — `uv`, `ruff`, `pytest`, `pyproject.toml`, Repo-Layout, CI-Skelett.
 2. **Persistenz** — SQLAlchemy-Modelle, `Alembic`-Init + erste Migration, Pragmas, Vocab-Seeds.
