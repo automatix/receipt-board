@@ -24,6 +24,9 @@ coverage.xml
 *.sqlite-wal
 *.sqlite-shm
 
+# esbuild-bundled GUI output (generated from gui-src/ via `npm run build`)
+src/receipt_board/gui/static/
+
 # Build output
 dist/
 build/

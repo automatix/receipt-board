@@ -1,0 +1,15 @@
+{
+  "name": "receipt-board-gui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Receipt Board GUI (TypeScript, no framework; bundled with esbuild).",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  }
+}
