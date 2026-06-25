@@ -19,6 +19,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **`instructions`** | A note on how to obtain the receipt. | — | `provisional` |
 | **Import** | Seeding a new list from the Markdown checklist format. | — | `provisional` |
 | **Clone** | Creating a new list by duplicating an existing list's structure with all `done` reset. | — | `provisional` |
+| **Cascade** | The rule that keeps `done` consistent across the tree: setting a Node propagates to its whole subtree, and a child change re-rolls-up its ancestors — maintaining `category.done ⇔ entire subtree done`. | — | `pinned` |
 | **Audit Log** | Append-only record of every write action. | — | `provisional` |
 
 > **Receipt / Beleg** is **deliberately not a domain entity in `v1`** — see
