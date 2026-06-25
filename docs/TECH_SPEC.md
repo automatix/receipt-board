@@ -110,8 +110,11 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
 
 - `set_node(kind, id, value)` → alle Nachkommen auf `value`; danach Vorfahren aufrollen
   (`ancestor.done = AND(direkte Kinder)`).
+- **Leere Kategorie (Edge-Case):** der Roll-up lässt eine Kategorie **ohne Kinder**
+  unverändert (kein vakuumes `done=true`); ein direktes Toggle setzt sie weiterhin. So
+  führt z. B. das Entfernen des letzten Kindes nicht zum stillen „Erledigt".
 - Extern (HTTP/CLI) ist **nur** `set_item_done` erlaubt (ADR-0003); Kategorie-`done` ändert
-  sich extern nur via Roll-up.
+  sich extern nur via Roll-up (intern/GUI über `POST /categories/{id}/done`).
 - Tool führt Cascade stur aus; destruktiver Schutz = GUI (Bestätigung, §7).
 
 ---
@@ -149,16 +152,19 @@ notations-konforme Fixture getestet.
 
 ## 7. GUI (G)
 
-- **Tech (G1):** `TypeScript`, **kein** Framework, `esbuild`-Bundle → `gui/`; im
-  `pywebview`-Fenster geladen.
+- **Tech (G1):** `TypeScript`, **kein** Framework, `esbuild`-Bundle (aus `gui-src/`) →
+  `src/receipt_board/gui/static/`. Der lokale Server liefert die GUI **same-origin** unter
+  `/app` aus (vermeidet `file://`→Loopback-CORS); das `pywebview`-Fenster lädt
+  `http://127.0.0.1:{port}/app/`.
 - **Baum (G2):** verschachtelte Listen; Inline-Edit der Felder; **natives HTML5-Drag&Drop**
   für Umsortieren/Re-Parenting (`position`-Update + Cascade-Roll-up).
 - **Bestätigungen (G3):** Dialoge für Kategorie-Abwählen (mit Anzahl betroffener Items),
   Remove, Checklist-Löschen. **Undo** → Backlog.
 - **Vokabular-Screen (G4):** hinzufügen/umbenennen; entfernen nur ungenutzt.
 - **Suche:** Box → flache Trefferliste (`id`, `name`, `kind`, `checklist_id`, Pfad).
-- **Token (ADR-0009):** beim Laden in die Seite injiziert (`pywebview`), als
-  `X-Session-Token` an privilegierte Endpunkte.
+- **Token (ADR-0009):** nach dem Laden via `pywebview.evaluate_js` als
+  `window.__RECEIPT_BOARD__.token` injiziert; an privilegierte Endpunkte als
+  `X-Session-Token` gesendet.
 - **Refresh (G4/H3):** aktive `Checklist` nach jeder mutierenden Aktion neu laden +
   manueller Refresh-Button. Live-Polling → Backlog.
 
@@ -173,7 +179,10 @@ notations-konforme Fixture getestet.
 `payload` (`JSON`: `old`/`new`), `affected_ids` (`JSON`-Liste), `app_version`, `session_id`.
 
 - **`affected_ids` (H2):** die Cascade-Routine liefert die geänderten IDs zurück; **ein**
-  Audit-Eintrag in derselben Transaktion.
+  Audit-Eintrag in derselben Transaktion. Bei strukturellen Ops (Anlegen/Verschieben)
+  enthält `affected_ids` die per Roll-up geänderten Knoten; bei Lösch-Ops ist es leer.
+- **`origin`-Erkennung:** gültiges `X-Session-Token` → `GUI`; Header
+  `X-Receipt-Board-Client: cli` → `CLI`; sonst → `REST`.
 - **Concurrency (ADR-0008):** eine `SQLite`-Transaktion pro Aktion (WAL), last-write-wins,
   kein App-Lock.
 - **GUI-Refresh (H3):** manuell/aktionsbezogen (siehe §7).
@@ -195,8 +204,11 @@ notations-konforme Fixture getestet.
 | `POST /checklists` (blank/import/clone) | privileged | anlegen |
 | `DELETE /checklists/{id}` | privileged | löschen |
 | `POST/PATCH/DELETE /categories…`, `…/items…` | privileged | CRUD |
+| `POST /categories/{id}/done` | privileged | `{done: bool}` — Kategorie-Toggle (Cascade) |
 | `POST /nodes/{kind}/{id}/move` | privileged | Re-Parent/Reorder |
 | `GET/POST/PATCH/DELETE /vocab/{kind}…` | privileged | Vokabular-Pflege |
+
+> Die gebaute GUI wird (sofern vorhanden) unter `/app` ausgeliefert (StaticFiles, §7).
 
 ---
 
@@ -212,12 +224,16 @@ notations-konforme Fixture getestet.
 
 ## 11. Packaging, Config & First-Run (I)
 
-- **PyInstaller (I1):** `onedir`, `--windowed` (kein Konsolenfenster), App-Icon; GUI-Assets
-  via `--add-data`.
-- **Pfade/Config (I2):** via `platformdirs` → `%APPDATA%\ReceiptBoard\` mit DB
-  (`receipt_board.sqlite`), `config.toml` (Port-Override, DB-Pfad — **strukturiertes
-  Format**), `runtime.json`.
-- **First-Run:** Ordner anlegen, DB via `Alembic` auf `head`, Vokabular-Seeds einspielen.
+- **PyInstaller (I1):** `onedir`, `--windowed` (kein Konsolenfenster); GUI-Assets **und**
+  `Alembic`-Migrations via `--add-data` (`receipt_board.spec`). App-Icon optional unter
+  `packaging/icon.ico` (sonst PyInstaller-Default — Backlog).
+- **Pfade/Config (I2):** via `platformdirs` → `%APPDATA%\ReceiptBoard\` (override per
+  `RECEIPT_BOARD_HOME`) mit DB (`receipt_board.sqlite`), `config.toml`
+  (`[server].port` — `0` = ephemer; optional `[database].path` — `TOML`), `runtime.json`.
+- **First-Run (`receipt_board.bootstrap`):** Ordner + Default-`config.toml` anlegen, DB via
+  `Alembic` auf `head` (seedet Vokabular), idempotentes Re-Seed, Session-Token erzeugen,
+  GUI starten. **Entry-Points:** `receipt-board-app` / `python -m receipt_board`;
+  `--check` führt nur den First-Run aus (ohne Fenster).
 
 ---
 
