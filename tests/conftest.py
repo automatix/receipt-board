@@ -10,6 +10,8 @@ import pytest
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from receipt_board.core.audit import AuditService
+from receipt_board.core.services import ChecklistService, VocabularyService
 from receipt_board.persistence.db import create_db_engine, make_session_factory
 from receipt_board.persistence.models import Base
 from receipt_board.persistence.seeds import seed_vocabularies
@@ -39,3 +41,18 @@ def session(session_factory: sessionmaker[Session]) -> Session:
         yield s
     finally:
         s.close()
+
+
+@pytest.fixture
+def audit(session: Session) -> AuditService:
+    return AuditService(session, origin="REST", session_id="test-session")
+
+
+@pytest.fixture
+def svc(session: Session, audit: AuditService) -> ChecklistService:
+    return ChecklistService(session, audit)
+
+
+@pytest.fixture
+def vocab(session: Session, audit: AuditService) -> VocabularyService:
+    return VocabularyService(session, audit)
