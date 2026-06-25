@@ -27,5 +27,7 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 | [0007](./0007-checklist-aggregate-with-separate-category-and-item-tables.md) | Checklist aggregate with separate Category and Expense Item tables | Accepted |
 | [0008](./0008-concurrency-one-transaction-per-action-last-write-wins.md) | Concurrency: one SQLite transaction per action, last-write-wins | Accepted |
 | [0009](./0009-gui-only-operations-protected-by-startup-session-token.md) | GUI-only operations are protected by a startup session token | Accepted |
+| [0010](./0010-integer-primary-keys-instead-of-uuids.md) | Integer primary keys instead of UUIDs (supersedes the UUID note in 0007) | Accepted |
+| [0011](./0011-cli-communicates-over-local-http.md) | The CLI communicates with the app over local HTTP | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).

@@ -16,8 +16,8 @@ tables); the cascade likewise spans both tables.
 
 - Every Expense Item lives **under a Category** — items cannot be direct children of the
   Checklist root. A brand-new blank Checklist needs a Category before its first item.
-- The unified **Node** concept is realised physically as two tables; ids are **UUIDs** so
-  they stay globally unique, and the external interface addresses Expense Items by their
-  id.
+- The unified **Node** concept is realised physically as two tables; the external interface
+  addresses Expense Items by their id. (Ids are **per-table integers**, not UUIDs — see
+  ADR-0010, which supersedes the original UUID note here.)
 - The multi-valued typed fields (`resources`, `tools`) live in their own child tables
   referencing the Expense Item; `data`/`instructions` are columns on `expense_items`.
