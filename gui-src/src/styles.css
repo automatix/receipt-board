@@ -330,6 +330,37 @@ select.input {
   margin-right: 0.8rem;
 }
 
+/* Import dry-run report */
+.import-report {
+  max-height: 220px;
+  overflow: auto;
+  font-size: 0.85rem;
+}
+
+.import-report:empty {
+  display: none;
+}
+
+.import-ok {
+  color: #2e9e5b;
+  margin: 0.2rem 0;
+}
+
+.import-bad {
+  color: var(--danger);
+  margin: 0.2rem 0;
+}
+
+.import-issue {
+  font-family: ui-monospace, monospace;
+  color: var(--muted);
+  padding: 0.05rem 0;
+}
+
+.import-issue.warn {
+  color: #b8860b;
+}
+
 /* Toast */
 .toast {
   position: fixed;
