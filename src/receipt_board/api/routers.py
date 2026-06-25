@@ -23,11 +23,13 @@ from receipt_board.api.schemas import (
     EditItemRequest,
     MoveRequest,
     SetDoneRequest,
+    ValidateImportRequest,
     VocabNameRequest,
 )
 from receipt_board.core import queries
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
 from receipt_board.core.services import ChecklistService, VocabularyService
+from receipt_board.importer.service import build_import_report
 
 public_router = APIRouter(tags=["public"])
 privileged_router = APIRouter(tags=["privileged"], dependencies=[Depends(require_token)])
@@ -60,6 +62,12 @@ def set_item_done(
     item_id: int, body: SetDoneRequest, svc: ChecklistService = Depends(get_checklist_service)
 ) -> dict:
     return _affected(svc.set_item_done(item_id, body.done))
+
+
+@public_router.post("/import/validate")
+def validate_import(body: ValidateImportRequest, session=Depends(get_session)) -> dict:
+    """Dry-run import validation (no write); returns {valid, errors, warnings, summary}."""
+    return build_import_report(session, body.text)
 
 
 # -- privileged: checklists ---------------------------------------------------

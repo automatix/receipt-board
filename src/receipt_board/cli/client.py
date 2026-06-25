@@ -78,3 +78,6 @@ class ApiClient:
 
     def set_item_done(self, item_id: int, done: bool) -> dict:
         return self._request("POST", f"/items/{item_id}/done", json={"done": done})
+
+    def validate_import(self, text: str) -> dict:
+        return self._request("POST", "/import/validate", json={"text": text})

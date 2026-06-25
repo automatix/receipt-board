@@ -61,6 +61,20 @@ export interface ItemFields {
   tools?: string[];
 }
 
+export interface ImportIssueDto {
+  line: number;
+  token: string;
+  kind: string;
+  message: string;
+}
+
+export interface ImportReport {
+  valid: boolean;
+  errors: ImportIssueDto[];
+  warnings: ImportIssueDto[];
+  summary: { categories: number; items: number };
+}
+
 declare global {
   interface Window {
     __RECEIPT_BOARD__?: RbConfig;

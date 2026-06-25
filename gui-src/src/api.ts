@@ -4,6 +4,7 @@
 import type {
   ChecklistSummary,
   ChecklistTree,
+  ImportReport,
   ItemFields,
   NodeKind,
   SearchHit,
@@ -58,6 +59,8 @@ export const api = {
     request<{ id: number }>("POST", "/checklists", { mode: "blank", name }),
   createImport: (name: string, text: string) =>
     request<{ id: number }>("POST", "/checklists", { mode: "import", name, text }),
+  validateImport: (text: string) =>
+    request<ImportReport>("POST", "/import/validate", { text }),
   createClone: (sourceId: number, name: string) =>
     request<{ id: number }>("POST", "/checklists", { mode: "clone", name, source_id: sourceId }),
   deleteChecklist: (id: number) => request<void>("DELETE", `/checklists/${id}`),

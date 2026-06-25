@@ -1,5 +1,7 @@
 // Small DOM helpers and modal dialogs (no framework).
 
+import type { ImportReport } from "./types";
+
 type ElAttrs = Record<string, string | number | EventListener>;
 
 export function el<K extends keyof HTMLElementTagNameMap>(
@@ -115,21 +117,69 @@ export interface ImportInput {
   text: string;
 }
 
-export function importDialog(): Promise<ImportInput | null> {
+function renderReport(container: HTMLElement, report: ImportReport): void {
+  const children: HTMLElement[] = [];
+  if (report.valid) {
+    children.push(
+      el("p", {
+        class: "import-ok",
+        text: `✓ Importierbar: ${report.summary.categories} Kategorien, ${report.summary.items} Einträge`,
+      }),
+    );
+  } else {
+    children.push(
+      el("p", { class: "import-bad", text: `✗ ${report.errors.length} Fehler — nicht importierbar:` }),
+    );
+    for (const issue of report.errors) {
+      children.push(
+        el("div", {
+          class: "import-issue",
+          text: `Zeile ${issue.line} · ${issue.token} · ${issue.message}`,
+        }),
+      );
+    }
+  }
+  for (const warning of report.warnings) {
+    children.push(
+      el("div", {
+        class: "import-issue warn",
+        text: `Warnung Zeile ${warning.line}: ${warning.message}`,
+      }),
+    );
+  }
+  container.replaceChildren(...children);
+}
+
+export function importDialog(
+  validate: (text: string) => Promise<ImportReport>,
+): Promise<ImportInput | null> {
   return new Promise((resolve) => {
     let dismiss = (): void => {};
     const name = el("input", { class: "input", placeholder: "Checklist-Name" });
     const text = el("textarea", { class: "textarea", placeholder: "Markdown einfügen…" });
+    const report = el("div", { class: "import-report" });
     const finish = (value: ImportInput | null): void => {
       dismiss();
       resolve(value);
+    };
+    const onCheck = async (): Promise<void> => {
+      report.replaceChildren(el("p", { class: "empty", text: "Prüfe…" }));
+      try {
+        renderReport(report, await validate(text.value));
+      } catch (error) {
+        report.replaceChildren(
+          el("p", { class: "import-bad", text: `Fehler: ${(error as Error).message}` }),
+        );
+      }
     };
     const box = el("div", { class: "modal modal-wide" }, [
       el("h3", { text: "Checklist importieren" }),
       name,
       text,
+      report,
       el("div", { class: "modal-actions" }, [
         el("button", { class: "btn", onclick: () => finish(null), text: "Abbrechen" }),
+        el("button", { class: "btn", onclick: () => void onCheck(), text: "Prüfen" }),
         el("button", {
           class: "btn btn-primary",
           onclick: () => finish({ name: name.value.trim(), text: text.value }),

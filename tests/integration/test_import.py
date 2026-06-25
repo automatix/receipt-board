@@ -17,7 +17,7 @@ from sqlalchemy import func, select
 
 from receipt_board.core.errors import InvalidImportError
 from receipt_board.core.queries import export_checklist
-from receipt_board.importer.service import ImportService
+from receipt_board.importer.service import ImportService, build_import_report
 from receipt_board.persistence.models import AuditEntry, Category, Checklist, ExpenseItem
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
@@ -133,3 +133,17 @@ def test_import_unknown_tool_aborts_atomically(session, audit):
 def test_import_empty_name_rejected(session, audit):
     with pytest.raises(InvalidImportError):
         ImportService(session, audit).import_markdown("   ", "- [ ] Top\n\t- [ ] x\n")
+
+
+def test_build_import_report_valid(session):
+    report = build_import_report(session, VALID.read_text("utf-8"))
+    assert report["valid"] is True
+    assert report["errors"] == []
+    assert report["summary"]["items"] > 0
+    assert report["summary"]["categories"] > 0
+
+
+def test_build_import_report_invalid(session):
+    report = build_import_report(session, REAL.read_text("utf-8"))
+    assert report["valid"] is False
+    assert any(e["token"] == "klassisch" for e in report["errors"])

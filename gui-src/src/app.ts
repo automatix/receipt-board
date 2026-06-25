@@ -483,7 +483,7 @@ async function onCreateBlank(): Promise<void> {
 }
 
 async function onImport(): Promise<void> {
-  const input = await importDialog();
+  const input = await importDialog((text) => api.validateImport(text));
   if (input && input.name) {
     await act(async () => {
       const created = await api.createImport(input.name, input.text);

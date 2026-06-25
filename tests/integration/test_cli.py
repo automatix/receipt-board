@@ -163,6 +163,23 @@ def test_http_error_is_friendly(live, capsys):
     assert "error:" in capsys.readouterr().err
 
 
+def test_validate_command(live, tmp_path, capsys):
+    good = tmp_path / "good.md"
+    good.write_text("- [ ] Top\n\t- [ ] Leaf\n", encoding="utf-8")
+    assert cli.main(["validate", str(good)]) == 0
+    assert "importierbar" in capsys.readouterr().out.lower()
+
+    bad = tmp_path / "bad.md"
+    bad.write_text("- [ ] Top\n\t- [ ] Leaf {Photoshop}\n", encoding="utf-8")
+    assert cli.main(["validate", str(bad)]) == 1
+    assert "Photoshop" in capsys.readouterr().out
+
+
+def test_validate_missing_file(live, capsys):
+    assert cli.main(["validate", "does-not-exist.md"]) == 1
+    assert "Cannot read" in capsys.readouterr().err
+
+
 # -- offline error paths (no fixture / no server) -----------------------------
 
 
