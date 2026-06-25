@@ -8,8 +8,10 @@ import time
 from collections.abc import Iterator
 from types import SimpleNamespace
 
+import httpx
 import pytest
 import uvicorn
+from sqlalchemy import select
 
 from receipt_board.api.app import create_app
 from receipt_board.api.runtime import write_runtime
@@ -18,14 +20,38 @@ from receipt_board.cli import main as cli
 from receipt_board.core.audit import AuditService
 from receipt_board.core.services import ChecklistService
 from receipt_board.persistence.db import create_db_engine, make_session_factory
-from receipt_board.persistence.models import Base, ExpenseItem
+from receipt_board.persistence.models import AuditEntry, Base
 from receipt_board.persistence.seeds import seed_vocabularies
+
+
+def _eventually(check, *, tries: int = 100, delay: float = 0.05):
+    """Retry ``check`` until truthy (covers the API's commit-after-response window)."""
+    result = None
+    for _ in range(tries):
+        result = check()
+        if result:
+            return result
+        time.sleep(delay)
+    return result
+
+
+def _find_node(tree: dict, node_id: int):
+    for child in tree.get("children", []):
+        if child["kind"] == "expense_item" and child["id"] == node_id:
+            return child
+        found = _find_node(child, node_id)
+        if found:
+            return found
+    return None
 
 
 @pytest.fixture
 def live(tmp_path, monkeypatch) -> Iterator[SimpleNamespace]:
     monkeypatch.setenv("RECEIPT_BOARD_HOME", str(tmp_path))
-    engine = create_db_engine(None)
+    # A file DB (not the shared in-memory StaticPool): the uvicorn thread and the
+    # verifying test thread then use independent connections, so there is no shared
+    # transaction-state race ("cannot rollback - no transaction is active").
+    engine = create_db_engine(tmp_path / "test.sqlite")
     Base.metadata.create_all(engine)
     factory = make_session_factory(engine)
 
@@ -49,7 +75,12 @@ def live(tmp_path, monkeypatch) -> Iterator[SimpleNamespace]:
     while not server.started:
         time.sleep(0.01)
     try:
-        yield SimpleNamespace(factory=factory, item_id=item_id, checklist_id=checklist_id)
+        yield SimpleNamespace(
+            factory=factory,
+            item_id=item_id,
+            checklist_id=checklist_id,
+            base_url=f"http://127.0.0.1:{port}",
+        )
     finally:
         server.should_exit = True
         thread.join(timeout=5)
@@ -102,25 +133,29 @@ def test_search_human_empty(live, capsys):
     assert "(no matches)" in capsys.readouterr().out
 
 
-def test_item_done_and_undone(live, capsys):
+def _item_done(live, *, expected: bool) -> bool:
+    tree = httpx.get(f"{live.base_url}/checklists/{live.checklist_id}").json()
+    node = _find_node(tree, live.item_id)
+    return node is not None and node["done"] is expected
+
+
+def test_item_done_and_undone(live):
     assert cli.main(["item", "done", str(live.item_id)]) == 0
-    with live.factory() as s:
-        assert s.get(ExpenseItem, live.item_id).done is True
+    assert _eventually(lambda: _item_done(live, expected=True))
 
     assert cli.main(["item", "undone", str(live.item_id)]) == 0
-    with live.factory() as s:
-        assert s.get(ExpenseItem, live.item_id).done is False
+    assert _eventually(lambda: _item_done(live, expected=False))
 
 
 def test_item_done_uses_cli_origin(live):
-    cli.main(["item", "done", str(live.item_id)])
-    from sqlalchemy import select
+    assert cli.main(["item", "done", str(live.item_id)]) == 0
 
-    from receipt_board.persistence.models import AuditEntry
+    def origin() -> str | None:
+        with live.factory() as s:
+            entry = s.scalar(select(AuditEntry).where(AuditEntry.action_type == "set_item_done"))
+            return entry.origin if entry else None
 
-    with live.factory() as s:
-        entry = s.scalars(select(AuditEntry).where(AuditEntry.action_type == "set_item_done")).one()
-    assert entry.origin == "CLI"
+    assert _eventually(lambda: origin() == "CLI")
 
 
 def test_http_error_is_friendly(live, capsys):
