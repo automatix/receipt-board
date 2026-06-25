@@ -24,6 +24,8 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **`instructions`** | Free-text note on how to obtain the receipt. Attribute of an Expense Item. | — | `pinned` |
 | **Import** | Seeding a new Checklist from the Markdown checklist format. | — | `provisional` |
 | **Clone** | Creating a new Checklist by **deep-copying** an existing one's structure and action fields (with fresh ids) and resetting all `done` to false. GUI-only. | — | `pinned` |
+| **Export** | A read operation returning the full **nested** JSON tree of a Checklist — all node fields (`id`, `name`, node type, `done`, `position`; for Expense Items also `resources`/`tools`/`data`/`instructions`). Available in GUI/REST/CLI. | — | `pinned` |
+| **Search** | A read operation: free-text match over node `name`s at **all levels**, returning a **flat** list of hits (each with node `id`, `name`, node type, Checklist `id`, and the ancestor path). Available in GUI/REST/CLI. | — | `pinned` |
 | **Cascade** | The rule that keeps `done` consistent across the tree: setting a Node propagates to its whole subtree, and a child change re-rolls-up its ancestors — maintaining `category.done ⇔ entire subtree done`. | — | `pinned` |
 | **Audit Log** | Append-only record of every write action — one entry per caller action: timestamp, origin (`GUI`/`CLI`/`REST`), action type, target `id`, old → new value, and the ids of all nodes affected by the cascade. | — | `pinned` |
 
