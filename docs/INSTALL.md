@@ -14,15 +14,16 @@ steht in der [`README.md`](../README.md).
 
 Receipt Board wird als eigenständiger Ordner ausgeliefert (PyInstaller `onedir`).
 
-1. Den Ordner `receipt-board` (enthält `receipt-board.exe` und den Unterordner
-   `_internal/`) an einen festen Ort kopieren, z. B.
-   `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
-2. `receipt-board.exe` per Doppelklick starten (optional eine Verknüpfung anlegen).
-3. Beim **ersten Start** legt die App ihren Datenordner an:
+1. Auf der **Releases-Seite** das ZIP herunterladen:
+   <https://github.com/automatix/receipt-board/releases> →
+   `receipt-board-v1.0.0-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
+2. Entpacken; den Ordner `receipt-board` (enthält `receipt-board.exe` und den Unterordner
+   `_internal/`) an einen festen Ort kopieren, z. B. `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
+3. `receipt-board.exe` per Doppelklick starten (optional eine Verknüpfung anlegen).
+4. Beim **ersten Start** legt die App ihren Datenordner an:
    `%APPDATA%\ReceiptBoard\` (Datenbank, `config.toml`, `runtime.json`).
 
-> Eine offizielle Release-Datei (`v1.0.0`) mit diesem Ordner ist vorgesehen. Bis dahin baust
-> du den Ordner wie in **Variante B**.
+> Ohne Repo-Zugriff (oder für eine eigene Variante) baust du den Ordner wie in **Variante B**.
 
 ## Variante B — Selbst bauen
 
