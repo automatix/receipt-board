@@ -19,5 +19,6 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 | ADR | Title | Status |
 | --- | ----- | ------ |
 | [0001](./0001-receipt-not-modeled-in-v1.md) | Receipt is not a domain entity in v1 | Accepted |
+| [0002](./0002-done-stored-on-every-node-with-symmetric-cascade.md) | `done` is stored on every node, kept consistent by a symmetric cascade | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).
