@@ -9,8 +9,8 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **Expense Item** | A checklist position representing **one expense source or cost position** (e.g. `Amazon`, `1&1`, `Betreuungskosten`) for which receipts must be gathered for the period. The actionable, checkable element. Carries the action fields `resources`, `tools`, `data`, `instructions` — these exist **only** on Expense Items, never on Categories. | `Item`, `Entry`, `Row`, `Leaf`, `Position`, `Source`, `Receipt` | `pinned` |
 | **Leaf** | Purely *structural*: a `Node` with no children. In this domain a `Leaf` represents an **Expense Item**. | — | `provisional` |
 | **Category** | A non-leaf `Node` used for grouping; carries a `name` and its own `done` checkbox (kept consistent with its subtree via cascade). | — | `provisional` |
-| **Node** | A single element in a Checklist's tree — either a `Category` or a `Leaf`. Every Node carries a stable `id` (the canonical reference, used by the API/CLI), a `name` (not required unique — sibling names may repeat), a `position` (its meaningful order among siblings), and a `done` checkbox. | — | `provisional` |
-| **Checklist** | A self-contained, hierarchical expense checklist, typically scoped to one accounting period (e.g. `2024`); the top-level container holding a tree of nodes. The app (Receipt Board) manages many Checklists. | `List`, `Board` | `pinned` |
+| **Node** | A single element in a Checklist's tree — either a `Category` or a `Leaf`. Every Node carries a **globally unique**, stable `id` (the canonical reference, used by the API/CLI), a `name` (not required unique — sibling names may repeat), a `position` (its meaningful order among siblings), and a `done` checkbox. | — | `provisional` |
+| **Checklist** | A self-contained, hierarchical expense checklist, typically scoped to one accounting period (e.g. `2024`); the top-level container holding a tree of nodes. The app (Receipt Board) manages many Checklists. Deletion (like node removal) is GUI-only. | `List`, `Board` | `pinned` |
 | **Period** | The accounting timeframe a list represents (year or month). | — | `provisional` |
 | **`done`** | A boolean checkbox present on **every Node**. The application is agnostic to its real-world meaning — it only stores and cascades checkmarks (the "receipt gathered" semantics live outside the tool). | — | `pinned` |
 | **`resources`** | The typed Resources of an Expense Item (zero or more) telling where its receipt(s) are found. | — | `pinned` |
@@ -22,7 +22,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **`data`** | Free-text auxiliary data needed to obtain the receipt (e.g. a login identifier). Attribute of an Expense Item. | — | `pinned` |
 | **`instructions`** | Free-text note on how to obtain the receipt. Attribute of an Expense Item. | — | `pinned` |
 | **Import** | Seeding a new Checklist from the Markdown checklist format. | — | `provisional` |
-| **Clone** | Creating a new Checklist by duplicating an existing one's structure with all `done` reset. | — | `provisional` |
+| **Clone** | Creating a new Checklist by **deep-copying** an existing one's structure and action fields (with fresh ids) and resetting all `done` to false. GUI-only. | — | `pinned` |
 | **Cascade** | The rule that keeps `done` consistent across the tree: setting a Node propagates to its whole subtree, and a child change re-rolls-up its ancestors — maintaining `category.done ⇔ entire subtree done`. | — | `pinned` |
 | **Audit Log** | Append-only record of every write action — one entry per caller action: timestamp, origin (`GUI`/`CLI`/`REST`), action type, target `id`, old → new value, and the ids of all nodes affected by the cascade. | — | `pinned` |
 
