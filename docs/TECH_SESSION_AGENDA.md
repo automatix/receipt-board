@@ -1,215 +1,208 @@
 # Technische Session — Fragenkatalog
 
-> **So beantwortest du:** Schreibe deine Antwort hinter `**Antwort:**`. **Leer lassen
-> (oder „Empfehlung")** = meine Empfehlung wird übernommen. Du kannst auch nur Teile
-> kommentieren/abweichen. Antworte gern **en bloc**; ich verdaue anschließend die komplette
-> Datei und erzeuge daraus `docs/TECH_SPEC.md`, ggf. neue ADRs und eine Task-Liste.
+> **So beantwortest du:** Schick mir eine **Map `Frage:Option`**, z. B.
+> `A1:1, A2:1, B2:2, F2:2 …`. **Nicht genannt = Option `1` (Empfehlung).** Freitext nur zu
+> den wenigen Fragen, die wirklich einen Kommentar brauchen (z. B. `B2:2 (sparse steps 100)`).
+> Block **J** ist Freitext.
+>
+> Ich verdaue anschließend die komplette Antwort, prüfe Querbezüge/Widersprüche und erzeuge
+> daraus `docs/TECH_SPEC.md`, ggf. neue ADRs und eine Task-Liste.
 >
 > Basis: [`PROJECT_BRIEF.md`](./PROJECT_BRIEF.md), [`GLOSSARY.md`](./GLOSSARY.md),
-> [`adr/`](./adr/README.md). Adaptiv — einzelne Punkte können sich beim Verdauen
-> verzweigen.
+> [`adr/`](./adr/README.md). Option `1` ist jeweils meine Empfehlung und mit den bisherigen
+> ADRs konsistent.
 
 ---
 
 ## A — Projekt-Setup & Tooling
 
 ### A1 — Dependency-Management
-**Empfehlung:** `uv` (schnell, Lockfile, modern).
-**Antwort:**
+1. **(Empfehlung)** `uv` — schnell, Lockfile, modern
+2. `poetry`
+3. `pip` + `requirements.txt` (+ `pip-tools`)
 
 ### A2 — Lint / Format / Types
-**Empfehlung:** `ruff` (Lint + Format) + `mypy` (strict) + `pre-commit`-Hooks.
-**Antwort:**
+1. **(Empfehlung)** `ruff` (Lint+Format) + `mypy` (strict) + `pre-commit`
+2. `ruff` allein (Lint+Format, kein `mypy`)
+3. `black` + `flake8` + `mypy`
 
 ### A3 — Repo-Layout
-**Empfehlung:** `src/receipt_board/` mit Subpackages `core` (Domäne + Services),
-`persistence` (Repository, Schema, Migrations), `api` (FastAPI), `cli`, `importer`,
-`gui` (statische Assets); dazu `tests/`.
-**Antwort:**
+1. **(Empfehlung)** `src/receipt_board/` mit `core`/`persistence`/`api`/`cli`/`importer`/`gui` + `tests/`
+2. Flaches `receipt_board/`-Package (ohne `src/`-Layout)
+3. Mehrere Top-Level-Packages (z. B. `backend`/`frontend` getrennt)
 
-### A4 — Python-Version
-**Empfehlung:** `3.12+` als Mindestversion.
-**Antwort:**
+### A4 — Python-Version (Mindestversion)
+1. **(Empfehlung)** `3.12+`
+2. `3.11+`
+3. `3.13+`
 
 ---
 
 ## B — DB-Schema
 
 ### B1 — Tabellen & Spalten
-**Empfehlung:** `checklists`, `categories` (self-ref `parent_id`), `expense_items`
-(`category_id NOT NULL`), `item_resources`, `item_tools`, `resource_types`, `tools`,
-`audit_log` — Spalten gemäß Brief/ADR-0007; je Tabelle `created_at`/`updated_at`.
-**Antwort:**
+1. **(Empfehlung)** Schema gemäß ADR-0007: `checklists`, `categories`, `expense_items`, `item_resources`, `item_tools`, `resource_types`, `tools`, `audit_log`
+2. Wie 1, aber Vokabular in **einer** Tabelle `vocabulary(kind, value)` zusammengefasst
+3. Freitext-Variante
 
 ### B2 — `position`-Schema (Interleaving Kategorien + Items)
-**Empfehlung:** Ein gemeinsamer Integer-`position` je Elternknoten über **beide** Tabellen
-hinweg; Anzeige = nach `position` gemischte Kinder. Umsortieren schreibt die betroffenen
-Geschwister neu (contiguous ints). (Alternative: fraktionale Positionen.)
-**Antwort:**
+1. **(Empfehlung)** Gemeinsamer Integer-`position` je Elternknoten über beide Tabellen; contiguous, Umsortieren schreibt betroffene Geschwister neu
+2. Gemeinsamer Integer mit **Lücken** (Schritte z. B. 100), weniger Rewrites
+3. **Fraktionale** Positionen (LexoRank-artig), keine Rewrites
 
 ### B3 — IDs & FK-Verhalten
-**Empfehlung:** `uuid4` als `TEXT`-PK; FK-Constraints aktiv; `ON DELETE CASCADE` für
-Eltern→Kinder und `Checklist`→alles; Vokabular-FKs `ON DELETE RESTRICT` (deckt „Remove nur
-ungenutzt").
-**Antwort:**
+1. **(Empfehlung)** `uuid4` als `TEXT`-PK; FKs aktiv; Eltern/`Checklist` `ON DELETE CASCADE`; Vokabular `ON DELETE RESTRICT`
+2. Integer-`AUTOINCREMENT`-PKs (pro Tabelle) statt UUID
+3. `uuid4`, aber Löschkaskaden in der App statt DB-seitig
 
 ### B4 — Indizes & SQLite-Pragmas
-**Empfehlung:** Indizes auf FKs (`checklist_id`, `parent_id`, `category_id`, `item_id`) und
-auf `name` (Suche); `WAL`, `foreign_keys=ON`, `busy_timeout=5000`.
-**Antwort:**
+1. **(Empfehlung)** FK-Indizes + `name`-Index (`LIKE`-Suche); `WAL`, `foreign_keys=ON`, `busy_timeout=5000`
+2. Wie 1, zusätzlich **FTS5**-Virtualtabelle für die Suche
+3. Minimal (nur PKs), Indizes später
 
 ### B5 — Migrations
-**Empfehlung:** `Alembic` (robuste Schema-Versionierung über App-Releases hinweg).
-**Antwort:**
+1. **(Empfehlung)** `Alembic`
+2. Handgerollte SQL-Migrationsskripte + Versionstabelle
+3. Keine Migrations in `v1` (Schema ad hoc)
 
 ---
 
 ## C — Domänen-/Service-Layer
 
-### C1 — Aggregat-Operationen (Signaturen)
-**Empfehlung:** `ChecklistService` (`toggle_item_done`, `add_category`, `add_item`,
-`edit_node`, `remove_node`, `move_node`, `clone_checklist`, `create_blank`, `delete_checklist`),
-`VocabularyService` (`add`/`rename`/`remove` mit In-Use-Check), `ImportService`,
-`AuditService`. Jede schreibende Op transaktional + Audit.
-**Antwort:**
+### C1 — Aggregat-Operationen
+1. **(Empfehlung)** `ChecklistService` + `VocabularyService` + `ImportService` + `AuditService` (jede Schreib-Op transaktional + Audit)
+2. Eine einzige Fassaden-Service-Klasse
+3. Freitext-Variante
 
 ### C2 — Cascade-Umsetzung
-**Empfehlung:** App-seitige Traversierung im Service (klar testbar; Datenmenge klein),
-gebündelte `UPDATE`s in **einer** Transaktion; rekursive SQL-CTE nur für Lese-/Roll-up-Abfragen.
-**Antwort:**
+1. **(Empfehlung)** App-seitige Traversierung für Writes, SQL-CTE für Lese-/Roll-up-Abfragen
+2. Reine rekursive SQL-CTE für beides
+3. Rein app-seitig (Teilbaum laden, mutieren, speichern)
 
 ### C3 — Fehlertypen
-**Empfehlung:** Domänen-Exceptions (`NotFoundError`, `ValidationError`,
-`VocabularyInUseError`, `InvalidImportError`), zentral auf REST-/CLI-Fehler gemappt.
-**Antwort:**
+1. **(Empfehlung)** Domänen-Exceptions, zentral auf REST/CLI gemappt
+2. Result/Either-Rückgabetypen (keine Exceptions)
+3. HTTP-artige Fehlercodes durchgängig
 
 ---
 
 ## D — Import-Spezifikation
 
 ### D1 — Markdown-Grammatik
-**Empfehlung:** Einrückung bestimmt Hierarchie (Tab/Spaces normalisiert, Einheit
-auto-erkannt); jede `- [ ]`/`- [x]`-Zeile = Node; Typ aus Verschachtelung; `name` getrimmt.
-**Antwort:**
+1. **(Empfehlung)** Einrückungsbasiert, Einheit auto-erkannt, Tabs/Spaces normalisiert
+2. Strikt nur 2-Spaces (oder nur Tab); inkonsistente Einrückung wird abgelehnt
+3. Freitext-Variante
 
 ### D2 — Typisierungsregeln
-**Empfehlung:** resource-Token = `URL`, wenn `^https?://`; Literal `Email`
-(case-insensitive) → Typ `Email`, optionaler `value` = Rest nach „Email"; tool-Token
-case-insensitive gegen das `tools`-Vokabular gematcht.
-**Antwort:**
+1. **(Empfehlung)** `URL` via `^https?://`; `Email`-Literal (case-insensitive) + optionaler `value`; `tools` case-insensitive gegen Vokabular
+2. Strenger: `URL` muss voll validieren, `Email` muss Postfach haben
+3. Freitext-Variante
 
-### D3 — Atomarität & Fehlerreport
-**Empfehlung:** Zwei-Phasen: erst komplett parsen + validieren (**alle** Fehler mit
-Zeilennummer + Token + betroffenem Vokabular sammeln); bei Fehlern Abbruch ohne Schreiben;
-sonst Insert in **einer** Transaktion.
-**Antwort:**
+### D3 — Fehlerreport (Import bleibt atomar, ADR-0005)
+1. **(Empfehlung)** **Alle** Fehler sammeln (Zeile + Token + Vokabular), dann abbrechen; sonst Insert in einer Transaktion
+2. Fail-fast beim ersten Fehler (weiterhin atomar)
+3. Freitext-Variante
 
 ---
 
 ## E — REST-Vertrag
 
-### E1 — Endpunktliste (Public vs. Privileged)
-**Empfehlung:** Public: `GET /checklists`, `GET /checklists/{id}` (nested),
-`GET /search?q=`, `POST /items/{id}/done`. Privileged: CRUD auf
-`checklists`/`categories`/`items`, `move`, `import`, `clone`, Vokabular-CRUD.
-**Antwort:**
+### E1 — Endpunktstil
+1. **(Empfehlung)** Ressourcen-REST: `GET /checklists`, `GET /checklists/{id}` (nested), `GET /search?q=`, `POST /items/{id}/done`; Privileged: CRUD + `move`/`import`/`clone`/Vokabular
+2. RPC-Stil: ein Endpunkt mit `action`-Feld
+3. Freitext-Variante
 
 ### E2 — Schemas & Fehlerformat
-**Empfehlung:** `Pydantic`-Modelle; Fehler `{error:{code,message,details}}`; `OpenAPI`
-automatisch.
-**Antwort:**
+1. **(Empfehlung)** `Pydantic`-Modelle; Fehler `{error:{code,message,details}}`; `OpenAPI` automatisch
+2. Schlichte Dicts, minimale Validierung
+3. Freitext-Variante
 
-### E3 — Token, Bind & Port-Discovery
-**Empfehlung:** Header `X-Session-Token`; Bind nur `127.0.0.1`; ephemerer Port beim Start,
-in `%APPDATA%\ReceiptBoard\runtime.json` (**nur Port**, kein Token) für HTTP-Clients
-geschrieben.
-**Antwort:**
+### E3 — Token, Bind & Port
+1. **(Empfehlung)** Header `X-Session-Token`; Bind `127.0.0.1`; **ephemerer** Port + `runtime.json` (nur Port) zur Discovery
+2. **Fester**, konfigurierbarer Port (z. B. `8765`)
+3. Freitext-Variante
 
 ---
 
 ## F — CLI
 
 ### F1 — Befehle & Output
-**Empfehlung:** `receipt-board export [--checklist ID]`, `search QUERY`, `item done ID`,
-`item undone ID`; `--json` als Standardausgabe.
-**Antwort:**
+1. **(Empfehlung)** `export [--checklist ID]`, `search QUERY`, `item done ID`, `item undone ID`; `--json`
+2. Andere Gruppierung (z. B. `done`/`undone` als Top-Level-Befehle)
+3. Freitext-Variante
 
-### F2 — Anbindung & Exit-Codes
-**Empfehlung:** CLI nutzt den **In-Process-Core** direkt auf der `SQLite`-DB (kein laufender
-Server nötig; WAL deckt Parallelität mit der GUI ab); nur Public-Operationen; Exit-Code `0`
-ok, `≠0` bei Fehler. (Die REST-API bleibt für GUI + HTTP/KI-Clients.)
-**Antwort:**
+### F2 — Anbindung
+1. **(Empfehlung)** In-Process-Core direkt auf `SQLite` (kein laufender Server nötig; WAL deckt Parallelität)
+2. CLI spricht **HTTP** gegen den laufenden Server (braucht Server + `runtime.json`)
+3. Freitext-Variante
 
 ---
 
 ## G — GUI
 
 ### G1 — Tech innerhalb HTML/CSS/JS
-**Empfehlung:** Vanilla `JS` (ES-Module), **kein** Build-Step (einfachstes Bundling in
-`PyInstaller`); kleine Helfer nur bei Bedarf.
-**Antwort:**
+1. **(Empfehlung)** Vanilla `JS` (ES-Module), **kein** Build-Step
+2. Kleines No-Build-Framework via CDN/ESM (z. B. `Preact`/`Vue`)
+3. Volles Framework mit Build (z. B. `Vite` + `Vue`/`React`)
 
 ### G2 — Baum, Inline-Edit, Drag&Drop
-**Empfehlung:** Verschachtelte Listen; Inline-Editing; natives HTML5-Drag&Drop für
-Umsortieren/Re-Parenting.
-**Antwort:**
+1. **(Empfehlung)** Verschachtelte Listen, Inline-Edit, natives HTML5-Drag&Drop
+2. Tree-Komponenten-Library
+3. Kein Drag&Drop (Umsortieren/Verschieben per Buttons/Menü)
 
 ### G3 — Destruktive Bestätigungen / Undo
-**Empfehlung:** Bestätigungsdialoge für Kategorie-Abwählen (mit Anzahl betroffener Items),
-Remove und Checklist-Löschen; **Undo** auf später vertagt (Audit-Log deckt
-Nachvollziehbarkeit).
-**Antwort:**
+1. **(Empfehlung)** Bestätigungsdialoge (Kategorie-Abwählen mit Anzahl, Remove, Checklist-Löschen); Undo später
+2. Bestätigungsdialoge **+ Undo** in `v1`
+3. Keine Bestätigungen (nur Audit-Log)
 
-### G4 — Vokabular-Screen, Suche, Token-Injektion, Refresh
-**Empfehlung:** Settings-Screen fürs Vokabular; Such-Box; Token beim Laden via `pywebview`
-injiziert; Refresh = aktive `Checklist` nach jeder mutierenden Aktion neu laden + manueller
-Refresh-Button (kein Live-Polling in `v1`).
-**Antwort:**
+### G4 — Vokabular-Screen, Suche, Token, Refresh
+1. **(Empfehlung)** Settings-Screen fürs Vokabular; Such-Box; Token beim Laden injiziert; Reload nach jeder Aktion + Refresh-Button
+2. Wie 1, zusätzlich Live-Polling externer Änderungen
+3. Freitext-Variante
 
 ---
 
 ## H — Audit & Concurrency
 
 ### H1 — `audit_log`-Schema
-**Empfehlung:** `id`, `ts`, `origin` (`GUI`/`CLI`/`REST`), `action_type`, `target_kind`,
-`target_id`, `checklist_id`, `payload` (`old`/`new` als `JSON`), `affected_ids` (`JSON`).
-**Antwort:**
+1. **(Empfehlung)** `id`, `ts`, `origin`, `action_type`, `target_kind`, `target_id`, `checklist_id`, `payload`(`old`/`new` JSON), `affected_ids`(JSON)
+2. Wie 1 + zusätzliche Metadaten (z. B. App-Version, Session-id)
+3. Minimal (`ts`, `action`, `target`)
 
 ### H2 — Sammeln der `affected_ids`
-**Empfehlung:** Die Cascade-Routine liefert die Menge geänderter Node-IDs zurück; **ein**
-Audit-Eintrag in derselben Transaktion.
-**Antwort:**
+1. **(Empfehlung)** Cascade-Routine liefert die geänderten IDs; **ein** Audit-Eintrag in derselben Transaktion
+2. `affected_ids` separat nachträglich ermitteln
+3. Freitext-Variante
 
 ### H3 — GUI-Refresh bei parallelen Änderungen
-**Empfehlung:** In `v1` manuelles/aktionsbezogenes Reload + Refresh-Button; kein
-WebSocket/Polling (optional später).
-**Antwort:**
+1. **(Empfehlung)** Manuelles/aktionsbezogenes Reload + Refresh-Button (kein Live-Update in `v1`)
+2. Polling alle N Sekunden
+3. WebSocket/SSE Live-Updates
 
 ---
 
 ## I — Packaging, Config & Tests
 
 ### I1 — PyInstaller
-**Empfehlung:** `onedir` + `--windowed` (kein Konsolenfenster), App-Icon; GUI-Assets via
-`--add-data` bündeln.
-**Antwort:**
+1. **(Empfehlung)** `onedir` + `--windowed` (kein Konsolenfenster) + Icon + GUI-Assets via `--add-data`
+2. `onefile`
+3. Freitext-Variante
 
 ### I2 — First-Run, Config & Pfade
-**Empfehlung:** Bei Erststart `%APPDATA%\ReceiptBoard\` anlegen, DB per Migrations auf
-`head`; Config `config.toml` (Port-Override, DB-Pfad) via `platformdirs`.
-**Antwort:**
+1. **(Empfehlung)** `%APPDATA%\ReceiptBoard\` bei Erststart; DB per Migrations auf `head`; `config.toml` via `platformdirs`
+2. Config als `JSON`/Env statt `TOML`
+3. Freitext-Variante
 
 ### I3 — Test-Strategie (≥ 90 %)
-**Empfehlung:** `pytest` + `pytest-cov`; Unit (Services, Importer, Cascade), Integration
-(`FastAPI` `TestClient`, CLI), Temp-/In-Memory-`SQLite`-Fixtures, echte Markdown-Quelle als
-Importer-Fixture, Coverage-Gate ≥ `90 %` in CI (GitHub Actions).
-**Antwort:**
+1. **(Empfehlung)** `pytest` + `pytest-cov`; Unit + Integration (`TestClient`, CLI); Temp-/In-Memory-`SQLite`; echte Markdown-Quelle als Fixture; Coverage-Gate ≥ `90 %` in **GitHub-Actions-CI**
+2. Wie 1, aber **ohne** CI-Gate (nur lokal)
+3. Freitext-Variante
 
 ---
 
-## J — Sonstiges / dein Input
+## J — Sonstiges / dein Input (Freitext)
 
-> Platz für Themen, die ich übersehen habe oder die dir wichtig sind (z. B. Logging,
-> i18n, Backup/Export der DB, GitHub-Actions-CI, Release-Artefakte).
+> Themen, die ich übersehen habe oder die dir wichtig sind — z. B. Logging, i18n,
+> DB-Backup/Restore, Release-Artefakte/GitHub Releases, Lizenz, Branch-/CI-Setup.
 
 **Antwort:**
