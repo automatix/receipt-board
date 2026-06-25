@@ -8,6 +8,8 @@ Config-file parsing and first-run DB initialisation are layered on in issue #10.
 from __future__ import annotations
 
 import os
+import tomllib
+from dataclasses import dataclass
 from pathlib import Path
 
 import platformdirs
@@ -41,3 +43,49 @@ def runtime_path() -> Path:
 
 def config_path() -> Path:
     return app_dir() / CONFIG_FILENAME
+
+
+DEFAULT_CONFIG_TOML = """\
+# Receipt Board configuration.
+[server]
+# Fixed loopback port; 0 = pick an ephemeral port on each start.
+port = 0
+
+[database]
+# Absolute path to override the SQLite database location.
+# path = ""
+"""
+
+
+@dataclass
+class Config:
+    port: int
+    db_path: Path
+
+
+def ensure_app_dir() -> Path:
+    directory = app_dir()
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
+
+
+def ensure_default_config() -> Path:
+    path = config_path()
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(DEFAULT_CONFIG_TOML, encoding="utf-8")
+    return path
+
+
+def load_config() -> Config:
+    """Load ``config.toml`` (structured), falling back to defaults for missing keys."""
+    data: dict = {}
+    path = config_path()
+    if path.exists():
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    server = data.get("server", {})
+    database = data.get("database", {})
+    port = int(server.get("port", 0) or 0)
+    override = database.get("path")
+    resolved_db = Path(override) if override else db_path()
+    return Config(port=port, db_path=resolved_db)
