@@ -15,9 +15,10 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **`done`** | A boolean checkbox present on **every Node**. The application is agnostic to its real-world meaning — it only stores and cascades checkmarks (the "receipt gathered" semantics live outside the tool). | — | `pinned` |
 | **`resources`** | The typed Resources of an Expense Item (zero or more) telling where its receipt(s) are found. | — | `pinned` |
 | **Resource** | A typed locator for a receipt: a `type` (a Resource Type) plus a value — e.g. the concrete URL, or the concrete email mailbox to look in. | — | `pinned` |
-| **Resource Type** | The kind of a Resource. Currently `URL` or `Email` (the set is extensible). | — | `pinned` |
+| **Resource Type** | The kind of a Resource, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `URL`, `Email`). | — | `pinned` |
 | **`tools`** | The Tools of an Expense Item (zero or more) used to obtain its receipt(s); defaults to `Browser`. | — | `pinned` |
-| **Tool** | An instrument used to obtain a receipt, drawn from a controlled set — currently `Browser` or `Thunderbird` (the set is extensible). | — | `pinned` |
+| **Tool** | An instrument used to obtain a receipt, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `Browser`, `Thunderbird`). | — | `pinned` |
+| **Controlled Vocabulary** | A user-extensible set of allowed values (e.g. the Tools, the Resource Types) managed via the GUI. Import validates typed tokens against these and aborts on unknown values (see ADR-0005). | — | `pinned` |
 | **`data`** | Free-text auxiliary data needed to obtain the receipt (e.g. a login identifier). Attribute of an Expense Item. | — | `pinned` |
 | **`instructions`** | Free-text note on how to obtain the receipt. Attribute of an Expense Item. | — | `pinned` |
 | **Import** | Seeding a new Checklist from the Markdown checklist format. | — | `provisional` |
