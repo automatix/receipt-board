@@ -1,11 +1,48 @@
-:root {
+/* Theme tokens. Light is the default; "System" follows prefers-color-scheme (only when no
+   explicit choice is set); an explicit choice sets data-theme on <html>. */
+:root,
+:root[data-theme="light"] {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --fg: #1c1e21;
+  --accent: #2563eb;
+  --on-accent: #ffffff;
+  --danger: #c0392b;
+  --muted: #6b7280;
+  --border: #d7dae0;
+  --hover: #eceef2;
+  --input-bg: #ffffff;
+  --btn-bg: #eaecef;
+}
+
+:root[data-theme="dark"] {
   --bg: #1e1e1e;
   --panel: #262626;
   --fg: #e8e8e8;
   --accent: #4ea1ff;
+  --on-accent: #07203a;
   --danger: #e06c75;
   --muted: #9aa0a6;
   --border: #3a3a3a;
+  --hover: #2f2f2f;
+  --input-bg: #1a1a1a;
+  --btn-bg: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1e1e1e;
+    --panel: #262626;
+    --fg: #e8e8e8;
+    --accent: #4ea1ff;
+    --on-accent: #07203a;
+    --danger: #e06c75;
+    --muted: #9aa0a6;
+    --border: #3a3a3a;
+    --hover: #2f2f2f;
+    --input-bg: #1a1a1a;
+    --btn-bg: #333333;
+  }
 }
 
 * {
@@ -56,7 +93,7 @@ main {
 .input,
 .textarea,
 select.input {
-  background: #1a1a1a;
+  background: var(--input-bg);
   color: var(--fg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -79,7 +116,7 @@ select.input {
 }
 
 .btn {
-  background: #333;
+  background: var(--btn-bg);
   color: var(--fg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -89,13 +126,13 @@ select.input {
 }
 
 .btn:hover {
-  background: #3d3d3d;
+  background: var(--hover);
 }
 
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #07203a;
+  color: var(--on-accent);
 }
 
 .btn-danger {
@@ -130,7 +167,7 @@ select.input {
 }
 
 .row:hover {
-  background: #2c2c2c;
+  background: var(--hover);
 }
 
 .row.drop-into {
@@ -285,13 +322,14 @@ select.input {
   position: fixed;
   bottom: 1rem;
   right: 1rem;
-  background: #2c3340;
+  background: var(--panel);
   border: 1px solid var(--accent);
   color: var(--fg);
   padding: 0.6rem 0.9rem;
   border-radius: 6px;
   z-index: 200;
   max-width: 50vw;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .toast-error {
