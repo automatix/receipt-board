@@ -26,10 +26,14 @@ def config_script(token: str) -> str:
 
 
 def open_window(url: str, token: str, *, title: str = "Receipt Board") -> None:  # pragma: no cover
-    """Open the native window and inject the token once the page has loaded."""
+    """Open the native window and inject the token once the page has loaded.
+
+    ``text_select=True`` enables document text selection (pywebview disables it by
+    default), so text can be selected and copied with ``Ctrl+C`` like in a browser.
+    """
     import webview
 
-    window = webview.create_window(title, url=url)
+    window = webview.create_window(title, url=url, text_select=True)
 
     def _inject() -> None:
         window.evaluate_js(config_script(token))
