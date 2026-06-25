@@ -5,6 +5,24 @@
 
 # Dependencies
 node_modules/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# SQLite databases (local app data)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 
 # Build output
 dist/
