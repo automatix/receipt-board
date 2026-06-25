@@ -18,6 +18,6 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 
 | ADR | Title | Status |
 | --- | ----- | ------ |
-| _none yet_ | | |
+| [0001](./0001-receipt-not-modeled-in-v1.md) | Receipt is not a domain entity in v1 | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).
