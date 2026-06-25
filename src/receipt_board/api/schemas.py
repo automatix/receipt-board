@@ -58,3 +58,7 @@ class MoveRequest(BaseModel):
 
 class VocabNameRequest(BaseModel):
     name: str
+
+
+class ValidateImportRequest(BaseModel):
+    text: str

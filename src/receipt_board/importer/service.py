@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from receipt_board.core.audit import AuditService
 from receipt_board.core.errors import InvalidImportError
 from receipt_board.core.refs import CATEGORY
-from receipt_board.importer.parser import ParsedNode, parse
+from receipt_board.importer.parser import ParsedNode, ParseResult, parse
 from receipt_board.persistence.models import (
     Category,
     Checklist,
@@ -32,6 +32,41 @@ from receipt_board.persistence.models import (
 )
 
 
+def _parse_with_vocab(session: Session, text: str) -> ParseResult:
+    valid_tools = {t.name.lower(): t.name for t in session.scalars(select(Tool))}
+    valid_resource_types = {r.name for r in session.scalars(select(ResourceType))}
+    return parse(text, valid_tools=valid_tools, valid_resource_types=valid_resource_types)
+
+
+def _count_nodes(roots: list[ParsedNode]) -> tuple[int, int]:
+    categories = items = 0
+    stack = list(roots)
+    while stack:
+        node = stack.pop()
+        if node.kind == CATEGORY:
+            categories += 1
+            stack.extend(node.children)
+        else:
+            items += 1
+    return categories, items
+
+
+def build_import_report(session: Session, text: str) -> dict:
+    """Dry-run: parse + validate ``text`` and return a report (writes nothing).
+
+    Shared with the GUI/CLI/REST so a user can check whether a file is importable
+    (and what is wrong) without importing.
+    """
+    result = _parse_with_vocab(session, text)
+    categories, items = _count_nodes(result.roots)
+    return {
+        "valid": not result.errors,
+        "errors": [issue.as_dict() for issue in result.errors],
+        "warnings": [issue.as_dict() for issue in result.warnings],
+        "summary": {"categories": categories, "items": items},
+    }
+
+
 class ImportService:
     def __init__(self, session: Session, audit: AuditService) -> None:
         self.session = session
@@ -41,9 +76,7 @@ class ImportService:
         if not (name or "").strip():
             raise InvalidImportError("Checklist name must not be empty")
 
-        valid_tools = {t.name.lower(): t.name for t in self.session.scalars(select(Tool))}
-        valid_resource_types = {r.name for r in self.session.scalars(select(ResourceType))}
-        result = parse(text, valid_tools=valid_tools, valid_resource_types=valid_resource_types)
+        result = _parse_with_vocab(self.session, text)
         if result.errors:
             raise InvalidImportError(
                 f"Import aborted: {len(result.errors)} validation error(s)",
