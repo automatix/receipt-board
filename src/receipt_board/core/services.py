@@ -101,6 +101,12 @@ class ChecklistService:
             payload={"old": {"name": old_name}, "new": None},
         )
 
+    def import_markdown(self, name: str, text: str) -> Checklist:
+        """Create a checklist from the Markdown format (delegates to ImportService)."""
+        from receipt_board.importer.service import ImportService
+
+        return ImportService(self.session, self.audit).import_markdown(name, text)
+
     def clone(self, checklist_id: int, new_name: str) -> Checklist:
         """Deep-copy structure + fields with fresh ids and ``done=False`` (GLOSSARY: Clone)."""
         source = self._get_checklist(checklist_id)

@@ -1,0 +1,84 @@
+- [ ] Verbindung
+	- [ ] Festnetz&DSL
+		- [ ] 1&1 (https://control-center.1und1.de/invoice.html#/current | Email) {Browser | Thunderbird} [Login 588791127] <öffne den Link im Browser und lade die Rechnungen runter>
+	- [ ] Handy&LTE
+		- [ ] sim.de (https://service.sim.de/mytariff/invoice/showAll | Email) {Browser | Thunderbird} [Login simex] <öffne den Link im Browser und lade die Rechnungen runter>
+- [ ] Mobility
+	- [ ] Miles [Email -> Download-Link]
+	- [ ] Share Now [Email]
+	- [ ] Sixt [Email]
+- [ ] Kleinrechnungen / Abos
+	- [ ] Services
+		- [ ] Google
+			- [ ] YouTube Premium [https://payments.google.com]
+			- [ ] Google One [https://payments.google.com]
+			- [ ] Google Workspace [Email automatix.pro "Google Workspace: Your invoice"]
+			- [ ] Google Play [https://payments.google.com]
+		- [ ] Dropbox [https://www.dropbox.com/manage/billing]
+	- [ ] Software
+		- [ ] Evernote [https://accounts.evernote.com/settings/account/billing | Email]
+		- [ ] Nirvana
+	- [ ] VPN
+		- [ ] SurfShark
+	- [ ] Antivirus
+		- [ ] McAfee
+	- [ ] Development
+		- [ ] JetBrains PhpStorm
+		- [ ] JetBrains Symfony Support
+	- [ ] Mobility
+		- [ ] BahnCard
+		- [ ] Car Sharing
+			- [ ] Miles
+			- [ ] Free2move
+			- [ ] Sixt
+			- [ ] Bolt
+		- [ ] Taxi
+			- [ ] Taxi (klassisch)
+			- [ ] Bolt
+	- [ ] AI
+		- [ ] ChatGPT Plus
+		- [ ] GitHub Copilot
+		- [ ] Bito [https://billing.stripe.com/p/session/live_YWNjdF8xTUNYbm5EdnpMNUtidHdHLF9VbEJiRW02dEVzWGxLSFBhOHd0b0d3dnF0cElDY0JF0100KT6IWJzv | Email]
+		- [ ] JetBrains AI Pro [https://account.jetbrains.com/licenses/transactions]
+		- [ ] Speak AI [https://beta.speakai.co/profile/payment]
+		- [ ] Replit [https://portal.withorb.com/view?token=IkNpR3RjRUNVOHdGU2FzZ24i.94d0j_t8wrOKQU1_h9Gry8VdXcc | Email]
+	- [ ] Presse
+		- [ ] Entwickler Magazin [Email]
+- [ ] Weiterbildung
+	- [ ] SymfonyCasts [https://symfonycasts.com/profile/settings#subscription]
+	- [ ] Sylius Academy [Email]
+- [ ] Online-Shops
+	- [ ] Amazon [https://www.amazon.de/gp/css/order-history?ref_=nav_orders_first]
+	- [ ] ebay [https://www.ebay.com/mye/myebay/purchase]
+	- [ ] notebooksbilliger.de [https://www.notebooksbilliger.de/kundenkonto/bestellungen]
+	- [ ] Galaxus [https://www.galaxus.de/de/order]
+- [ ] Mitgliedschaften
+	- [ ] Xing [https://www.xing.com/settings/purchases/consumer-products/subscription-details/PRM/invoices]
+	- [ ] LinkedIn [https://www.linkedin.com/manage/purchases-payments/transactions]
+		- [ ] Membership
+		- [ ] Premium Abos
+	- [ ] freelancermap.de [https://www.freelancermap.de/dashboard/einstellungen]
+	- [ ] freelance.de [https://www.freelance.de/account/index.php]
+	- [ ] Gulp [Email]
+- [ ] Hosting & Domains
+	- [ ] Hosting
+		- [ ] fly.io [https://fly.io/dashboard/ilya-khanataev/billing/invoices]
+	- [ ] Domains
+		- [ ] INWX [https://account.inwx.de/de/accounting/invoices]
+		- [ ] Squarespace [https://account.squarespace.com/domains/managed/<DOMAN>/billing/settings]
+- [ ] Sonderposten
+	- [ ] Bankkosten (Gebühren und Zinsen)
+		- [ ] Berliner Sparkasse
+	- [ ] Betreuungskosten
+	- [ ] Büro
+		- [ ] Miete
+		- [ ] Nebenkostenabrechnugen
+		- [ ] Strom
+	- [ ] Gesundheit
+	- [ ] GEZ - ARD, ZDF, DRadio - Rundfunkbeitrag
+	- [ ] Reisekosten
+	- [ ]  Wohltätigkeit
+		- [ ] Wikipedia
+	- [ ] Versicherungen
+		- [ ] KV
+		- [ ] HPV

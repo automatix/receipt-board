@@ -134,6 +134,17 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
    Fehlern Abbruch **ohne** Schreiben + Report (empfiehlt Vokabular-Erweiterung via GUI);
    sonst Insert in **einer** Transaktion. Import ist GUI-privilegiert.
 
+**Reservierte Kontrollzeichen (strikt):** Die acht Zeichen `(` `)` `[` `]` `{` `}` `<` `>`
+sind **reserviert** (Feld-Delimiter) und im **Freitext** (Namen und Feldwerte) **nicht
+zulässig**. Ein reserviertes Zeichen im Wert (z. B. ein `<…>` innerhalb eines `[...]`) ist
+ein `syntax`-Fehler und bricht den atomaren Import ab. **Felder werden nur für `Expense
+Item`s** geparst; auf einem Knoten, der strukturell zur `Category` wird, werden
+Klammer-Inhalte ignoriert (Warnung). **Konsequenz:** Die reale Referenzdatei
+`Expenses Checklist 2024_v02.md` importiert **nicht** unverändert — sie nutzt Klammern als
+Namens-Zusatz (`Taxi (klassisch)`) bzw. `<…>` im Freitext (`…/<DOMAN>/…`) — und wird mit
+präzisem, zeilenbezogenem Report abgelehnt. Der Erfolgsfall wird gegen eine
+notations-konforme Fixture getestet.
+
 ---
 
 ## 7. GUI (G)
