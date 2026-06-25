@@ -1,8 +1,11 @@
 :root {
   --bg: #1e1e1e;
+  --panel: #262626;
   --fg: #e8e8e8;
   --accent: #4ea1ff;
+  --danger: #e06c75;
   --muted: #9aa0a6;
+  --border: #3a3a3a;
 }
 
 * {
@@ -14,14 +17,16 @@ body {
   font-family: "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
   color: var(--fg);
+  font-size: 14px;
 }
 
 header {
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #333;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
 }
 
 header h1 {
@@ -29,11 +34,266 @@ header h1 {
   margin: 0;
 }
 
-.status {
-  color: var(--muted);
-  font-size: 0.85rem;
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 main {
   padding: 1rem;
+}
+
+/* Inputs and buttons */
+.input,
+.textarea,
+select.input {
+  background: #1a1a1a;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+}
+
+.input.inline {
+  padding: 0.1rem 0.3rem;
+}
+
+.search {
+  min-width: 180px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 220px;
+  font-family: ui-monospace, monospace;
+}
+
+.btn {
+  background: #333;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn:hover {
+  background: #3d3d3d;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #07203a;
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-mini {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.85rem;
+}
+
+/* Tree */
+.tree h2,
+.vocab h2,
+.search-head h2 {
+  font-size: 1rem;
+  margin: 0 0 0.6rem;
+}
+
+.node-list {
+  margin-left: 1rem;
+  border-left: 1px dashed var(--border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+}
+
+.row:hover {
+  background: #2c2c2c;
+}
+
+.row.drop-into {
+  outline: 2px solid var(--accent);
+}
+
+.toggle {
+  width: 1rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.name {
+  cursor: text;
+}
+
+.row-category .name {
+  font-weight: 600;
+}
+
+.summary {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.2rem;
+  opacity: 0;
+}
+
+.row:hover .actions {
+  opacity: 1;
+}
+
+.node-add {
+  margin: 0.1rem 0 0.3rem 1.5rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.drop-zone {
+  height: 6px;
+  margin-left: 1rem;
+}
+
+.drop-zone.active {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.empty {
+  color: var(--muted);
+}
+
+/* Vocabulary */
+.vocab-section {
+  margin-bottom: 1.2rem;
+}
+
+.vocab-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0.25rem 0;
+}
+
+/* Search */
+.search-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hit {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.hit-path {
+  color: var(--muted);
+  margin-left: auto;
+}
+
+/* Modals */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 320px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.modal-wide {
+  min-width: 520px;
+}
+
+.modal h3 {
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resource-row {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.2rem 0;
+}
+
+.tool-check {
+  margin-right: 0.8rem;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: #2c3340;
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  z-index: 200;
+  max-width: 50vw;
+}
+
+.toast-error {
+  border-color: var(--danger);
 }
