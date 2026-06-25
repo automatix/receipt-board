@@ -14,6 +14,8 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   (`v1` guards with confirmation dialogs; the Audit Log provides traceability.)
 - **Headless server mode** — let the CLI/AI operate without the GUI window open. (`v1` CLI
   talks HTTP to the running app — see ADR-0011 — so it currently requires the app to run.)
+- **Branded app icon** — ship a real `packaging/icon.ico` (the PyInstaller spec already
+  uses it when present; `v1` falls back to the default PyInstaller icon).
 
 ## Out of scope for `v1` (tracked elsewhere)
 
