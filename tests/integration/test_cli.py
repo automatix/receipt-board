@@ -85,6 +85,18 @@ def test_search(live, capsys):
     assert hits[0]["name"] == "1&1"
 
 
+def test_json_flag_accepted_after_subcommand(live, capsys):
+    # --json must work trailing (as documented), not only before the subcommand.
+    assert cli.main(["search", "1&1", "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)[0]["name"] == "1&1"
+
+    assert cli.main(["export", "--json"]) == 0
+    assert isinstance(json.loads(capsys.readouterr().out), list)
+
+    assert cli.main(["item", "done", str(live.item_id), "--json"]) == 0
+    assert "affected_ids" in json.loads(capsys.readouterr().out)
+
+
 def test_search_human_empty(live, capsys):
     assert cli.main(["search", "zzz-nomatch"]) == 0
     assert "(no matches)" in capsys.readouterr().out
