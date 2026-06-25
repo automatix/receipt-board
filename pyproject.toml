@@ -15,6 +15,9 @@ dependencies = [
     "uvicorn>=0.49.0",
 ]
 
+[project.scripts]
+receipt-board = "receipt_board.cli.main:main"
+
 [dependency-groups]
 dev = [
     "ruff>=0.6",
