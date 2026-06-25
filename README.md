@@ -7,6 +7,13 @@ GUI and a small local programmatic interface (REST + CLI).
 `v1` is the structured store plus its interface — receipt acquisition/automation is out of
 scope (see [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) §2).
 
+## End-user docs (German)
+
+- **Installation** — [`docs/INSTALL.md`](docs/INSTALL.md)
+- **Bedienungsanleitung** (user guide) — [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
+
+The rest of this README is the **developer** setup (build/run from source, tests, packaging).
+
 ## Architecture
 
 `GUI (pywebview)` → `FastAPI (127.0.0.1, loopback)` → `core/services` → `repository` →
@@ -120,6 +127,7 @@ docs/           brief, glossary, ADRs, tech spec, backlog
 
 ## Documentation
 
+End-user (German): `docs/INSTALL.md`, `docs/USER_GUIDE.md`. Design/spec:
 `docs/PROJECT_BRIEF.md`, `docs/GLOSSARY.md`, `docs/adr/`, `docs/TECH_SPEC.md`,
 `docs/BACKLOG.md`. On any conflict, the glossary and ADRs win.
 
