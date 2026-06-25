@@ -37,3 +37,27 @@ jobs:
 
       - name: Pytest with coverage gate
         run: uv run pytest --cov --cov-report=term-missing --cov-fail-under=90
+
+  gui-build:
+    name: GUI build (TypeScript / esbuild)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: gui-src/package-lock.json
+
+      - name: Install GUI dependencies
+        working-directory: gui-src
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: gui-src
+        run: npm run typecheck
+
+      - name: Build GUI bundle
+        working-directory: gui-src
+        run: npm run build
