@@ -6,8 +6,10 @@ Read-only plus the leaf done-toggle (public surface). Commands::
     receipt-board search QUERY
     receipt-board item done ID
     receipt-board item undone ID
+    receipt-board validate PATH        # dry-run: is a Markdown file importable?
 
-``--json`` switches to machine-readable output. Exit code 0 on success, non-zero on error.
+``--json`` switches to machine-readable output. Exit code 0 on success, non-zero on error
+(``validate`` exits 1 when the file is not importable).
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
 from receipt_board import config
 from receipt_board.cli.client import ApiClient, CliError
@@ -52,6 +55,11 @@ def build_parser() -> argparse.ArgumentParser:
     item_sub = item.add_subparsers(dest="item_command", required=True)
     item_sub.add_parser("done", parents=[json_flag]).add_argument("id", type=int)
     item_sub.add_parser("undone", parents=[json_flag]).add_argument("id", type=int)
+
+    validate = sub.add_parser(
+        "validate", parents=[json_flag], help="dry-run: check if a Markdown file is importable"
+    )
+    validate.add_argument("path", help="path to the Markdown checklist file")
 
     return parser
 
@@ -93,6 +101,22 @@ def _format_hits(hits: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _format_report(report: dict) -> str:
+    summary = report["summary"]
+    lines: list[str] = []
+    if report["valid"]:
+        lines.append(
+            f"OK — importierbar: {summary['categories']} Kategorien, {summary['items']} Einträge"
+        )
+    else:
+        lines.append(f"UNGÜLTIG — {len(report['errors'])} Fehler:")
+        for issue in report["errors"]:
+            lines.append(f"  Zeile {issue['line']} · {issue['token']} · {issue['message']}")
+    for warning in report["warnings"]:
+        lines.append(f"  Warnung Zeile {warning['line']}: {warning['message']}")
+    return "\n".join(lines)
+
+
 def _dispatch(args: argparse.Namespace, client: ApiClient) -> int:
     if args.command == "export":
         if args.checklist is None:
@@ -112,6 +136,14 @@ def _dispatch(args: argparse.Namespace, client: ApiClient) -> int:
             f"Item {args.id} marked {'done' if done else 'undone'} ({affected} node(s) affected)"
         )
         _emit(args.json, result, human)
+    elif args.command == "validate":
+        try:
+            text = Path(args.path).read_text(encoding="utf-8")
+        except OSError as exc:
+            raise CliError(f"Cannot read {args.path}: {exc}") from exc
+        report = client.validate_import(text)
+        _emit(args.json, report, _format_report(report))
+        return 0 if report["valid"] else 1
     return 0
 
 
