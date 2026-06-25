@@ -23,7 +23,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **Import** | Seeding a new Checklist from the Markdown checklist format. | — | `provisional` |
 | **Clone** | Creating a new Checklist by duplicating an existing one's structure with all `done` reset. | — | `provisional` |
 | **Cascade** | The rule that keeps `done` consistent across the tree: setting a Node propagates to its whole subtree, and a child change re-rolls-up its ancestors — maintaining `category.done ⇔ entire subtree done`. | — | `pinned` |
-| **Audit Log** | Append-only record of every write action. | — | `provisional` |
+| **Audit Log** | Append-only record of every write action — one entry per caller action: timestamp, origin (`GUI`/`CLI`/`REST`), action type, target `id`, old → new value, and the ids of all nodes affected by the cascade. | — | `pinned` |
 
 > **Receipt / Beleg** is **deliberately not a domain entity in `v1`** — see
 > [`adr/0001-receipt-not-modeled-in-v1.md`](./adr/0001-receipt-not-modeled-in-v1.md).
