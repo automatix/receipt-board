@@ -22,6 +22,17 @@ from receipt_board.cli.client import ApiClient, CliError
 
 
 def build_parser() -> argparse.ArgumentParser:
+    # --json is accepted both before the subcommand (global) and after it: a shared
+    # parent carries it onto each subcommand with default=SUPPRESS so it never clobbers
+    # the global flag when given up front.
+    json_flag = argparse.ArgumentParser(add_help=False)
+    json_flag.add_argument(
+        "--json",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="machine-readable JSON output",
+    )
+
     parser = argparse.ArgumentParser(
         prog="receipt-board",
         description="Receipt Board CLI — read and toggle expense-item checkboxes.",
@@ -29,16 +40,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true", help="machine-readable JSON output")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    export = sub.add_parser("export", help="export checklists (all, or one nested tree)")
+    export = sub.add_parser(
+        "export", parents=[json_flag], help="export checklists (all, or one nested tree)"
+    )
     export.add_argument("--checklist", type=int, default=None, metavar="ID")
 
-    search = sub.add_parser("search", help="search node names (flat hits)")
+    search = sub.add_parser("search", parents=[json_flag], help="search node names (flat hits)")
     search.add_argument("query")
 
     item = sub.add_parser("item", help="toggle an expense item's done checkbox")
     item_sub = item.add_subparsers(dest="item_command", required=True)
-    item_sub.add_parser("done").add_argument("id", type=int)
-    item_sub.add_parser("undone").add_argument("id", type=int)
+    item_sub.add_parser("done", parents=[json_flag]).add_argument("id", type=int)
+    item_sub.add_parser("undone", parents=[json_flag]).add_argument("id", type=int)
 
     return parser
 
