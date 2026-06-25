@@ -17,6 +17,14 @@ import type {
   VocabEntry,
 } from "./types";
 import {
+  type ThemeMode,
+  applyTheme,
+  loadTheme,
+  nextTheme,
+  saveTheme,
+  themeLabel,
+} from "./theme";
+import {
   byId,
   clear,
   confirmDialog,
@@ -47,6 +55,7 @@ const state: State = {
 };
 
 let dragged: { kind: NodeKind; id: number } | null = null;
+let themeMode: ThemeMode = loadTheme();
 const parentOf = new Map<string, number | null>();
 
 const key = (kind: NodeKind, id: number): string => `${kind}:${id}`;
@@ -174,6 +183,12 @@ function renderToolbar(): void {
       button(state.view === "vocab" ? "Checklist" : "Vokabular", () => {
         state.view = state.view === "vocab" ? "checklist" : "vocab";
         render();
+      }),
+      button(themeLabel(themeMode), () => {
+        themeMode = nextTheme(themeMode);
+        applyTheme(themeMode);
+        saveTheme(themeMode);
+        renderToolbar();
       }),
     ]),
   );
