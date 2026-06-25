@@ -22,5 +22,6 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 | [0002](./0002-done-stored-on-every-node-with-symmetric-cascade.md) | `done` is stored on every node, kept consistent by a symmetric cascade | Accepted |
 | [0003](./0003-external-interface-toggles-leaf-checkboxes-only.md) | The external interface may only toggle leaf checkboxes | Accepted |
 | [0004](./0004-audit-logs-one-entry-per-action-with-affected-ids.md) | Audit logs one entry per action, with cascade-affected node ids | Accepted |
+| [0005](./0005-import-is-atomic-and-validates-controlled-vocabularies.md) | Import is atomic and validates against the controlled vocabularies | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).
