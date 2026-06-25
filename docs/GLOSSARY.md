@@ -27,6 +27,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **Export** | A read operation returning the full **nested** JSON tree of a Checklist — all node fields (`id`, `name`, node type, `done`, `position`; for Expense Items also `resources`/`tools`/`data`/`instructions`). Available in GUI/REST/CLI. | — | `pinned` |
 | **Search** | A read operation: free-text match over node `name`s at **all levels**, returning a **flat** list of hits (each with node `id`, `name`, node type, Checklist `id`, and the ancestor path). Available in GUI/REST/CLI. | — | `pinned` |
 | **Cascade** | The rule that keeps `done` consistent across the tree: setting a Node propagates to its whole subtree, and a child change re-rolls-up its ancestors — maintaining `category.done ⇔ entire subtree done`. | — | `pinned` |
+| **Privileged Operation** | A write only the GUI may perform: add/edit/remove nodes, Category `done` toggles, import/clone/delete Checklists, and vocabulary maintenance. Guarded by a startup-generated session token injected only into the GUI; the public surface (reads + leaf `done`-toggle) needs no token. See ADR-0003, ADR-0009. | — | `pinned` |
 | **Audit Log** | Append-only record of every write action — one entry per caller action: timestamp, origin (`GUI`/`CLI`/`REST`), action type, target `id`, old → new value, and the ids of all nodes affected by the cascade. | — | `pinned` |
 
 > **Receipt / Beleg** is **deliberately not a domain entity in `v1`** — see
