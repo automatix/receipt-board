@@ -17,7 +17,7 @@ sharpened. Definitions say what a term **is**, not what it does.
 | **`resources`** | The typed Resources of an Expense Item (zero or more) telling where its receipt(s) are found. | — | `pinned` |
 | **Resource** | A typed locator for a receipt: a `type` (a Resource Type) plus an **optional** value — e.g. the concrete URL, or the concrete email mailbox to look in. A value-less `Email` resource means "check your email" (mailbox unspecified). | — | `pinned` |
 | **Resource Type** | The kind of a Resource, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `URL`, `Email`). | — | `pinned` |
-| **`tools`** | The Tools of an Expense Item (zero or more) used to obtain its receipt(s); defaults to `Browser`. | — | `pinned` |
+| **`tools`** | The Tools of an Expense Item (zero or more) used to obtain its receipt(s). May be empty; there is **no implicit default** — `Browser` is an ordinary value like any other. | — | `pinned` |
 | **Tool** | An instrument used to obtain a receipt, drawn from an extensible **controlled vocabulary** managed in the app via the GUI (currently `Browser`, `Thunderbird`). | — | `pinned` |
 | **Controlled Vocabulary** | An **application-wide** (shared across all Checklists), user-extensible set of allowed values (e.g. the Tools, the Resource Types) managed via the GUI. Import validates typed tokens against these and aborts on unknown values (see ADR-0005). | — | `pinned` |
 | **`data`** | Free-text auxiliary data needed to obtain the receipt (e.g. a login identifier). Attribute of an Expense Item. | — | `pinned` |
