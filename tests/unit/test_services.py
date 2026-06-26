@@ -86,6 +86,28 @@ def test_add_item_unknown_resource_type_rejected(svc):
     assert exc.value.details.get("name") == "Fax"
 
 
+def test_resource_value_must_match_pattern(svc):
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    with pytest.raises(ValidationError):
+        svc.add_item(cl.id, cat.id, "x", resources=[{"type": "URL", "value": "not-a-url"}])
+
+
+def test_resource_value_required_when_not_optional(svc):
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    with pytest.raises(ValidationError):
+        svc.add_item(cl.id, cat.id, "x", resources=[{"type": "URL"}])  # URL needs a value
+
+
+def test_optional_resource_value_allowed(svc, session):
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    item = svc.add_item(cl.id, cat.id, "x", resources=[{"type": "Email"}])  # value optional
+    session.refresh(item)
+    assert item.resources[0].value is None
+
+
 def test_add_item_unknown_tool_rejected(svc):
     cl = svc.create_blank("CL")
     cat = svc.add_category(cl.id, "Cat")
@@ -118,7 +140,7 @@ def test_edit_category_rename(svc, session):
 def test_edit_item_replaces_resources(svc, session):
     cl = svc.create_blank("CL")
     cat = svc.add_category(cl.id, "Cat")
-    item = svc.add_item(cl.id, cat.id, "x", resources=[{"type": "URL", "value": "a"}])
+    item = svc.add_item(cl.id, cat.id, "x", resources=[{"type": "URL", "value": "https://a"}])
     svc.edit_node(
         EXPENSE_ITEM,
         item.id,
@@ -220,7 +242,7 @@ def test_clone_deep_copies_and_resets_done(svc, session):
     cl = svc.create_blank("Source")
     cat = svc.add_category(cl.id, "Cat")
     item = svc.add_item(
-        cl.id, cat.id, "x", resources=[{"type": "URL", "value": "u"}], tools=["Browser"]
+        cl.id, cat.id, "x", resources=[{"type": "URL", "value": "https://u"}], tools=["Browser"]
     )
     svc.set_item_done(item.id, True)
 

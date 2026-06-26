@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from receipt_board.core.audit import AuditService
 from receipt_board.core.errors import InvalidImportError
 from receipt_board.core.refs import CATEGORY
-from receipt_board.importer.parser import ParsedNode, ParseResult, parse
+from receipt_board.importer.parser import ParsedNode, ParseResult, ResourceTypeDef, parse
 from receipt_board.persistence.models import (
     Category,
     Checklist,
@@ -34,8 +34,11 @@ from receipt_board.persistence.models import (
 
 def _parse_with_vocab(session: Session, text: str) -> ParseResult:
     valid_tools = {t.name.lower(): t.name for t in session.scalars(select(Tool))}
-    valid_resource_types = {r.name for r in session.scalars(select(ResourceType))}
-    return parse(text, valid_tools=valid_tools, valid_resource_types=valid_resource_types)
+    resource_types = [
+        ResourceTypeDef(r.name, r.value_optional, r.value_pattern)
+        for r in session.scalars(select(ResourceType).order_by(ResourceType.name))
+    ]
+    return parse(text, valid_tools=valid_tools, resource_types=resource_types)
 
 
 def _count_nodes(roots: list[ParsedNode]) -> tuple[int, int]:

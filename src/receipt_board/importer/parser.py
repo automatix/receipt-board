@@ -24,8 +24,6 @@ from dataclasses import dataclass, field
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM, NodeKind
 
 _LINE_RE = re.compile(r"^(?P<indent>[ \t]*)-\s\[(?P<check>[ xX])\]\s+(?P<text>.*)$")
-_URL_RE = re.compile(r"^https?://", re.IGNORECASE)
-_EMAIL_RE = re.compile(r"^email(?:\s+(?P<value>.*))?$", re.IGNORECASE)
 
 _OPENERS = {"(": ")", "{": "}", "[": "]", "<": ">"}
 _FIELD_BY_OPENER = {"(": "resources", "{": "tools", "[": "data", "<": "instructions"}
@@ -36,6 +34,15 @@ _RESERVED = set("()[]{}<>")
 class ParsedResource:
     type: str
     value: str | None
+
+
+@dataclass
+class ResourceTypeDef:
+    """A resource type's matching rules: the name key, value-optionality and value regex."""
+
+    name: str
+    value_optional: bool = False
+    value_pattern: str | None = None
 
 
 @dataclass
@@ -120,15 +127,41 @@ def extract_fields(text: str) -> tuple[str, list[tuple[str, str]], list[str]]:
     return name, groups, problems
 
 
-def type_resource(token: str) -> ParsedResource | None:
-    """Type a resource token: URL by scheme, else literal ``Email`` with optional value."""
-    if _URL_RE.match(token):
-        return ParsedResource(type="URL", value=token)
-    match = _EMAIL_RE.match(token)
-    if match:
-        value = (match.group("value") or "").strip() or None
-        return ParsedResource(type="Email", value=value)
-    return None
+def _value_matches(rt: ResourceTypeDef, value: str) -> bool:
+    if not rt.value_pattern:
+        return True
+    return re.search(rt.value_pattern, value, re.IGNORECASE) is not None
+
+
+def type_resource(
+    token: str, resource_types: list[ResourceTypeDef]
+) -> tuple[ParsedResource | None, str | None]:
+    """Type a resource token against the resource-type definitions, case-insensitively.
+
+    Generic (data-driven) — no per-type branching. Accepted forms:
+      * ``Key: value`` — the key matches a type name; the value must match its pattern.
+      * a bare ``Key`` — when that type's value is optional (e.g. ``Email``).
+      * a bare value — typed by the first resource type whose regex matches it.
+    Returns ``(resource, None)`` on success, or ``(None, message)`` when a keyed token is
+    malformed, or ``(None, None)`` when the token matches no type at all.
+    """
+    token = token.strip()
+    by_key = {rt.name.lower(): rt for rt in resource_types}
+    key_part, sep, value_part = token.partition(":")
+    keyed = by_key.get(key_part.strip().lower())
+    if keyed is not None:
+        value = value_part.strip() if sep else ""
+        if not value:
+            if keyed.value_optional:
+                return ParsedResource(keyed.name, None), None
+            return None, f"resource type {keyed.name!r} requires a value"
+        if not _value_matches(keyed, value):
+            return None, f"value {value!r} does not match the {keyed.name} pattern"
+        return ParsedResource(keyed.name, value), None
+    for rt in resource_types:
+        if rt.value_pattern and re.search(rt.value_pattern, token, re.IGNORECASE):
+            return ParsedResource(rt.name, token), None
+    return None, None
 
 
 def _parse_item_fields(
@@ -136,7 +169,7 @@ def _parse_item_fields(
     groups: list[tuple[str, str]],
     *,
     valid_tools: dict[str, str],
-    valid_resource_types: set[str],
+    resource_types: list[ResourceTypeDef],
     errors: list[ImportIssue],
 ) -> None:
     resource_tokens: list[str] = []
@@ -155,14 +188,14 @@ def _parse_item_fields(
             instruction_parts.append(content.strip())
 
     for token in resource_tokens:
-        typed = type_resource(token)
-        if typed is None or typed.type not in valid_resource_types:
+        typed, problem = type_resource(token, resource_types)
+        if typed is None:
             errors.append(
                 ImportIssue(
                     line=node.line,
                     token=token,
                     kind="resource_type",
-                    message=f"Cannot type resource {token!r} (expected a URL or 'Email')",
+                    message=problem or f"Cannot type resource {token!r}",
                 )
             )
         else:
@@ -190,7 +223,7 @@ def parse(
     text: str,
     *,
     valid_tools: dict[str, str],
-    valid_resource_types: set[str],
+    resource_types: list[ResourceTypeDef],
 ) -> ParseResult:
     """Parse Markdown into a typed node tree, collecting all errors and warnings."""
     errors: list[ImportIssue] = []
@@ -255,7 +288,7 @@ def parse(
                     node,
                     groups,
                     valid_tools=valid_tools,
-                    valid_resource_types=valid_resource_types,
+                    resource_types=resource_types,
                     errors=errors,
                 )
 

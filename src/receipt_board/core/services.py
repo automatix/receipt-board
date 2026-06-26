@@ -434,12 +434,23 @@ class ChecklistService:
                     f"Unknown resource type: {type_name!r}",
                     details={"kind": "resource_type", "name": type_name},
                 )
-            new_links.append(
-                ItemResource(
-                    resource_type_id=resource_type.id,
-                    value=resource.get("value"),
-                    position=position,
+            value = (resource.get("value") or "").strip() or None
+            if value is None and not resource_type.value_optional:
+                raise ValidationError(
+                    f"Resource type {resource_type.name!r} requires a value",
+                    details={"kind": "resource_value", "name": type_name},
                 )
+            if (
+                value is not None
+                and resource_type.value_pattern
+                and re.search(resource_type.value_pattern, value, re.IGNORECASE) is None
+            ):
+                raise ValidationError(
+                    f"Value {value!r} does not match the {resource_type.name} pattern",
+                    details={"kind": "resource_value", "name": type_name, "value": value},
+                )
+            new_links.append(
+                ItemResource(resource_type_id=resource_type.id, value=value, position=position)
             )
         item.resources = new_links
 

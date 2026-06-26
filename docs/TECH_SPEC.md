@@ -131,8 +131,11 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
    `done` aus `[x]`/`[ ]`.
 2. **Felder (strikt nach Klammer-Typ):** `(...)`→`resources`, `{...}`→`tools`,
    `[...]`→`data`, `<...>`→`instructions`; Mehrfachwerte per `|`.
-3. **Typisierung (D2):** resource-Token → `URL` wenn `^https?://`, sonst Literal `Email`
-   (case-insensitive) → Typ `Email` mit optionalem `value` (Rest nach „Email"); tool-Token
+3. **Typisierung (D2) — datengetrieben, case-insensitive (kein if-else):** ein
+   resource-Token wird generisch gegen die `resource_types` aufgelöst: `Key: value`
+   (Key = Typname, `value` muss `value_pattern` erfüllen), ein bloßer `Key` (wenn
+   `value_optional`, z. B. `Email`), oder ein bloßer Wert (typisiert durch den ersten Typ,
+   dessen `value_pattern` matcht — z. B. `https://…`→`URL`, `a@b.de`→`Email`). tool-Token
    case-insensitive gegen `tools`-Vokabular.
 4. **Validierung & Atomarität (D3, ADR-0005):** zwei-Phasen — erst komplett parsen +
    validieren, **alle** Fehler sammeln (Zeilennr. + Token + betroffenes Vokabular); bei
