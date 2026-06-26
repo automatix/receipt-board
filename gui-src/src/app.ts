@@ -631,10 +631,21 @@ async function onAddItem(categoryId: number): Promise<void> {
   if (state.activeId === null) {
     return;
   }
-  const name = await textPrompt("Eintrag-Name");
-  if (name) {
+  const template: TreeNode = {
+    kind: "expense_item",
+    id: 0,
+    name: "",
+    position: 0,
+    done: false,
+    data: null,
+    instructions: null,
+    resources: [],
+    tools: [],
+  };
+  const fields = await itemEditDialog(template, "Eintrag hinzufügen");
+  if (fields && fields.name) {
     const cid = state.activeId;
-    await act(() => api.addItem(cid, categoryId, name));
+    await act(() => api.addItem(cid, categoryId, { ...fields, name: fields.name! }));
   }
 }
 
@@ -689,7 +700,7 @@ async function onRemoveVocab(kind: "resource_type" | "tool", entry: VocabEntry):
 
 // -- item editor dialog -------------------------------------------------------
 
-function itemEditDialog(node: TreeNode): Promise<ItemFields | null> {
+function itemEditDialog(node: TreeNode, title = "Eintrag bearbeiten"): Promise<ItemFields | null> {
   return new Promise((resolve) => {
     const overlay = el("div", { class: "overlay" });
     const finish = (value: ItemFields | null): void => {
@@ -757,7 +768,7 @@ function itemEditDialog(node: TreeNode): Promise<ItemFields | null> {
     };
 
     const box = el("div", { class: "modal modal-wide" }, [
-      el("h3", { text: "Eintrag bearbeiten" }),
+      el("h3", { text: title }),
       labelled("Name", nameInput),
       labelled("Data", dataInput),
       labelled("Instructions", instrInput),

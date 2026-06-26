@@ -70,10 +70,10 @@ export const api = {
       name,
       parent_id: parentId,
     }),
-  addItem: (checklistId: number, categoryId: number, name: string) =>
+  addItem: (checklistId: number, categoryId: number, fields: ItemFields & { name: string }) =>
     request<{ id: number }>("POST", `/checklists/${checklistId}/items`, {
       category_id: categoryId,
-      name,
+      ...fields,
     }),
 
   editCategory: (id: number, name: string) =>
