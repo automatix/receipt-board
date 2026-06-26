@@ -248,8 +248,8 @@ Klammer-Typ** (keine Heuristik), **atomar / all-or-nothing**
 
 - **Packaging**: `PyInstaller` → ausführbare `.exe` (Windows-Fokus).
 - **Speicherorte** (Vorschlag, via `platformdirs`):
-  - `config` + `SQLite`-DB unter `%APPDATA%\ReceiptBoard\`.
-  - Programm/Executable z. B. unter `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
+  - `config` + `SQLite`-DB unter `%LOCALAPPDATA%\receipt-board\`.
+  - Programm/Executable z. B. unter `%LOCALAPPDATA%\Programs\receipt-board\`.
 - DB-/Config-Pfad konfigurierbar; saubere Erst-Initialisierung bei leerer DB.
 
 ---

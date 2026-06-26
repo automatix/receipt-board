@@ -234,7 +234,7 @@ notations-konforme Fixture getestet.
 - **PyInstaller (I1):** `onedir`, `--windowed` (kein Konsolenfenster); GUI-Assets **und**
   `Alembic`-Migrations via `--add-data` (`receipt_board.spec`). App-Icon optional unter
   `packaging/icon.ico` (sonst PyInstaller-Default — Backlog).
-- **Pfade/Config (I2):** via `platformdirs` → `%APPDATA%\ReceiptBoard\` (override per
+- **Pfade/Config (I2):** via `platformdirs` → `%LOCALAPPDATA%\receipt-board\` (override per
   `RECEIPT_BOARD_HOME`) mit DB (`receipt_board.sqlite`), `config.toml`
   (`[server].port` — `0` = ephemer; optional `[database].path` — `TOML`), `runtime.json`.
 - **First-Run (`receipt_board.bootstrap`):** Ordner + Default-`config.toml` anlegen, DB via

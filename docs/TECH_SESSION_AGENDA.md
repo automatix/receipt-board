@@ -189,7 +189,7 @@
 3. Freitext-Variante
 
 ### I2 — First-Run, Config & Pfade
-1. **(Empfehlung)** `%APPDATA%\ReceiptBoard\` bei Erststart; DB per Migrations auf `head`; `config.toml` via `platformdirs`
+1. **(Empfehlung)** `%LOCALAPPDATA%\receipt-board\` bei Erststart; DB per Migrations auf `head`; `config.toml` via `platformdirs`
 2. Config als `JSON`/Env statt `TOML`
 3. Freitext-Variante
 

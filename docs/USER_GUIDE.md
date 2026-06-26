@@ -151,7 +151,7 @@ herunter (alle Felder).
 
 ## 10. Daten & Nachvollziehbarkeit
 
-Alle Daten liegen lokal in `%APPDATA%\ReceiptBoard\receipt_board.sqlite`. **Jede**
+Alle Daten liegen lokal in `%LOCALAPPDATA%\receipt-board\receipt_board.sqlite`. **Jede**
 schreibende Aktion wird in einem **Audit-Log** protokolliert (Zeitpunkt, Herkunft, Aktion,
 betroffene Knoten). Backup: siehe [`INSTALL.md`](./INSTALL.md).
 

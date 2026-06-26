@@ -52,7 +52,7 @@ uv run pytest tests/unit/test_cascade.py::test_no_op_toggle_changes_nothing  # a
 # GUI build (TypeScript -> src/receipt_board/gui/static via esbuild)
 cd gui-src && npm ci && npm run typecheck && npm run build
 
-# Run the app (build the GUI first); first run creates %APPDATA%\ReceiptBoard\
+# Run the app (build the GUI first); first run creates %LOCALAPPDATA%\receipt-board\
 uv run receipt-board-app             # or: uv run python -m receipt_board
 uv run receipt-board-app --check     # first-run init only, no window (smoke test)
 

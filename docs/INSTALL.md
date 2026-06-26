@@ -18,10 +18,10 @@ Receipt Board wird als eigenständiger Ordner ausgeliefert (PyInstaller `onedir`
    <https://github.com/automatix/receipt-board/releases> →
    `receipt-board-v1.0.2-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
 2. Entpacken; den Ordner `receipt-board` (enthält `receipt-board.exe` und den Unterordner
-   `_internal/`) an einen festen Ort kopieren, z. B. `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
+   `_internal/`) an einen festen Ort kopieren, z. B. `%LOCALAPPDATA%\Programs\receipt-board\`.
 3. `receipt-board.exe` per Doppelklick starten (optional eine Verknüpfung anlegen).
 4. Beim **ersten Start** legt die App ihren Datenordner an:
-   `%APPDATA%\ReceiptBoard\` (Datenbank, `config.toml`, `runtime.json`).
+   `%LOCALAPPDATA%\receipt-board\` (Datenbank, `config.toml`, `runtime.json`).
 
 > Ohne Repo-Zugriff (oder für eine eigene Variante) baust du den Ordner wie in **Variante B**.
 
@@ -76,7 +76,11 @@ uv run receipt-board-app
 
 ## Datenspeicherort & Backup
 
-Alle Daten liegen in `%APPDATA%\ReceiptBoard\`:
+Alle Daten liegen in `%LOCALAPPDATA%\receipt-board\`:
+
+> Vor `v1.1.0` hieß dieser Ordner `%APPDATA%\ReceiptBoard\`. Beim Upgrade legt die App einen
+> neuen, leeren `receipt-board`-Ordner an; eine bestehende `receipt_board.sqlite` ggf. einmalig
+> manuell von dort hierher kopieren.
 
 - `receipt_board.sqlite` — die Datenbank. **Backup** = diese Datei kopieren.
 - `config.toml` — Konfiguration: `[server].port` (`0` = automatischer Port) und optional
@@ -98,7 +102,7 @@ nützlich zum Testen der Installation.
 ## Deinstallation
 
 1. Den Programmordner löschen.
-2. Optional `%APPDATA%\ReceiptBoard\` löschen — **entfernt alle Checklists**.
+2. Optional `%LOCALAPPDATA%\receipt-board\` löschen — **entfernt alle Checklists**.
 
 ## Bedienung
 
