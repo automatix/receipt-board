@@ -4,17 +4,21 @@ from __future__ import annotations
 
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
 from receipt_board.importer.parser import (
+    ResourceTypeDef,
     extract_fields,
     parse,
     type_resource,
 )
 
 VALID_TOOLS = {"browser": "Browser", "thunderbird": "Thunderbird"}
-VALID_TYPES = {"URL", "Email"}
+RESOURCE_TYPES = [
+    ResourceTypeDef("Email", value_optional=True, value_pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"),
+    ResourceTypeDef("URL", value_optional=False, value_pattern=r"^https?://"),
+]
 
 
 def _parse(text):
-    return parse(text, valid_tools=VALID_TOOLS, valid_resource_types=VALID_TYPES)
+    return parse(text, valid_tools=VALID_TOOLS, resource_types=RESOURCE_TYPES)
 
 
 def test_extract_fields_all_types():
@@ -43,14 +47,31 @@ def test_extract_fields_no_groups():
     assert problems == []
 
 
-def test_type_resource_url_email_and_unknown():
-    assert type_resource("https://x").type == "URL"
-    assert type_resource("https://x").value == "https://x"
-    email = type_resource("Email box@x.de")
-    assert email.type == "Email"
-    assert email.value == "box@x.de"
-    assert type_resource("Email").value is None
-    assert type_resource("ftp://nope") is None
+def test_type_resource_flexible_forms():
+    def typed(token):
+        return type_resource(token, RESOURCE_TYPES)[0]
+
+    # URL: explicit key or bare; case-insensitive key
+    assert typed("URL: https://x").type == "URL"
+    assert typed("https://x").type == "URL"
+    assert typed("https://x").value == "https://x"
+    assert typed("url: https://x").type == "URL"
+    # Email: explicit, bare address, or bare key (value optional -> None)
+    assert typed("Email: a@b.de").value == "a@b.de"
+    assert typed("a@b.de").type == "Email"
+    email = typed("Email")
+    assert email.type == "Email" and email.value is None
+    # Unknown token types to nothing
+    assert typed("ftp://nope") is None
+
+
+def test_type_resource_keyed_errors():
+    # URL's value is required (not optional)
+    res, problem = type_resource("URL", RESOURCE_TYPES)
+    assert res is None and problem
+    # A value that does not match the type's pattern is rejected
+    res, problem = type_resource("URL: not-a-url", RESOURCE_TYPES)
+    assert res is None and problem
 
 
 def test_parse_builds_hierarchy_and_types():
@@ -89,6 +110,18 @@ def test_data_is_not_split_on_pipe():
     text = "- [ ] Top\n\t- [ ] Leaf [a | b]\n"
     result = _parse(text)
     assert result.roots[0].children[0].data == "a | b"
+
+
+def test_item_flexible_resource_notation():
+    text = "- [ ] Cat\n\t- [ ] Leaf (URL: https://x | a@b.de | Email)\n"
+    result = _parse(text)
+    assert not result.errors
+    leaf = result.roots[0].children[0]
+    assert [(r.type, r.value) for r in leaf.resources] == [
+        ("URL", "https://x"),
+        ("Email", "a@b.de"),
+        ("Email", None),
+    ]
 
 
 def test_top_level_leaf_is_an_error():
