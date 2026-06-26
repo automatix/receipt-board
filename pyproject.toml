@@ -1,6 +1,6 @@
 [project]
 name = "receipt-board"
-version = "1.0.2"
+version = "1.1.0"
 description = "Desktop app for managing year-/month-end expense checklists."
 readme = "README.md"
 requires-python = ">=3.12"
