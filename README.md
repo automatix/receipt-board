@@ -116,8 +116,18 @@ Build the GUI, then create a `onedir`, windowed Windows build:
 uv run pyinstaller receipt_board.spec   # -> dist/receipt-board/receipt-board.exe
 ```
 
-The GUI assets and Alembic migrations are bundled via the spec. A branded icon can be
-added at `packaging/icon.ico` (otherwise the default PyInstaller icon is used).
+The GUI assets and Alembic migrations are bundled via the spec. The app ships a branded
+icon at `packaging/icon.ico` (regenerate it with `uv run --with pillow python
+packaging/make_icon.py`).
+
+To build the full Windows **installer** (`setup.exe`, Inno Setup), run the orchestrator
+(builds the GUI, freezes the `onedir`, then compiles `packaging/receipt-board.iss`):
+
+```powershell
+pwsh scripts/build-installer.ps1            # -> dist/installer/receipt-board-vX.Y.Z-setup.exe
+```
+
+It installs Inno Setup via `winget` if `ISCC` is not already present.
 
 ## Configuration & data
 
