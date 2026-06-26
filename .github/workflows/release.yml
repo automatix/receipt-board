@@ -1,0 +1,79 @@
+name: Release
+
+# Build the Windows installer on a version tag and attach setup.exe to the GitHub Release.
+# Cutting a release is then: bump the version, `git tag vX.Y.Z`, push the tag.
+# The existing ci.yml (lint/test/gui on branches + PRs) is unaffected — it does not run on tags.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # create the Release and upload assets
+
+jobs:
+  build-installer:
+    name: Build Windows installer + attach to Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          # Safety: the tag must match the packaged version so the artifact is not mislabeled.
+          $proj = Select-String -Path pyproject.toml -Pattern '^version\s*=\s*"(.+)"' | Select-Object -First 1
+          $projVersion = $proj.Matches[0].Groups[1].Value
+          if ($projVersion -ne $version) {
+            throw "Tag version '$version' does not match pyproject.toml version '$projVersion'."
+          }
+          Write-Host "Building Receipt Board $version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install pinned Python
+        run: uv python install 3.12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: gui-src/package-lock.json
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer (GUI -> PyInstaller -> Inno Setup)
+        shell: pwsh
+        run: ./scripts/build-installer.ps1 -Version "${{ steps.version.outputs.version }}"
+
+      - name: Publish installer to the Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = "${{ steps.version.outputs.version }}"
+          $artifact = "dist/installer/receipt-board-v$version-setup.exe"
+          if (-not (Test-Path $artifact)) { throw "Installer not found at $artifact" }
+          # Create the Release if it does not exist yet, then attach the installer
+          # (clobbering any prior asset). A curated Release authored beforehand is kept.
+          gh release view $tag 1>$null 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "Receipt Board $tag" --generate-notes
+          }
+          gh release upload $tag $artifact --clobber
+
+      - name: Upload installer as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: receipt-board-installer
+          path: dist/installer/receipt-board-v${{ steps.version.outputs.version }}-setup.exe
+          if-no-files-found: error
