@@ -1,7 +1,8 @@
 """Application paths (TECH_SPEC §11, I2).
 
-Resolves the per-user app-data directory via ``platformdirs`` (``%APPDATA%\\ReceiptBoard``
-on Windows), overridable with ``RECEIPT_BOARD_HOME`` for tests and portable installs.
+Resolves the per-user app-data directory via ``platformdirs``
+(``%LOCALAPPDATA%\\receipt-board`` on Windows — ``user_data_dir`` is Local, not Roaming),
+overridable with ``RECEIPT_BOARD_HOME`` for tests and portable installs.
 Config-file parsing and first-run DB initialisation are layered on in issue #10.
 """
 
@@ -14,7 +15,7 @@ from pathlib import Path
 
 import platformdirs
 
-APP_NAME = "ReceiptBoard"
+APP_NAME = "receipt-board"
 DB_FILENAME = "receipt_board.sqlite"
 RUNTIME_FILENAME = "runtime.json"
 CONFIG_FILENAME = "config.toml"

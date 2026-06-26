@@ -58,7 +58,7 @@ uv run receipt-board-app          # opens the native window
 uv run python -m receipt_board
 ```
 
-First run creates the app-data directory (`%APPDATA%\ReceiptBoard\` on Windows), writes a
+First run creates the app-data directory (`%LOCALAPPDATA%\receipt-board\` on Windows), writes a
 default `config.toml`, migrates the database to `head`, and seeds the controlled
 vocabularies. Use `--check` to run first-run initialisation without opening a window:
 
