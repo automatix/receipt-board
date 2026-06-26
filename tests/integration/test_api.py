@@ -282,6 +282,23 @@ def test_resource_type_management(client):
     assert client.post("/vocab/resource_type", json={"name": "NoAuth"}).status_code == 401
 
 
+# -- audit --------------------------------------------------------------------
+
+
+def test_audit_log_is_public(client):
+    cid = _blank(client)
+    client.post(f"/checklists/{cid}/categories", json={"name": "Cat"}, headers=AUTH)
+
+    rows = client.get("/audit").json()  # no token = public
+    assert rows
+    assert {r["action_type"] for r in rows} >= {"create_checklist", "add_category"}
+    assert rows[0]["action_type"] == "add_category"  # newest first
+
+    filtered = client.get("/audit", params={"checklist_id": cid, "limit": 5}).json()
+    assert filtered and all(r["checklist_id"] == cid for r in filtered)
+    assert len(filtered) <= 5
+
+
 # -- errors -------------------------------------------------------------------
 
 

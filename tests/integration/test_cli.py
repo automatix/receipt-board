@@ -180,6 +180,16 @@ def test_validate_missing_file(live, capsys):
     assert "Cannot read" in capsys.readouterr().err
 
 
+def test_audit_command(live, capsys):
+    assert cli.main(["--json", "audit"]) == 0
+    rows = json.loads(capsys.readouterr().out)
+    assert rows
+    assert {"create_checklist", "add_category", "add_item"} <= {r["action_type"] for r in rows}
+
+    assert cli.main(["audit", "--checklist", str(live.checklist_id), "--limit", "10"]) == 0
+    assert "add_item" in capsys.readouterr().out
+
+
 # -- offline error paths (no fixture / no server) -----------------------------
 
 

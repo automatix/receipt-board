@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from receipt_board.core.errors import NotFoundError
-from receipt_board.core.queries import export_checklist, list_checklists, search
+from receipt_board.core.queries import export_checklist, list_audit, list_checklists, search
 
 
 def _sample(svc):
@@ -22,6 +22,24 @@ def _sample(svc):
         instructions="open link",
     )
     return cl, top, sub, item
+
+
+def test_list_audit_newest_first_filter_and_limit(svc):
+    cl, _top, _sub, item = _sample(svc)
+    svc.set_item_done(item.id, True)
+    svc.create_blank("Other")
+
+    rows = list_audit(svc.session)
+    assert rows
+    ids = [r["id"] for r in rows]
+    assert ids == sorted(ids, reverse=True)  # newest first
+    assert rows[0]["action_type"] == "create_checklist"  # the most recent action
+
+    cl_rows = list_audit(svc.session, checklist_id=cl.id)
+    assert cl_rows and all(r["checklist_id"] == cl.id for r in cl_rows)
+    assert any(r["action_type"] == "set_item_done" for r in cl_rows)
+
+    assert len(list_audit(svc.session, limit=1)) == 1
 
 
 def test_list_checklists(svc):

@@ -379,3 +379,28 @@ select.input {
 .toast-error {
   border-color: var(--danger);
 }
+
+.audit-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.audit-table th,
+.audit-table td {
+  text-align: left;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.audit-table th {
+  color: var(--muted);
+  font-weight: 600;
+}

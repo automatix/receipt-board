@@ -8,6 +8,7 @@
 
 import { ApiError, api } from "./api";
 import type {
+  AuditEntry,
   ChecklistSummary,
   ChecklistTree,
   ItemFields,
@@ -38,9 +39,10 @@ interface State {
   checklists: ChecklistSummary[];
   activeId: number | null;
   tree: ChecklistTree | null;
-  view: "checklist" | "vocab";
+  view: "checklist" | "vocab" | "audit";
   resourceTypes: VocabEntry[];
   tools: VocabEntry[];
+  audit: AuditEntry[];
   collapsed: Set<number>;
 }
 
@@ -51,6 +53,7 @@ const state: State = {
   view: "checklist",
   resourceTypes: [],
   tools: [],
+  audit: [],
   collapsed: new Set(),
 };
 
@@ -81,6 +84,10 @@ async function loadActiveTree(): Promise<void> {
   state.tree = state.activeId === null ? null : await api.exportChecklist(state.activeId);
 }
 
+async function loadAudit(): Promise<void> {
+  state.audit = await api.listAudit(state.activeId ?? undefined, 100);
+}
+
 async function reload(): Promise<void> {
   await loadChecklists();
   await loadActiveTree();
@@ -95,6 +102,9 @@ async function act(action: () => Promise<unknown>): Promise<void> {
     await action();
     await loadChecklists();
     await loadActiveTree();
+    if (state.view === "audit") {
+      await loadAudit();
+    }
     render();
   } catch (error) {
     if (error instanceof ApiError) {
@@ -138,7 +148,9 @@ function render(): void {
   renderToolbar();
   const main = byId("app");
   clear(main);
-  if (state.view === "vocab") {
+  if (state.view === "audit") {
+    main.append(renderAudit());
+  } else if (state.view === "vocab") {
     main.append(renderVocab());
   } else if (!state.tree) {
     main.append(el("p", { class: "empty", text: "Keine Checklist. Lege eine an oder importiere." }));
@@ -186,6 +198,15 @@ function renderToolbar(): void {
       button(state.view === "vocab" ? "Checklist" : "Vokabular", () => {
         state.view = state.view === "vocab" ? "checklist" : "vocab";
         render();
+      }),
+      button(state.view === "audit" ? "Checklist" : "Audit", () => {
+        if (state.view === "audit") {
+          state.view = "checklist";
+          render();
+        } else {
+          state.view = "audit";
+          void loadAudit().then(render);
+        }
       }),
       button(themeLabel(themeMode), () => {
         themeMode = nextTheme(themeMode);
@@ -507,6 +528,47 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
     ]),
   );
   return section;
+}
+
+// -- audit view ---------------------------------------------------------------
+
+function renderAudit(): HTMLElement {
+  const wrap = el("div", { class: "audit" }, [
+    el("div", { class: "audit-head" }, [
+      el("h2", { text: "Audit-Log" }),
+      button("Aktualisieren", () => void loadAudit().then(render)),
+    ]),
+  ]);
+  if (state.audit.length === 0) {
+    wrap.append(el("p", { class: "empty", text: "Keine Audit-Einträge." }));
+    return wrap;
+  }
+  const table = el("table", { class: "audit-table" });
+  table.append(
+    el("tr", {}, [
+      el("th", { text: "Zeit" }),
+      el("th", { text: "Herkunft" }),
+      el("th", { text: "Aktion" }),
+      el("th", { text: "Ziel" }),
+      el("th", { text: "Betroffen" }),
+    ]),
+  );
+  for (const entry of state.audit) {
+    const target =
+      entry.target_id != null ? `${entry.target_kind} ${entry.target_id}` : entry.target_kind;
+    const affected = Array.isArray(entry.affected_ids) ? String(entry.affected_ids.length) : "";
+    table.append(
+      el("tr", {}, [
+        el("td", { text: entry.ts }),
+        el("td", { text: entry.origin }),
+        el("td", { text: entry.action_type }),
+        el("td", { text: target }),
+        el("td", { text: affected }),
+      ]),
+    );
+  }
+  wrap.append(table);
+  return wrap;
 }
 
 // -- search -------------------------------------------------------------------

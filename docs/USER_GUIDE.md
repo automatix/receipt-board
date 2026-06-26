@@ -155,7 +155,8 @@ herunter (alle Felder).
 
 Alle Daten liegen lokal in `%LOCALAPPDATA%\receipt-board\receipt_board.sqlite`. **Jede**
 schreibende Aktion wird in einem **Audit-Log** protokolliert (Zeitpunkt, Herkunft, Aktion,
-betroffene Knoten). Backup: siehe [`INSTALL.md`](./INSTALL.md).
+betroffene Knoten). Das Log ist einsehbar über den Button **„Audit"** (Tabelle, neueste
+zuerst) sowie per CLI (`receipt-board audit`). Backup: siehe [`INSTALL.md`](./INSTALL.md).
 
 ## 11. Für Fortgeschrittene: Kommandozeile (CLI)
 

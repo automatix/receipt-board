@@ -63,6 +63,20 @@ export interface ItemFields {
   tools?: string[];
 }
 
+export interface AuditEntry {
+  id: number;
+  ts: string;
+  origin: string;
+  action_type: string;
+  target_kind: string;
+  target_id: number | null;
+  checklist_id: number | null;
+  payload: unknown;
+  affected_ids: unknown;
+  app_version: string | null;
+  session_id: string | null;
+}
+
 export interface ImportIssueDto {
   line: number;
   token: string;

@@ -2,6 +2,7 @@
 // session token injected by pywebview (ADR-0009).
 
 import type {
+  AuditEntry,
   ChecklistSummary,
   ChecklistTree,
   ImportReport,
@@ -54,6 +55,11 @@ export const api = {
   listChecklists: () => request<ChecklistSummary[]>("GET", "/checklists"),
   exportChecklist: (id: number) => request<ChecklistTree>("GET", `/checklists/${id}`),
   search: (q: string) => request<SearchHit[]>("GET", `/search?q=${encodeURIComponent(q)}`),
+  listAudit: (checklistId?: number, limit = 100) =>
+    request<AuditEntry[]>(
+      "GET",
+      `/audit?limit=${limit}${checklistId != null ? `&checklist_id=${checklistId}` : ""}`,
+    ),
 
   createBlank: (name: string) =>
     request<{ id: number }>("POST", "/checklists", { mode: "blank", name }),

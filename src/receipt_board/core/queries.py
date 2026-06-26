@@ -1,6 +1,6 @@
-"""Read-only domain queries: list checklists, nested export, flat search.
+"""Read-only domain queries: list checklists, nested export, flat search, audit log.
 
-Used by the public REST/CLI surface (GLOSSARY: Export, Search). No audit, no writes.
+Used by the public REST/CLI surface (GLOSSARY: Export, Search). Read-only (no writes).
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from receipt_board.core.errors import NotFoundError
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
 from receipt_board.core.tree import ancestor_path, ordered_children, top_level_categories
-from receipt_board.persistence.models import Category, Checklist, ExpenseItem
+from receipt_board.persistence.models import AuditEntry, Category, Checklist, ExpenseItem
 
 
 def list_checklists(session: Session) -> list[dict]:
@@ -75,6 +75,33 @@ def export_checklist(session: Session, checklist_id: int) -> dict:
         "updated_at": checklist.updated_at.isoformat(),
         "children": children,
     }
+
+
+def _serialize_audit(entry: AuditEntry) -> dict:
+    return {
+        "id": entry.id,
+        "ts": entry.ts,
+        "origin": entry.origin,
+        "action_type": entry.action_type,
+        "target_kind": entry.target_kind,
+        "target_id": entry.target_id,
+        "checklist_id": entry.checklist_id,
+        "payload": entry.payload,
+        "affected_ids": entry.affected_ids,
+        "app_version": entry.app_version,
+        "session_id": entry.session_id,
+    }
+
+
+def list_audit(
+    session: Session, *, checklist_id: int | None = None, limit: int = 100
+) -> list[dict]:
+    """Audit-log entries, newest first; optionally filtered to one checklist. Read-only."""
+    stmt = select(AuditEntry).order_by(AuditEntry.id.desc())
+    if checklist_id is not None:
+        stmt = stmt.where(AuditEntry.checklist_id == checklist_id)
+    stmt = stmt.limit(max(1, min(limit, 1000)))
+    return [_serialize_audit(entry) for entry in session.scalars(stmt)]
 
 
 def search(session: Session, query: str, *, checklist_id: int | None = None) -> list[dict]:
