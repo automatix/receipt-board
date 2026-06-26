@@ -265,7 +265,7 @@ def test_operations_on_missing_entities_raise_not_found(svc):
 def test_vocab_add_rename_list(vocab):
     added = vocab.add("tool", "Photoshop")
     assert added["name"] == "Photoshop"
-    vocab.rename("tool", added["id"], "GIMP")
+    vocab.update("tool", added["id"], {"name": "GIMP"})
     names = [row["name"] for row in vocab.list("tool")]
     assert "GIMP" in names and "Photoshop" not in names
 
@@ -278,7 +278,40 @@ def test_vocab_add_duplicate_rejected(vocab):
 def test_vocab_rename_clash_rejected(vocab):
     added = vocab.add("tool", "Photoshop")
     with pytest.raises(ValidationError):
-        vocab.rename("tool", added["id"], "Browser")
+        vocab.update("tool", added["id"], {"name": "Browser"})
+
+
+def test_resource_type_list_carries_metadata(vocab):
+    by_name = {row["name"]: row for row in vocab.list("resource_type")}
+    assert by_name["URL"]["value_optional"] is False
+    assert by_name["URL"]["value_pattern"] == r"^https?://"
+    assert by_name["Email"]["value_optional"] is True
+    # tools have no extra fields
+    assert set(vocab.list("tool")[0]) == {"id", "name"}
+
+
+def test_resource_type_add_and_update_fields(vocab):
+    added = vocab.add("resource_type", "FTP", value_optional=True, value_pattern=r"^ftps?://\S+$")
+    assert added["value_optional"] is True
+    assert added["value_pattern"] == r"^ftps?://\S+$"
+    updated = vocab.update(
+        "resource_type", added["id"], {"value_optional": False, "value_pattern": None}
+    )
+    assert updated["value_optional"] is False
+    assert updated["value_pattern"] is None
+
+
+def test_resource_type_invalid_pattern_rejected(vocab):
+    with pytest.raises(ValidationError):
+        vocab.add("resource_type", "Bad", value_pattern="[unterminated")
+
+
+def test_vocab_duplicate_copies_fields(vocab):
+    source = next(r for r in vocab.list("resource_type") if r["name"] == "URL")
+    copy = vocab.duplicate("resource_type", source["id"], "Link")
+    assert copy["name"] == "Link"
+    assert copy["value_pattern"] == source["value_pattern"]
+    assert copy["value_optional"] == source["value_optional"]
 
 
 def test_vocab_remove_unused(vocab, session):
@@ -301,7 +334,7 @@ def test_vocab_unknown_kind_and_missing_id(vocab):
     with pytest.raises(ValidationError):
         vocab.add("color", "Red")
     with pytest.raises(NotFoundError):
-        vocab.rename("tool", 999, "X")
+        vocab.update("tool", 999, {"name": "X"})
     with pytest.raises(NotFoundError):
         vocab.remove("tool", 999)
 

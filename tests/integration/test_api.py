@@ -246,6 +246,42 @@ def test_vocab_crud_and_in_use_block(client):
     assert blocked.json()["error"]["code"] == "vocabulary_in_use"
 
 
+def test_resource_type_management(client):
+    # List carries the metadata.
+    types = client.get("/vocab/resource_type", headers=AUTH).json()
+    url = next(r for r in types if r["name"] == "URL")
+    assert url["value_pattern"] == r"^https?://"
+    assert url["value_optional"] is False
+
+    # Create with fields.
+    created = client.post(
+        "/vocab/resource_type",
+        json={"name": "FTP", "value_optional": True, "value_pattern": r"^ftps?://\S+$"},
+        headers=AUTH,
+    )
+    assert created.status_code == 201
+    ftp = created.json()
+    assert ftp["value_optional"] is True and ftp["value_pattern"] == r"^ftps?://\S+$"
+
+    # Update fields.
+    client.patch(f"/vocab/resource_type/{ftp['id']}", json={"value_optional": False}, headers=AUTH)
+    # Duplicate copies the fields under a new key.
+    dup = client.post(
+        f"/vocab/resource_type/{url['id']}/duplicate", json={"name": "Link"}, headers=AUTH
+    )
+    assert dup.status_code == 201
+    assert dup.json()["value_pattern"] == r"^https?://"
+
+    # An invalid regex is rejected.
+    bad = client.post(
+        "/vocab/resource_type", json={"name": "Bad", "value_pattern": "[oops"}, headers=AUTH
+    )
+    assert bad.status_code == 400
+
+    # Resource-type management is privileged (GUI-only).
+    assert client.post("/vocab/resource_type", json={"name": "NoAuth"}).status_code == 401
+
+
 # -- errors -------------------------------------------------------------------
 
 
