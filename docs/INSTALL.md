@@ -16,7 +16,7 @@ Receipt Board wird als eigenständiger Ordner ausgeliefert (PyInstaller `onedir`
 
 1. Auf der **Releases-Seite** das ZIP herunterladen:
    <https://github.com/automatix/receipt-board/releases> →
-   `receipt-board-v1.0.0-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
+   `receipt-board-v1.0.1-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
 2. Entpacken; den Ordner `receipt-board` (enthält `receipt-board.exe` und den Unterordner
    `_internal/`) an einen festen Ort kopieren, z. B. `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
 3. `receipt-board.exe` per Doppelklick starten (optional eine Verknüpfung anlegen).
