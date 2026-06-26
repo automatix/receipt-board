@@ -63,7 +63,9 @@ Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
   Wert; *„+ Resource"* für weitere Zeilen) und **Tools** (Mehrfachauswahl). **Speichern**
   übernimmt.
 - **Hinzufügen:** unter jeder Kategorie **„+ Kategorie"** / **„+ Eintrag"**; auf oberster
-  Ebene **„+ Kategorie"** (Einträge liegen immer unter einer Kategorie).
+  Ebene **„+ Kategorie"** (Einträge liegen immer unter einer Kategorie). **„+ Eintrag"**
+  öffnet denselben Dialog wie *„Eintrag bearbeiten"* — alle Felder (Name, Data,
+  Instructions, Resources, Tools) lassen sich direkt in einem Schritt setzen.
 - **Entfernen:** das **🗑** (mit Bestätigung).
 - **Verschieben / Umsortieren (Drag & Drop):**
   - einen Knoten auf eine **Kategorie-Zeile** ziehen → **in** diese Kategorie verschieben
