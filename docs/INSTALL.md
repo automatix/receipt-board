@@ -25,6 +25,28 @@ Receipt Board wird als eigenständiger Ordner ausgeliefert (PyInstaller `onedir`
 
 > Ohne Repo-Zugriff (oder für eine eigene Variante) baust du den Ordner wie in **Variante B**.
 
+### Windows SmartScreen / „Unbekannte App"
+
+Die `.exe` ist **nicht code-signiert**, deshalb zeigt Windows beim ersten Start ggf.
+**„Der Computer wurde durch Windows geschützt" (Microsoft Defender SmartScreen)**. Das ist
+für eine unsignierte, aus dem Internet geladene Datei erwartbar. Optionen:
+
+- **Einmalig zulassen:** im Dialog **„Weitere Informationen" → „Trotzdem ausführen"**.
+- **Dauerhaft vermeiden (empfohlen):** die ZIP **vor dem Entpacken entsperren** — dann fragt
+  SmartScreen nicht mehr.
+  - Rechtsklick auf die ZIP → **Eigenschaften** → unten **„Zulassen"/„Unblock"** ankreuzen →
+    OK → **danach** entpacken; oder per PowerShell:
+
+    ```powershell
+    Unblock-File "$HOME\Downloads\receipt-board-v1.0.1-windows.zip"
+    ```
+- **Alternativ** den Ordner selbst bauen (kein Download = keine Markierung) — siehe
+  **Variante B**.
+
+> Selbst-signierte Zertifikate helfen SmartScreen **nicht**. Eine vollständig warnungsfreie
+> Auslieferung an Dritte erfordert ein (kostenpflichtiges) **Code-Signing-Zertifikat**
+> (Authenticode, idealerweise EV); für den lokalen Eigenbetrieb reicht das Entsperren oben.
+
 ## Variante B — Selbst bauen
 
 Voraussetzungen: `Python 3.12+`, [`uv`](https://docs.astral.sh/uv/), `Node.js`.
