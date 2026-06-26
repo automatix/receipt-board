@@ -91,6 +91,23 @@ uv run pytest --cov --cov-report=term-missing --cov-fail-under=90
 CI (GitHub Actions) runs ruff + pytest with the **≥ 90 %** coverage gate, plus a GUI
 typecheck/build job.
 
+## Developer utilities
+
+**`dev-reset` — developer-only, NOT the product uninstaller.** It selectively wipes the
+per-user state (`receipt_board.sqlite` + WAL/SHM sidecars, `config.toml`, `runtime.json`,
+`receipt-board.log`) so the first-run flow can be re-tested from zero. It honours
+`RECEIPT_BOARD_HOME` and any custom `[database].path` in `config.toml`, prints a deletion
+plan, and asks for confirmation unless `--yes` is given:
+
+```bash
+uv run python -m receipt_board.dev_reset --all --yes    # wipe everything, no prompt
+uv run python -m receipt_board.dev_reset --db --config  # only DB + config, with confirmation
+scripts/dev-reset.ps1 --all                             # PowerShell wrapper (forwards args)
+```
+
+With no category flag (`--db`/`--config`/`--runtime`/`--logs`/`--all`) it offers an
+interactive y/N selection per target.
+
 ## Packaging
 
 Build the GUI, then create a `onedir`, windowed Windows build:
