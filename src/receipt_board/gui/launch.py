@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from receipt_board import __version__
 from receipt_board.api.app import create_app
 from receipt_board.api.runtime import write_runtime
-from receipt_board.api.server import HOST, pick_ephemeral_port
+from receipt_board.api.server import HOST, build_config, pick_ephemeral_port
 from receipt_board.gui.window import open_window, static_dir
 
 
@@ -44,9 +44,7 @@ def launch(  # pragma: no cover
     if runtime_path is not None:
         write_runtime(runtime_path, bound_port)
 
-    server = uvicorn.Server(
-        uvicorn.Config(app, host=HOST, port=bound_port, log_level="warning", lifespan="off")
-    )
+    server = uvicorn.Server(build_config(app, bound_port))
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     while not server.started:

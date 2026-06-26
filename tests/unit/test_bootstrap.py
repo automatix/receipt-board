@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import sys
+
 from sqlalchemy import select
 
 from receipt_board import bootstrap, config
+from receipt_board.api import server
 from receipt_board.persistence.models import ResourceType, Tool
 
 
@@ -57,3 +60,30 @@ def test_main_check_runs_first_run_and_exits(tmp_path, monkeypatch, capsys):
     assert (tmp_path / config.DB_FILENAME).exists()
     assert (tmp_path / config.CONFIG_FILENAME).exists()
     assert "ready" in capsys.readouterr().out
+
+
+async def _noop_asgi(scope, receive, send):  # minimal ASGI app for Config construction
+    return None
+
+
+def test_server_config_builds_without_a_console(monkeypatch):
+    # A --windowed PyInstaller build has sys.stdout/stderr = None; uvicorn's default log
+    # formatters call sys.stdout.isatty() in Config.__init__ -> crash. log_config=None avoids it.
+    monkeypatch.setattr(sys, "stdout", None)
+    monkeypatch.setattr(sys, "stderr", None)
+    cfg = server.build_config(_noop_asgi, 0)  # must not raise
+    assert cfg.log_config is None
+
+
+def test_ensure_writable_streams_redirects_to_log(tmp_path, monkeypatch):
+    _home(tmp_path, monkeypatch)
+    config.ensure_app_dir()
+    monkeypatch.setattr(sys, "stdout", None)
+    monkeypatch.setattr(sys, "stderr", None)
+    bootstrap.ensure_writable_streams()
+    try:
+        assert sys.stdout is not None and sys.stderr is not None
+        sys.stdout.write("ok\n")
+    finally:
+        sys.stdout.close()
+    assert "ok" in (tmp_path / "receipt-board.log").read_text(encoding="utf-8")

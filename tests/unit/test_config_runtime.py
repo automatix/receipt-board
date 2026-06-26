@@ -36,8 +36,8 @@ def test_pick_ephemeral_port_is_usable():
 
 
 def test_serve_writes_runtime_and_builds_app(tmp_path, monkeypatch):
-    captured = {}
-    monkeypatch.setattr(server.uvicorn, "run", lambda app, **kw: captured.update(kw, app=app))
+    # Stub out the blocking Server.run; serve() must publish the bound port.
+    monkeypatch.setattr(server.uvicorn.Server, "run", lambda self: None)
     engine = create_db_engine(None)
     Base.metadata.create_all(engine)
     factory = make_session_factory(engine)
@@ -45,7 +45,15 @@ def test_serve_writes_runtime_and_builds_app(tmp_path, monkeypatch):
         runtime_file = tmp_path / "runtime.json"
         server.serve(factory, "tok", port=12345, runtime_path=runtime_file)
         assert read_port(runtime_file) == 12345
-        assert captured["port"] == 12345
-        assert captured["host"] == server.HOST
     finally:
         engine.dispose()
+
+
+def test_build_config_uses_loopback_and_no_log_config():
+    async def _app(scope, receive, send):
+        return None
+
+    cfg = server.build_config(_app, 12345)
+    assert cfg.host == server.HOST
+    assert cfg.port == 12345
+    assert cfg.log_config is None
