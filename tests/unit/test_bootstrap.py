@@ -75,6 +75,11 @@ def test_server_config_builds_without_a_console(monkeypatch):
     assert cfg.log_config is None
 
 
+def test_unblock_bundle_is_noop_when_not_frozen():
+    # Not a frozen build -> nothing to unblock; must be a safe no-op.
+    bootstrap.unblock_bundle()
+
+
 def test_ensure_writable_streams_redirects_to_log(tmp_path, monkeypatch):
     _home(tmp_path, monkeypatch)
     config.ensure_app_dir()

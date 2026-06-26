@@ -1,7 +1,7 @@
 {
   "name": "receipt-board-gui",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Receipt Board GUI (TypeScript, no framework; bundled with esbuild).",
   "scripts": {
