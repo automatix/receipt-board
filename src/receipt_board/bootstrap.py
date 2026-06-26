@@ -11,11 +11,13 @@ used to smoke-test the packaged executable (it creates the app folder + DB end-t
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import secrets
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -45,6 +47,24 @@ def ensure_writable_streams() -> None:
         sys.stdout = sink
     if sys.stderr is None:
         sys.stderr = sink
+
+
+def unblock_bundle() -> None:
+    """Strip the Mark-of-the-Web (``Zone.Identifier``) from the frozen bundle.
+
+    A downloaded+extracted onedir build carries the Internet-zone tag on every file; the
+    .NET CLR then refuses to load the managed ``Python.Runtime.dll`` (pywebview → pythonnet)
+    and the app crashes at startup. Removing the tag before the GUI loads .NET — the same
+    thing ``Unblock-File`` does — fixes it. Frozen builds only; per-file failures (e.g. a
+    read-only install directory, or a file in use) are ignored.
+    """
+    if not getattr(sys, "frozen", False):
+        return
+    meipass = getattr(sys, "_MEIPASS", None)
+    base = Path(meipass) if meipass else Path(sys.executable).resolve().parent
+    for path in base.rglob("*"):
+        with contextlib.suppress(OSError):
+            os.remove(f"{path}:Zone.Identifier")
 
 
 @dataclass
@@ -78,6 +98,7 @@ def prepare() -> Prepared:
 def main(argv: Sequence[str] | None = None) -> int:
     config.ensure_app_dir()
     ensure_writable_streams()
+    unblock_bundle()
 
     parser = argparse.ArgumentParser(
         prog="receipt-board-app", description="Receipt Board desktop application."
