@@ -10,12 +10,24 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   minimal schema: PKs + `UNIQUE` on vocabulary names only.)
 - **GUI live updates** — reflect external changes (CLI/AI) while the GUI is open, via
   polling or WebSocket/SSE. (`v1` uses after-action reload + a manual refresh button.)
-- **Undo** for destructive operations (Category uncheck, node remove, Checklist delete).
-  (`v1` guards with confirmation dialogs; the Audit Log provides traceability.)
+- **Undo** for destructive operations (Category uncheck, node remove, Checklist delete),
+  including a dedicated **"Undo" button** in the GUI. (`v1` guards with confirmation
+  dialogs; the Audit Log provides traceability.)
 - **Headless server mode** — let the CLI/AI operate without the GUI window open. (`v1` CLI
   talks HTTP to the running app — see ADR-0011 — so it currently requires the app to run.)
 - **Branded app icon** — ship a real `packaging/icon.ico` (the PyInstaller spec already
   uses it when present; `v1` falls back to the default PyInstaller icon).
+- **Internationalization (i18n)** — translatable UI strings with a **default language of
+  English** (the app currently ships German strings); aligns with the global
+  English-as-default decision.
+- **Button icons** — add icons to the toolbar/row buttons (distinct from the branded app
+  icon above).
+- **Clarify / possibly remove the "Vocabulary" button** — its purpose is unclear; evaluate
+  folding it into the resource-type / vocabulary management or dropping it.
+- **Clarify / possibly remove the "Refresh" button** — once the checklist dropdown stays
+  current automatically (#45), the manual refresh may be redundant.
+- **Installer wizard** — a guided Windows installer (vs. the portable `onedir`).
+- **Uninstaller wizard** — a matching uninstaller.
 
 ## Out of scope for `v1` (tracked elsewhere)
 
