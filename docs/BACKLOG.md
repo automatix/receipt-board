@@ -15,8 +15,6 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   dialogs; the Audit Log provides traceability.)
 - **Headless server mode** — let the CLI/AI operate without the GUI window open. (`v1` CLI
   talks HTTP to the running app — see ADR-0011 — so it currently requires the app to run.)
-- **Branded app icon** — ship a real `packaging/icon.ico` (the PyInstaller spec already
-  uses it when present; `v1` falls back to the default PyInstaller icon).
 - **Internationalization (i18n)** — translatable UI strings with a **default language of
   English** (the app currently ships German strings); aligns with the global
   English-as-default decision.
@@ -26,8 +24,6 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   folding it into the resource-type / vocabulary management or dropping it.
 - **Clarify / possibly remove the "Refresh" button** — once the checklist dropdown stays
   current automatically (#45), the manual refresh may be redundant.
-- **Installer wizard** — a guided Windows installer (vs. the portable `onedir`).
-- **Uninstaller wizard** — a matching uninstaller.
 
 ## Out of scope for `v1` (tracked elsewhere)
 

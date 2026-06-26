@@ -9,7 +9,7 @@ scope (see [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) §2).
 
 ## End-user docs (German)
 
-- **Download (Windows)** — [Releases](https://github.com/automatix/receipt-board/releases) → `receipt-board-vX.Y.Z-windows.zip` (private repo: access required)
+- **Download (Windows)** — [Releases](https://github.com/automatix/receipt-board/releases) → `receipt-board-vX.Y.Z-setup.exe` (installer; private repo: access required)
 - **Installation** — [`docs/INSTALL.md`](docs/INSTALL.md)
 - **Bedienungsanleitung** (user guide) — [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
 
@@ -127,7 +127,9 @@ To build the full Windows **installer** (`setup.exe`, Inno Setup), run the orche
 pwsh scripts/build-installer.ps1            # -> dist/installer/receipt-board-vX.Y.Z-setup.exe
 ```
 
-It installs Inno Setup via `winget` if `ISCC` is not already present.
+It installs Inno Setup via `winget` if `ISCC` is not already present. See
+[`docs/dev-testing.md`](docs/dev-testing.md) for the full build + installer-testing guide
+(and the dev `reset` CLI for re-testing first run).
 
 ## Configuration & data
 
