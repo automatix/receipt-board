@@ -11,7 +11,9 @@ used to smoke-test the packaged executable (it creates the app folder + DB end-t
 from __future__ import annotations
 
 import argparse
+import os
 import secrets
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -22,6 +24,27 @@ from receipt_board import __version__, config
 from receipt_board.persistence.db import create_db_engine, make_session_factory
 from receipt_board.persistence.migrate import run_migrations
 from receipt_board.persistence.seeds import seed_vocabularies
+
+
+def ensure_writable_streams() -> None:
+    """Redirect ``sys.stdout``/``sys.stderr`` to a log file when they are ``None``.
+
+    A ``--windowed`` PyInstaller build has no console, so both streams are ``None``;
+    anything that writes to them (uvicorn logging, ``print``) would crash. Point them at
+    ``receipt-board.log`` in the app dir (falling back to the null device).
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    try:
+        sink = open(  # noqa: SIM115 (kept open for the app's lifetime)
+            config.app_dir() / "receipt-board.log", "a", encoding="utf-8", buffering=1
+        )
+    except OSError:
+        sink = open(os.devnull, "w")  # noqa: SIM115
+    if sys.stdout is None:
+        sys.stdout = sink
+    if sys.stderr is None:
+        sys.stderr = sink
 
 
 @dataclass
@@ -53,6 +76,9 @@ def prepare() -> Prepared:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    config.ensure_app_dir()
+    ensure_writable_streams()
+
     parser = argparse.ArgumentParser(
         prog="receipt-board-app", description="Receipt Board desktop application."
     )

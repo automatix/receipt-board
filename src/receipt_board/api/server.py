@@ -7,6 +7,7 @@ written to ``runtime.json`` so the CLI can find the running app (ADR-0011).
 from __future__ import annotations
 
 import socket
+from collections.abc import Callable
 from pathlib import Path
 
 import uvicorn
@@ -25,6 +26,24 @@ def pick_ephemeral_port(host: str = HOST) -> int:
         return sock.getsockname()[1]
 
 
+def build_config(app: Callable, port: int) -> uvicorn.Config:
+    """uvicorn config for the local server.
+
+    ``log_config=None`` is essential: a ``--windowed`` PyInstaller build has
+    ``sys.stdout``/``sys.stderr`` set to ``None``, and uvicorn's default log formatters
+    call ``sys.stdout.isatty()`` at init, which crashes. The desktop app needs no console
+    logger.
+    """
+    return uvicorn.Config(
+        app,
+        host=HOST,
+        port=port,
+        log_level="warning",
+        lifespan="off",
+        log_config=None,
+    )
+
+
 def serve(
     session_factory: sessionmaker[Session],
     session_token: str,
@@ -38,4 +57,4 @@ def serve(
     bound_port = port or pick_ephemeral_port()
     if runtime_path is not None:
         write_runtime(runtime_path, bound_port)
-    uvicorn.run(app, host=HOST, port=bound_port, log_level="warning")  # pragma: no cover
+    uvicorn.Server(build_config(app, bound_port)).run()  # pragma: no cover
