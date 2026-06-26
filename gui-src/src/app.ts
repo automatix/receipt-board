@@ -88,9 +88,12 @@ async function reload(): Promise<void> {
 }
 
 // Run a mutating action, surfacing API errors as toasts and reloading on success.
+// Reloads the checklist list too so the toolbar dropdown stays current after a
+// create/import/clone/delete (and reflects the active selection after any action).
 async function act(action: () => Promise<unknown>): Promise<void> {
   try {
     await action();
+    await loadChecklists();
     await loadActiveTree();
     render();
   } catch (error) {
