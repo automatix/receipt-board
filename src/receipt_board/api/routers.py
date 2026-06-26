@@ -72,6 +72,14 @@ def validate_import(body: ValidateImportRequest, session=Depends(get_session)) -
     return build_import_report(session, body.text)
 
 
+@public_router.get("/audit")
+def list_audit(
+    checklist_id: int | None = None, limit: int = 100, session=Depends(get_session)
+) -> list[dict]:
+    """Read the append-only audit log (newest first; optionally one checklist)."""
+    return queries.list_audit(session, checklist_id=checklist_id, limit=limit)
+
+
 # -- privileged: checklists ---------------------------------------------------
 
 

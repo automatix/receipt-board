@@ -81,3 +81,9 @@ class ApiClient:
 
     def validate_import(self, text: str) -> dict:
         return self._request("POST", "/import/validate", json={"text": text})
+
+    def list_audit(self, checklist_id: int | None = None, limit: int = 100) -> list[dict]:
+        params: dict = {"limit": limit}
+        if checklist_id is not None:
+            params["checklist_id"] = checklist_id
+        return self._request("GET", "/audit", params=params)

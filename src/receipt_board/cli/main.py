@@ -7,6 +7,7 @@ Read-only plus the leaf done-toggle (public surface). Commands::
     receipt-board item done ID
     receipt-board item undone ID
     receipt-board validate PATH        # dry-run: is a Markdown file importable?
+    receipt-board audit [--checklist ID] [--limit N]   # read the audit log
 
 ``--json`` switches to machine-readable output. Exit code 0 on success, non-zero on error
 (``validate`` exits 1 when the file is not importable).
@@ -61,6 +62,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("path", help="path to the Markdown checklist file")
 
+    audit = sub.add_parser("audit", parents=[json_flag], help="read the audit log (newest first)")
+    audit.add_argument("--checklist", type=int, default=None, metavar="ID")
+    audit.add_argument("--limit", type=int, default=50, metavar="N")
+
     return parser
 
 
@@ -98,6 +103,20 @@ def _format_hits(hits: list[dict]) -> str:
     for hit in hits:
         path = " / ".join(hit["path"]) if hit["path"] else "(top level)"
         lines.append(f"{hit['kind']}\t{hit['id']}\t{hit['name']}\t[{path}]")
+    return "\n".join(lines)
+
+
+def _format_audit(rows: list[dict]) -> str:
+    if not rows:
+        return "(no audit entries)"
+    lines = []
+    for row in rows:
+        target = row["target_kind"]
+        if row.get("target_id") is not None:
+            target += f" {row['target_id']}"
+        affected = row.get("affected_ids") or []
+        suffix = f" ({len(affected)} affected)" if affected else ""
+        lines.append(f"{row['ts']}\t{row['origin']}\t{row['action_type']}\t{target}{suffix}")
     return "\n".join(lines)
 
 
@@ -144,6 +163,9 @@ def _dispatch(args: argparse.Namespace, client: ApiClient) -> int:
         report = client.validate_import(text)
         _emit(args.json, report, _format_report(report))
         return 0 if report["valid"] else 1
+    elif args.command == "audit":
+        rows = client.list_audit(checklist_id=args.checklist, limit=args.limit)
+        _emit(args.json, rows, _format_audit(rows))
     return 0
 
 
