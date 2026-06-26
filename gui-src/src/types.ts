@@ -51,6 +51,8 @@ export interface SearchHit {
 export interface VocabEntry {
   id: number;
   name: string;
+  value_optional?: boolean; // resource_type only
+  value_pattern?: string | null; // resource_type only
 }
 
 export interface ItemFields {

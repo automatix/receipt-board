@@ -371,16 +371,13 @@ function dropZone(parentId: number | null, position: number): HTMLElement {
 
 function renderVocab(): HTMLElement {
   const wrap = el("div", { class: "vocab" }, [el("h2", { text: "Vokabular" })]);
-  wrap.append(renderVocabSection("Resource Types", "resource_type", state.resourceTypes));
+  wrap.append(renderResourceTypeSection(state.resourceTypes));
   wrap.append(renderVocabSection("Tools", "tool", state.tools));
   return wrap;
 }
 
-function renderVocabSection(
-  title: string,
-  kind: "resource_type" | "tool",
-  entries: VocabEntry[],
-): HTMLElement {
+// Tools (and any name-only vocabulary): rename on Enter, remove, add.
+function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]): HTMLElement {
   const section = el("div", { class: "vocab-section" }, [el("h3", { text: title })]);
   for (const entry of entries) {
     const nameInput = el("input", { class: "input inline", value: entry.name }) as HTMLInputElement;
@@ -388,7 +385,7 @@ function renderVocabSection(
       const value = nameInput.value.trim();
       if (value && value !== entry.name) {
         void act(async () => {
-          await api.renameVocab(kind, entry.id, value);
+          await api.updateVocab(kind, entry.id, { name: value });
           await loadVocab();
         });
       }
@@ -410,7 +407,7 @@ function renderVocabSection(
     const value = adder.value.trim();
     if (value) {
       void act(async () => {
-        await api.addVocab(kind, value);
+        await api.addVocab(kind, { name: value });
         await loadVocab();
       });
     }
@@ -421,6 +418,91 @@ function renderVocabSection(
     }
   });
   section.append(el("div", { class: "vocab-row" }, [adder, button("Hinzufügen", add)]));
+  return section;
+}
+
+// Resource types carry a key, value-optionality and a value regex; full CRUD + duplicate.
+function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
+  const kind = "resource_type" as const;
+  const optionalLabel = (box: HTMLInputElement): HTMLElement =>
+    el("label", { class: "tool-check" }, [box, document.createTextNode(" Wert optional")]);
+  const section = el("div", { class: "vocab-section" }, [el("h3", { text: "Resource Types" })]);
+
+  for (const entry of entries) {
+    const nameInput = el("input", { class: "input inline", value: entry.name }) as HTMLInputElement;
+    const optBox = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+    optBox.checked = entry.value_optional ?? false;
+    const patternInput = el("input", {
+      class: "input",
+      placeholder: "Regex (optional)",
+      value: entry.value_pattern ?? "",
+    }) as HTMLInputElement;
+    const save = (): void => {
+      void act(async () => {
+        await api.updateVocab(kind, entry.id, {
+          name: nameInput.value.trim() || entry.name,
+          value_optional: optBox.checked,
+          value_pattern: patternInput.value.trim() || null,
+        });
+        await loadVocab();
+      });
+    };
+    const duplicate = async (): Promise<void> => {
+      const name = await textPrompt(`Duplikat von "${entry.name}" – neuer Key`);
+      if (name) {
+        await act(async () => {
+          await api.duplicateVocab(kind, entry.id, name);
+          await loadVocab();
+        });
+      }
+    };
+    section.append(
+      el("div", { class: "vocab-row" }, [
+        nameInput,
+        optionalLabel(optBox),
+        patternInput,
+        button("Speichern", save, "btn-mini"),
+        button("Duplizieren", () => void duplicate(), "btn-mini"),
+        button("Entfernen", () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+      ]),
+    );
+  }
+
+  const nameAdd = el("input", {
+    class: "input",
+    placeholder: "Neuer Resource Type (Key)…",
+  }) as HTMLInputElement;
+  const optAdd = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+  const patternAdd = el("input", {
+    class: "input",
+    placeholder: "Regex (optional)",
+  }) as HTMLInputElement;
+  const add = (): void => {
+    const value = nameAdd.value.trim();
+    if (value) {
+      void act(async () => {
+        await api.addVocab(kind, {
+          name: value,
+          value_optional: optAdd.checked,
+          value_pattern: patternAdd.value.trim() || null,
+        });
+        await loadVocab();
+      });
+    }
+  };
+  nameAdd.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      add();
+    }
+  });
+  section.append(
+    el("div", { class: "vocab-row" }, [
+      nameAdd,
+      optionalLabel(optAdd),
+      patternAdd,
+      button("Hinzufügen", add),
+    ]),
+  );
   return section;
 }
 

@@ -56,7 +56,19 @@ class MoveRequest(BaseModel):
     position: int | None = None
 
 
-class VocabNameRequest(BaseModel):
+class VocabCreateRequest(BaseModel):
+    name: str
+    value_optional: bool = False  # resource_type only
+    value_pattern: str | None = None  # resource_type only
+
+
+class VocabUpdateRequest(BaseModel):
+    name: str | None = None
+    value_optional: bool | None = None
+    value_pattern: str | None = None
+
+
+class DuplicateVocabRequest(BaseModel):
     name: str
 
 

@@ -104,7 +104,12 @@ class ResourceType(Base):
     __tablename__ = "resource_types"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # ``name`` is the type key (e.g. "URL", "Email").
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    # Whether a resource of this type may omit its value (e.g. a bare "Email").
+    value_optional: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Regex a provided value must match (case-insensitive); also used to type a bare token.
+    value_pattern: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Tool(Base):

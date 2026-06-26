@@ -93,9 +93,11 @@ export const api = {
     request<{ affected_ids: unknown[] }>("POST", `/categories/${id}/done`, { done }),
 
   listVocab: (kind: VocabKind) => request<VocabEntry[]>("GET", `/vocab/${kind}`),
-  addVocab: (kind: VocabKind, name: string) =>
-    request<VocabEntry>("POST", `/vocab/${kind}`, { name }),
-  renameVocab: (kind: VocabKind, id: number, name: string) =>
-    request<VocabEntry>("PATCH", `/vocab/${kind}/${id}`, { name }),
+  addVocab: (kind: VocabKind, entry: Partial<VocabEntry> & { name: string }) =>
+    request<VocabEntry>("POST", `/vocab/${kind}`, entry),
+  updateVocab: (kind: VocabKind, id: number, patch: Partial<VocabEntry>) =>
+    request<VocabEntry>("PATCH", `/vocab/${kind}/${id}`, patch),
+  duplicateVocab: (kind: VocabKind, id: number, name: string) =>
+    request<VocabEntry>("POST", `/vocab/${kind}/${id}/duplicate`, { name }),
   removeVocab: (kind: VocabKind, id: number) => request<void>("DELETE", `/vocab/${kind}/${id}`),
 };

@@ -19,12 +19,14 @@ from receipt_board.api.schemas import (
     AddCategoryRequest,
     AddItemRequest,
     CreateChecklistRequest,
+    DuplicateVocabRequest,
     EditCategoryRequest,
     EditItemRequest,
     MoveRequest,
     SetDoneRequest,
     ValidateImportRequest,
-    VocabNameRequest,
+    VocabCreateRequest,
+    VocabUpdateRequest,
 )
 from receipt_board.core import queries
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
@@ -202,19 +204,31 @@ def list_vocab(kind: str, vs: VocabularyService = Depends(get_vocab_service)) ->
 
 @privileged_router.post("/vocab/{kind}", status_code=201)
 def add_vocab(
-    kind: str, body: VocabNameRequest, vs: VocabularyService = Depends(get_vocab_service)
+    kind: str, body: VocabCreateRequest, vs: VocabularyService = Depends(get_vocab_service)
 ) -> dict:
-    return vs.add(kind, body.name)
+    return vs.add(
+        kind, body.name, value_optional=body.value_optional, value_pattern=body.value_pattern
+    )
 
 
 @privileged_router.patch("/vocab/{kind}/{vocab_id}")
-def rename_vocab(
+def update_vocab(
     kind: str,
     vocab_id: int,
-    body: VocabNameRequest,
+    body: VocabUpdateRequest,
     vs: VocabularyService = Depends(get_vocab_service),
 ) -> dict:
-    return vs.rename(kind, vocab_id, body.name)
+    return vs.update(kind, vocab_id, body.model_dump(exclude_unset=True))
+
+
+@privileged_router.post("/vocab/{kind}/{vocab_id}/duplicate", status_code=201)
+def duplicate_vocab(
+    kind: str,
+    vocab_id: int,
+    body: DuplicateVocabRequest,
+    vs: VocabularyService = Depends(get_vocab_service),
+) -> dict:
+    return vs.duplicate(kind, vocab_id, body.name)
 
 
 @privileged_router.delete("/vocab/{kind}/{vocab_id}", status_code=204)

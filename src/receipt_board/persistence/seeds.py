@@ -11,16 +11,19 @@ from sqlalchemy.orm import Session
 
 from receipt_board.persistence.models import ResourceType, Tool
 
-RESOURCE_TYPE_SEEDS: tuple[str, ...] = ("URL", "Email")
+RESOURCE_TYPE_SEEDS: tuple[dict, ...] = (
+    {"name": "URL", "value_optional": False, "value_pattern": r"^https?://"},
+    {"name": "Email", "value_optional": True, "value_pattern": r"^[^@\s]+@[^@\s]+\.[^@\s]+$"},
+)
 TOOL_SEEDS: tuple[str, ...] = ("Browser", "Thunderbird")
 
 
 def seed_vocabularies(session: Session) -> None:
     """Insert the seed vocabularies if missing (idempotent on the unique ``name``)."""
     existing_types = set(session.scalars(select(ResourceType.name)).all())
-    for name in RESOURCE_TYPE_SEEDS:
-        if name not in existing_types:
-            session.add(ResourceType(name=name))
+    for seed in RESOURCE_TYPE_SEEDS:
+        if seed["name"] not in existing_types:
+            session.add(ResourceType(**seed))
 
     existing_tools = set(session.scalars(select(Tool.name)).all())
     for name in TOOL_SEEDS:

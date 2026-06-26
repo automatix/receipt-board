@@ -7,6 +7,8 @@ one SQLite transaction per action). The caller (API request scope) commits.
 
 from __future__ import annotations
 
+import re
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -30,6 +32,11 @@ from receipt_board.persistence.models import (
 )
 
 _VOCAB_MODELS = {"resource_type": ResourceType, "tool": Tool}
+# Extra (non-id/name) columns each vocabulary kind carries; drives generic CRUD.
+_VOCAB_FIELDS: dict[str, tuple[str, ...]] = {
+    "resource_type": ("value_optional", "value_pattern"),
+    "tool": (),
+}
 
 
 def _require_name(name: str) -> str:
@@ -481,45 +488,80 @@ class VocabularyService:
     def list(self, kind: str) -> list[dict]:
         model = self._model(kind)
         rows = self.session.scalars(select(model).order_by(model.name)).all()
-        return [{"id": row.id, "name": row.name} for row in rows]
+        return [self._serialize(kind, row) for row in rows]
 
-    def add(self, kind: str, name: str) -> dict:
+    def add(
+        self,
+        kind: str,
+        name: str,
+        *,
+        value_optional: bool = False,
+        value_pattern: str | None = None,
+    ) -> dict:
         model = self._model(kind)
         cleaned = _require_name(name)
         if self.session.scalar(select(model).where(model.name == cleaned)) is not None:
             raise ValidationError(f"{kind} {cleaned!r} already exists")
-        row = model(name=cleaned)
+        row = model(name=cleaned, **self._field_attrs(kind, value_optional, value_pattern))
         self.session.add(row)
         self.session.flush()
         self.audit.record(
             action_type="add_vocabulary",
             target_kind="vocabulary",
             target_id=row.id,
-            payload={"old": None, "new": {"kind": kind, "name": cleaned}},
+            payload={"old": None, "new": self._serialize(kind, row)},
         )
-        return {"id": row.id, "name": row.name}
+        return self._serialize(kind, row)
 
-    def rename(self, kind: str, vocab_id: int, name: str) -> dict:
+    def update(self, kind: str, vocab_id: int, fields: dict) -> dict:
+        """Rename and/or update the kind's extra fields (only the keys provided)."""
         model = self._model(kind)
         row = self.session.get(model, vocab_id)
         if row is None:
             raise NotFoundError(f"{kind} {vocab_id} not found")
-        cleaned = _require_name(name)
-        clash = self.session.scalar(
-            select(model).where(model.name == cleaned, model.id != vocab_id)
-        )
-        if clash is not None:
-            raise ValidationError(f"{kind} {cleaned!r} already exists")
-        old_name = row.name
-        row.name = cleaned
+        old = self._serialize(kind, row)
+        if "name" in fields:
+            cleaned = _require_name(fields["name"])
+            clash = self.session.scalar(
+                select(model).where(model.name == cleaned, model.id != vocab_id)
+            )
+            if clash is not None:
+                raise ValidationError(f"{kind} {cleaned!r} already exists")
+            row.name = cleaned
+        allowed = _VOCAB_FIELDS[kind]
+        if "value_optional" in fields and "value_optional" in allowed:
+            row.value_optional = bool(fields["value_optional"])
+        if "value_pattern" in fields and "value_pattern" in allowed:
+            row.value_pattern = self._clean_pattern(fields["value_pattern"])
         self.session.flush()
         self.audit.record(
-            action_type="rename_vocabulary",
+            action_type="update_vocabulary",
             target_kind="vocabulary",
             target_id=vocab_id,
-            payload={"old": {"name": old_name}, "new": {"name": cleaned}},
+            payload={"old": old, "new": self._serialize(kind, row)},
         )
-        return {"id": row.id, "name": row.name}
+        return self._serialize(kind, row)
+
+    def duplicate(self, kind: str, vocab_id: int, new_name: str) -> dict:
+        """Create a new entry copying the source's extra fields under ``new_name``."""
+        model = self._model(kind)
+        source = self.session.get(model, vocab_id)
+        if source is None:
+            raise NotFoundError(f"{kind} {vocab_id} not found")
+        cleaned = _require_name(new_name)
+        if self.session.scalar(select(model).where(model.name == cleaned)) is not None:
+            raise ValidationError(f"{kind} {cleaned!r} already exists")
+        attrs = {field: getattr(source, field) for field in _VOCAB_FIELDS[kind]}
+        row = model(name=cleaned, **attrs)
+        self.session.add(row)
+        self.session.flush()
+        self.audit.record(
+            action_type="duplicate_vocabulary",
+            target_kind="vocabulary",
+            target_id=row.id,
+            payload={"old": {"source_id": vocab_id}, "new": self._serialize(kind, row)},
+        )
+        return self._serialize(kind, row)
 
     def remove(self, kind: str, vocab_id: int) -> None:
         model = self._model(kind)
@@ -555,3 +597,35 @@ class VocabularyService:
             return _VOCAB_MODELS[kind]
         except KeyError:
             raise ValidationError(f"Unknown vocabulary kind: {kind!r}") from None
+
+    @staticmethod
+    def _serialize(kind: str, row: ResourceType | Tool) -> dict:
+        data: dict = {"id": row.id, "name": row.name}
+        for field in _VOCAB_FIELDS[kind]:
+            data[field] = getattr(row, field)
+        return data
+
+    def _field_attrs(self, kind: str, value_optional: bool, value_pattern: str | None) -> dict:
+        allowed = _VOCAB_FIELDS[kind]
+        attrs: dict = {}
+        if "value_optional" in allowed:
+            attrs["value_optional"] = bool(value_optional)
+        if "value_pattern" in allowed:
+            attrs["value_pattern"] = self._clean_pattern(value_pattern)
+        return attrs
+
+    @staticmethod
+    def _clean_pattern(pattern: str | None) -> str | None:
+        if pattern is None:
+            return None
+        cleaned = pattern.strip()
+        if not cleaned:
+            return None
+        try:
+            re.compile(cleaned)
+        except re.error as exc:
+            raise ValidationError(
+                f"Invalid value pattern: {exc}",
+                details={"kind": "value_pattern", "pattern": pattern},
+            ) from None
+        return cleaned

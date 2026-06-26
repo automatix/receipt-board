@@ -62,7 +62,9 @@ PKs = **Integer**, pro Tabelle (ADR-0010). `done` als `INTEGER` (0/1).
   `category_id` → `categories` **NOT NULL** `ON DELETE CASCADE`, `name` NOT NULL,
   `position` NOT NULL, `done` NOT NULL DEFAULT 0, `data` TEXT NULL, `instructions` TEXT NULL,
   `created_at`, `updated_at`.
-- **`resource_types`**: `id` PK, `name` NOT NULL `UNIQUE`. (Vocab; Seed: `URL`, `Email`.)
+- **`resource_types`**: `id` PK, `name` NOT NULL `UNIQUE` (the type key), `value_optional`
+  NOT NULL DEFAULT 0, `value_pattern` TEXT NULL (regex a value must match / used to type a
+  bare token). (Vocab; Seed: `URL` `^https?://`, `Email` optional `^[^@\s]+@[^@\s]+\.[^@\s]+$`.)
 - **`tools`**: `id` PK, `name` NOT NULL `UNIQUE`. (Vocab; Seed: `Browser`, `Thunderbird`.)
 - **`item_resources`**: `id` PK, `item_id` → `expense_items` `ON DELETE CASCADE`,
   `resource_type_id` → `resource_types` `ON DELETE RESTRICT`, `value` TEXT **NULL**,
@@ -207,7 +209,8 @@ notations-konforme Fixture getestet.
 | `POST/PATCH/DELETE /categories…`, `…/items…` | privileged | CRUD |
 | `POST /categories/{id}/done` | privileged | `{done: bool}` — Kategorie-Toggle (Cascade) |
 | `POST /nodes/{kind}/{id}/move` | privileged | Re-Parent/Reorder |
-| `GET/POST/PATCH/DELETE /vocab/{kind}…` | privileged | Vokabular-Pflege |
+| `GET/POST/PATCH/DELETE /vocab/{kind}…` | privileged | Vokabular-Pflege (resource_type trägt `value_optional`/`value_pattern`) |
+| `POST /vocab/{kind}/{id}/duplicate` | privileged | `{name}` — Vokabular-Eintrag duplizieren |
 
 > Die gebaute GUI wird (sofern vorhanden) unter `/app` ausgeliefert (StaticFiles, §7).
 
