@@ -16,7 +16,7 @@ Receipt Board wird als eigenständiger Ordner ausgeliefert (PyInstaller `onedir`
 
 1. Auf der **Releases-Seite** das ZIP herunterladen:
    <https://github.com/automatix/receipt-board/releases> →
-   `receipt-board-v1.0.1-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
+   `receipt-board-v1.0.2-windows.zip`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
 2. Entpacken; den Ordner `receipt-board` (enthält `receipt-board.exe` und den Unterordner
    `_internal/`) an einen festen Ort kopieren, z. B. `%LOCALAPPDATA%\Programs\ReceiptBoard\`.
 3. `receipt-board.exe` per Doppelklick starten (optional eine Verknüpfung anlegen).
@@ -38,10 +38,17 @@ für eine unsignierte, aus dem Internet geladene Datei erwartbar. Optionen:
     OK → **danach** entpacken; oder per PowerShell:
 
     ```powershell
-    Unblock-File "$HOME\Downloads\receipt-board-v1.0.1-windows.zip"
+    Unblock-File "$HOME\Downloads\receipt-board-v1.0.2-windows.zip"
     ```
 - **Alternativ** den Ordner selbst bauen (kein Download = keine Markierung) — siehe
   **Variante B**.
+
+> **Hinweis (ab v1.0.2):** Die App **entsperrt ihre eigenen Dateien beim Start automatisch**
+> (entfernt die „Mark of the Web" aus dem Programmordner). Hat die ZIP/der Ordner die
+> Markierung getragen, startet die App trotzdem (der SmartScreen-Dialog für die `.exe` kann
+> einmalig erscheinen). Liegt das Programm in einem schreibgeschützten Pfad (z. B.
+> `Program Files`), entsperre den Ordner einmalig manuell:
+> `Get-ChildItem "<Ordner>\receipt-board" -Recurse | Unblock-File`.
 
 > Selbst-signierte Zertifikate helfen SmartScreen **nicht**. Eine vollständig warnungsfreie
 > Auslieferung an Dritte erfordert ein (kostenpflichtiges) **Code-Signing-Zertifikat**
