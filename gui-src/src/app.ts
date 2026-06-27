@@ -1038,9 +1038,25 @@ function labelled(label: string, input: HTMLElement): HTMLElement {
   return el("div", { class: "field" }, [el("div", { class: "field-label", text: label }), input]);
 }
 
+// -- status bar ---------------------------------------------------------------
+
+// Slim gray bar with the app version, right-aligned. The running app injects the real
+// version via window.__RECEIPT_BOARD__; __APP_VERSION__ (baked from package.json) is the
+// fallback when served without pywebview. Rendered once — it lives outside #app, so view
+// re-renders never clear it.
+function renderStatusbar(): void {
+  const version = window.__RECEIPT_BOARD__?.version ?? __APP_VERSION__;
+  const bar = byId("statusbar");
+  clear(bar);
+  bar.append(
+    el("span", { class: "version", text: `v${version}`, title: t("status.version", { version }) }),
+  );
+}
+
 // -- entry --------------------------------------------------------------------
 
 export async function start(): Promise<void> {
+  renderStatusbar();
   try {
     await loadVocab();
     await reload();
