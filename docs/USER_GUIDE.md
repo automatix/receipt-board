@@ -21,10 +21,10 @@ Die App ist **semantik-agnostisch** — sie kennt nur Häkchen. Was „erledigt"
 - **Expense Item (Eintrag)** — das abzuarbeitende Blatt (z. B. „Amazon", „1&1"); trägt die
   Aktionsfelder; hat nie Unterpunkte.
 - **done** — ein Häkchen auf **jedem** Knoten.
-- **Aktionsfelder** (nur am Eintrag): **resources** (typisierte Fundorte — `URL`/`Email`),
-  **tools** (Werkzeuge — z. B. `Browser`, `Thunderbird`), **data** (Freitext, z. B. ein
-  Login), **instructions** (Freitext-Hinweis).
-- **Vokabular** — app-weite Listen erlaubter Werte für **Resource Type** und **Tool**.
+- **Aktionsfelder** (nur am Eintrag): **Ressourcen** (typisierte Fundorte — `URL`/`Email`),
+  **Werkzeuge** (z. B. `Browser`, `Thunderbird`), **Daten** (Freitext, z. B. ein Login),
+  **Anweisungen** (Freitext-Hinweis).
+- **Vokabular** — app-weite Listen erlaubter Werte für **Ressourcentypen** und **Werkzeuge**.
 
 > **Wo darf was geändert werden?** Struktur-Änderungen (anlegen, bearbeiten, entfernen,
 > importieren, klonen, löschen, Vokabular) gehen **nur in der GUI**. Die CLI/Schnittstelle
@@ -70,8 +70,8 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
     einem Dialog bestätigt, der die **Anzahl betroffener erledigter Einträge** zeigt.
 - **Umbenennen:** **Doppelklick** auf den Namen → tippen → `Enter` (`Esc` bricht ab).
 - **Eintrag bearbeiten:** das **Stift-Symbol ✎** am Eintrag öffnet den Dialog *„Eintrag bearbeiten"* für
-  **Name**, **Data**, **Instructions**, **Resources** (Typ aus dem Vokabular + optionaler
-  Wert; *„+ Resource"* für weitere Zeilen) und **Tools** (Mehrfachauswahl). **Speichern**
+  **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem Vokabular + optionaler
+  Wert; *„+ Ressource"* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). **Speichern**
   übernimmt.
 - **Hinzufügen:** unter jeder Kategorie **„+ Kategorie"** / **„+ Eintrag"**; auf oberster
   Ebene **„+ Kategorie"** (Einträge liegen immer unter einer Kategorie). **„+ Eintrag"**
@@ -146,8 +146,9 @@ Resources (`URL`, `Email`), zwei Tools, `data` „Login 588791127" und einer Ins
 
 ## 7. Vokabular verwalten
 
-Mit **Vokabular** umschalten. Zwei Listen: **Resource Types** (z. B. `URL`, `Email`) und
-**Tools** (z. B. `Browser`, `Thunderbird`).
+Mit **Vokabular** umschalten. Zwei **Tabellen** mit beschrifteten Spalten:
+**Ressourcentypen** (z. B. `URL`, `Email`) und **Werkzeuge** (z. B. `Browser`,
+`Thunderbird`).
 
 - **Hinzufügen:** Namen eingeben → **„Hinzufügen"**.
 - **Umbenennen:** in das Namensfeld schreiben → `Enter`. Da Einträge per `id` referenzieren,
