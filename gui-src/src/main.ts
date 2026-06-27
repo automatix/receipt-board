@@ -14,7 +14,22 @@ async function whenConfigReady(timeoutMs = 3000): Promise<void> {
   }
 }
 
+// Ignore files dropped anywhere on the window (issue #105): WebView2 would otherwise navigate
+// to / preview the dropped file. Scoped to file drags ("Files"), so the internal tree
+// drag-and-drop (which carries "text/plain") is untouched. The import dialog attaches its own
+// handler on its element — that runs first and reads the file before this no-op fires.
+function ignoreWindowFileDrops(): void {
+  for (const type of ["dragover", "drop"] as const) {
+    window.addEventListener(type, (event: DragEvent) => {
+      if (event.dataTransfer && Array.from(event.dataTransfer.types).includes("Files")) {
+        event.preventDefault();
+      }
+    });
+  }
+}
+
 async function main(): Promise<void> {
+  ignoreWindowFileDrops();
   initLocale();
   applyTheme(loadTheme());
   await whenConfigReady();
