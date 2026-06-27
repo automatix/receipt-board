@@ -17,13 +17,15 @@ Receipt Board wird als **Windows-Installer** ausgeliefert (Inno Setup, per-machi
 
 1. Auf der **Releases-Seite** den Installer herunterladen:
    <https://github.com/automatix/receipt-board/releases> →
-   `receipt-board-v1.4.0-setup.exe`. *(Das Repo ist öffentlich — kein Login nötig.)*
+   `receipt-board-v1.5.0-setup.exe`. *(Das Repo ist öffentlich — kein Login nötig.)*
 2. Die `setup.exe` per Doppelklick starten.
 3. Windows fragt per **Benutzerkontensteuerung (UAC)** nach Administratorrechten —
    bestätigen (die Installation erfolgt nach `C:\Program Files\Receipt Board\`, also
    per-machine).
-4. Dem Assistenten folgen (optional ein **Desktop-Symbol** anhaken). Nach Abschluss liegt
-   **Receipt Board** im **Startmenü** (und ggf. auf dem Desktop).
+4. Dem Assistenten folgen (optional ein **Desktop-Symbol** anhaken). Auf der **letzten
+   Seite** ist **„Launch Receipt Board"** standardmäßig angehakt — die App startet damit
+   direkt nach dem Klick auf **Fertigstellen** (Häkchen entfernen, falls nicht gewünscht).
+   Nach Abschluss liegt **Receipt Board** im **Startmenü** (und ggf. auf dem Desktop).
 5. Beim **ersten Start** legt die App ihren Datenordner an:
    `%LOCALAPPDATA%\receipt-board\` (Datenbank, `config.toml`, `runtime.json`, Log). Der
    Programmordner unter `Program Files` bleibt unverändert (schreibgeschützt-tauglich).
@@ -39,7 +41,7 @@ für eine unsignierte, aus dem Internet geladene Datei erwartbar:
   **Eigenschaften** → unten **„Zulassen"/„Unblock"** ankreuzen → OK; oder per PowerShell:
 
   ```powershell
-  Unblock-File "$HOME\Downloads\receipt-board-v1.4.0-setup.exe"
+  Unblock-File "$HOME\Downloads\receipt-board-v1.5.0-setup.exe"
   ```
 
 > Selbst-signierte Zertifikate helfen SmartScreen **nicht**. Eine vollständig warnungsfreie
