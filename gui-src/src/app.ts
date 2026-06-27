@@ -35,6 +35,7 @@ import {
   textPrompt,
   toast,
 } from "./ui";
+import { checkForUpdatesManually, checkForUpdatesOnStartup } from "./updates";
 
 interface State {
   checklists: ChecklistSummary[];
@@ -311,6 +312,7 @@ function renderToolbar(): void {
           void loadAudit().then(render);
         }
       }),
+      button("Updates", () => void checkForUpdatesManually()),
       button(themeLabel(themeMode), () => {
         themeMode = nextTheme(themeMode);
         applyTheme(themeMode);
@@ -991,6 +993,7 @@ export async function start(): Promise<void> {
     await loadVocab();
     await reload();
     connectEvents();
+    void checkForUpdatesOnStartup();
   } catch (error) {
     toast(error instanceof ApiError ? error.message : String(error), true);
   }
