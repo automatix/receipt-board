@@ -72,7 +72,7 @@ uv run receipt-board-app --check
 
 ## CLI
 
-The CLI talks HTTP to the **running** app (it reads the port from `runtime.json`):
+The CLI talks HTTP to a **running** server (it reads the port from `runtime.json`):
 
 ```bash
 uv run receipt-board export [--checklist ID] [--json]
@@ -80,9 +80,20 @@ uv run receipt-board search "QUERY" [--json]
 uv run receipt-board item done ID
 uv run receipt-board item undone ID
 uv run receipt-board validate PATH [--json]   # dry-run: is a Markdown file importable?
+uv run receipt-board audit [--checklist ID] [--limit N] [--json]
 ```
 
-Exit code `0` on success, non-zero on error (e.g. the app is not running).
+Exit code `0` on success, non-zero on error (e.g. no server is running).
+
+The server is the open desktop app **or** the **headless** server (ADR-0011) — same REST
+API, no GUI window:
+
+```bash
+uv run receipt-board serve [--port PORT]   # foreground; Ctrl+C to stop
+```
+
+In a packaged install the CLI ships as `receipt-board-cli` (a console exe on `PATH`), so the
+same commands run from any terminal: `receipt-board-cli serve`, `receipt-board-cli export`, …
 
 ## Tests & linting
 
@@ -114,10 +125,13 @@ interactive y/N selection per target.
 
 ## Packaging
 
-Build the GUI, then create a `onedir`, windowed Windows build:
+Build the GUI, then create a `onedir` Windows build with **two** executables — the windowed
+GUI and the console CLI — from one spec:
 
 ```bash
-uv run pyinstaller receipt_board.spec   # -> dist/receipt-board/receipt-board.exe
+uv run pyinstaller receipt_board.spec
+# -> dist/receipt-board/receipt-board.exe       (windowed GUI)
+# -> dist/receipt-board/receipt-board-cli.exe   (console CLI + headless `serve`)
 ```
 
 The GUI assets and Alembic migrations are bundled via the spec. The app ships a branded

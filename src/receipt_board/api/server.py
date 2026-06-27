@@ -44,6 +44,29 @@ def build_config(app: Callable, port: int) -> uvicorn.Config:
     )
 
 
+def build_server(
+    session_factory: sessionmaker[Session],
+    session_token: str,
+    *,
+    port: int = 0,
+    runtime_path: str | Path | None = None,
+    app_version: str = __version__,
+    gui_dir: str | Path | None = None,
+) -> tuple[uvicorn.Server, int]:
+    """Build the app, reserve a port, publish ``runtime.json`` and return ``(server, port)``.
+
+    Does everything up to (but not including) the blocking ``server.run()`` so callers can
+    run it in the foreground (headless ``serve``) or a thread (tests).
+    """
+    app = create_app(
+        session_factory, session_token=session_token, app_version=app_version, gui_dir=gui_dir
+    )
+    bound_port = port or pick_ephemeral_port()
+    if runtime_path is not None:
+        write_runtime(runtime_path, bound_port)
+    return uvicorn.Server(build_config(app, bound_port)), bound_port
+
+
 def serve(
     session_factory: sessionmaker[Session],
     session_token: str,
@@ -51,10 +74,23 @@ def serve(
     port: int = 0,
     runtime_path: str | Path | None = None,
     app_version: str = __version__,
+    gui_dir: str | Path | None = None,
 ) -> None:
-    """Build the app, reserve a port, publish ``runtime.json``, then run uvicorn (blocking)."""
-    app = create_app(session_factory, session_token=session_token, app_version=app_version)
-    bound_port = port or pick_ephemeral_port()
-    if runtime_path is not None:
-        write_runtime(runtime_path, bound_port)
-    uvicorn.Server(build_config(app, bound_port)).run()  # pragma: no cover
+    """Run the local server in the foreground (headless mode — no GUI window).
+
+    Blocks until interrupted (Ctrl+C). The CLI/automation then drives it over REST, exactly
+    as it does the windowed app (ADR-0011) — the server stays the sole owner of the DB.
+    """
+    server, bound_port = build_server(
+        session_factory,
+        session_token,
+        port=port,
+        runtime_path=runtime_path,
+        app_version=app_version,
+        gui_dir=gui_dir,
+    )
+    print(  # noqa: T201 (headless console output is intentional)
+        f"Receipt Board {app_version} serving on http://{HOST}:{bound_port}/  (Ctrl+C to stop)",
+        flush=True,
+    )
+    server.run()  # pragma: no cover (blocking)

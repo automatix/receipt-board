@@ -18,6 +18,7 @@
 #define AppName "Receipt Board"
 #define AppPublisher "Ilya Khanataev"
 #define AppExeName "receipt-board.exe"
+#define CliExeName "receipt-board-cli.exe"
 
 [Setup]
 ; The leading double-brace escapes to a literal "{" so AppId = {6E5EAF6B-...}.
@@ -41,6 +42,8 @@ UninstallDisplayName={#AppName}
 WizardStyle=modern
 Compression=lzma2
 SolidCompression=yes
+; We add the install dir to the system PATH (for the CLI), so notify the shell.
+ChangesEnvironment=yes
 
 [Tasks]
 ; Optional desktop shortcut (off by default).
@@ -54,6 +57,13 @@ Source: "dist\receipt-board\*"; DestDir: "{app}"; Flags: recursesubdirs createal
 Name: "{autoprograms}\Receipt Board"; Filename: "{app}\{#AppExeName}"
 Name: "{autodesktop}\Receipt Board"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
+[Registry]
+; Put the install dir on the system PATH so `receipt-board-cli` works in any terminal
+; (issue #104). Append only when not already present; removal is handled in [Code] on
+; uninstall (an `uninsdeletevalue` flag would wipe the entire Path, so we don't use it).
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
+  ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath
+
 [Run]
 ; Offer to launch Receipt Board from the final wizard page, checked by default (no
 ; `unchecked` flag). `runasoriginaluser` starts it as the logged-in, non-elevated user so
@@ -65,6 +75,53 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; F
 [Code]
 const
   DataSubdir = '\receipt-board';
+  EnvKey = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment';
+
+// True when the install dir is not already on the system PATH (avoids duplicate entries).
+function NeedsAddPath: Boolean;
+var
+  OrigPath: string;
+begin
+  if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', OrigPath) then
+  begin
+    Result := True;
+    exit;
+  end;
+  Result := Pos(';' + Uppercase(ExpandConstant('{app}')) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
+end;
+
+// Remove the install dir from the system PATH on uninstall (case-insensitive, exact entry).
+procedure RemoveFromPath(Dir: string);
+var
+  OrigPath, NewPath, UpperDir: string;
+  Parts: TStringList;
+  I: Integer;
+begin
+  if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', OrigPath) then
+    exit;
+  UpperDir := Uppercase(Dir);
+  Parts := TStringList.Create;
+  try
+    while Pos(';', OrigPath) > 0 do
+    begin
+      Parts.Add(Copy(OrigPath, 1, Pos(';', OrigPath) - 1));
+      Delete(OrigPath, 1, Pos(';', OrigPath));
+    end;
+    if OrigPath <> '' then
+      Parts.Add(OrigPath);
+    NewPath := '';
+    for I := 0 to Parts.Count - 1 do
+      if Uppercase(Trim(Parts[I])) <> UpperDir then
+      begin
+        if NewPath <> '' then
+          NewPath := NewPath + ';';
+        NewPath := NewPath + Parts[I];
+      end;
+    RegWriteExpandStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', NewPath);
+  finally
+    Parts.Free;
+  end;
+end;
 
 procedure RemoveUserData();
 var
@@ -84,6 +141,13 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   DataDir: string;
 begin
+  // Always strip our install dir from PATH (also on a silent uninstall).
+  if CurUninstallStep = usUninstall then
+  begin
+    RemoveFromPath(ExpandConstant('{app}'));
+    exit;
+  end;
+
   if CurUninstallStep <> usPostUninstall then
     exit;
 

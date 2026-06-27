@@ -36,7 +36,11 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
-exe = EXE(
+# Two executables from the same analysis (same dispatcher entry, see packaging/entry.py):
+#   receipt-board.exe      — windowed GUI (Start-menu shortcut).
+#   receipt-board-cli.exe  — console; CLI commands + headless `serve` (issue #104).
+# Both share the one set of collected binaries/datas below, so the second exe adds ~no size.
+exe_gui = EXE(
     pyz,
     a.scripts,
     [],
@@ -50,8 +54,23 @@ exe = EXE(
     icon=icon,
 )
 
+exe_cli = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name="receipt-board-cli",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=True,
+    icon=icon,
+)
+
 coll = COLLECT(
-    exe,
+    exe_gui,
+    exe_cli,
     a.binaries,
     a.datas,
     strip=False,
