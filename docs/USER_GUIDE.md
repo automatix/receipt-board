@@ -55,6 +55,9 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 
 Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
 
+Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **App-Version**
+(z. B. `v1.6.0`).
+
 ## 4. Mit dem Baum arbeiten
 
 - **Auf-/Zuklappen:** das Dreieck **▸ / ▾** vor einer Kategorie.
