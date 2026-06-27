@@ -32,7 +32,11 @@ Die App ist **semantik-agnostisch** — sie kennt nur Häkchen. Was „erledigt"
 
 ## 3. Die Oberfläche
 
-Oben die **Werkzeugleiste**:
+> **Sprache:** Die App startet auf **Englisch**. Über den **Sprach-Button** (🌐 **EN/DE**)
+> rechts in der Werkzeugleiste schaltest du auf **Deutsch** (die Wahl bleibt gespeichert).
+> Diese Anleitung nennt die **deutschen** Beschriftungen.
+
+Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 
 | Element | Funktion |
 | ------- | -------- |
@@ -44,6 +48,10 @@ Oben die **Werkzeugleiste**:
 | **Export** | aktive Checklist als JSON-Datei herunterladen |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
 | **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
+| **Audit** | das Audit-Log einsehen (siehe §10) |
+| **Updates** | nach einer neuen Version suchen (siehe §12) |
+| **🌐 EN/DE** | Sprache umschalten (Englisch ↔ Deutsch) |
+| **Design** (System/Hell/Dunkel) | Farbschema umschalten |
 
 Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
 
@@ -57,7 +65,7 @@ Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
   - **Eine Kategorie abwählen** ist destruktiv (setzt den Teilbaum zurück) und wird mit
     einem Dialog bestätigt, der die **Anzahl betroffener erledigter Einträge** zeigt.
 - **Umbenennen:** **Doppelklick** auf den Namen → tippen → `Enter` (`Esc` bricht ab).
-- **Eintrag bearbeiten:** das **✎** am Eintrag öffnet den Dialog *„Eintrag bearbeiten"* für
+- **Eintrag bearbeiten:** das **Stift-Symbol ✎** am Eintrag öffnet den Dialog *„Eintrag bearbeiten"* für
   **Name**, **Data**, **Instructions**, **Resources** (Typ aus dem Vokabular + optionaler
   Wert; *„+ Resource"* für weitere Zeilen) und **Tools** (Mehrfachauswahl). **Speichern**
   übernimmt.
@@ -65,7 +73,7 @@ Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
   Ebene **„+ Kategorie"** (Einträge liegen immer unter einer Kategorie). **„+ Eintrag"**
   öffnet denselben Dialog wie *„Eintrag bearbeiten"* — alle Felder (Name, Data,
   Instructions, Resources, Tools) lassen sich direkt in einem Schritt setzen.
-- **Entfernen:** das **🗑** (mit Bestätigung).
+- **Entfernen:** das **Papierkorb-Symbol 🗑** (mit Bestätigung).
 - **Verschieben / Umsortieren (Drag & Drop):**
   - einen Knoten auf eine **Kategorie-Zeile** ziehen → **in** diese Kategorie verschieben
     (ans Ende);
@@ -171,3 +179,14 @@ receipt-board item done|undone ID
 
 Die CLI ist in der Entwickler-Installation enthalten (siehe [`README.md`](../README.md));
 Struktur-Änderungen bleiben der GUI vorbehalten.
+
+## 12. Updates (aus der App heraus)
+
+Die App kann sich **selbst aktualisieren**: Beim Start prüft sie still, ob auf GitHub eine
+neuere Version vorliegt, und zeigt dann ein **Hinweis-Banner** (Version + „Was ist neu?").
+Manuell startest du die Prüfung über den Button **„Updates"**.
+
+Mit **„Jetzt installieren"** lädt die App die neue `setup.exe` herunter und startet sie;
+Windows fragt per **UAC** nach Adminrechten, dann beendet sich die App, damit der Installer
+die Dateien ersetzen kann. **„Später"** blendet das Banner aus. Es wird **nie automatisch**
+installiert, und deine Daten bleiben erhalten. Details: [`INSTALL.md`](./INSTALL.md).

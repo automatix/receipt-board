@@ -17,7 +17,7 @@ Receipt Board wird als **Windows-Installer** ausgeliefert (Inno Setup, per-machi
 
 1. Auf der **Releases-Seite** den Installer herunterladen:
    <https://github.com/automatix/receipt-board/releases> →
-   `receipt-board-v1.3.0-setup.exe`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
+   `receipt-board-v1.4.0-setup.exe`. *(Das Repo ist öffentlich — kein Login nötig.)*
 2. Die `setup.exe` per Doppelklick starten.
 3. Windows fragt per **Benutzerkontensteuerung (UAC)** nach Administratorrechten —
    bestätigen (die Installation erfolgt nach `C:\Program Files\Receipt Board\`, also
@@ -39,12 +39,26 @@ für eine unsignierte, aus dem Internet geladene Datei erwartbar:
   **Eigenschaften** → unten **„Zulassen"/„Unblock"** ankreuzen → OK; oder per PowerShell:
 
   ```powershell
-  Unblock-File "$HOME\Downloads\receipt-board-v1.3.0-setup.exe"
+  Unblock-File "$HOME\Downloads\receipt-board-v1.4.0-setup.exe"
   ```
 
 > Selbst-signierte Zertifikate helfen SmartScreen **nicht**. Eine vollständig warnungsfreie
 > Auslieferung an Dritte erfordert ein (kostenpflichtiges) **Code-Signing-Zertifikat**
 > (Authenticode, idealerweise EV); für den lokalen Eigenbetrieb genügt das Entsperren oben.
+
+## Updates (aus der App heraus)
+
+Ab `v1.4.0` kann sich Receipt Board **selbst aktualisieren** (das Repo ist öffentlich, daher
+ohne Login):
+
+- Beim Start prüft die App still, ob eine neuere Version vorliegt, und zeigt dann ein
+  **Hinweis-Banner** (Version + „Was ist neu?"). Manuell geht es über den Toolbar-Button
+  **„Updates"**.
+- Mit **„Jetzt installieren"** lädt die App die neue `setup.exe` herunter und startet sie;
+  Windows fragt erneut per **UAC** nach Adminrechten, dann beendet sich die App, damit der
+  Installer die Dateien ersetzen kann. Deine Daten unter `%LOCALAPPDATA%\receipt-board\`
+  bleiben erhalten.
+- Es wird **nie automatisch** installiert — die Bestätigung liegt immer bei dir.
 
 ## Deinstallation
 

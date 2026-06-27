@@ -9,9 +9,13 @@ scope (see [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) §2).
 
 ## End-user docs (German)
 
-- **Download (Windows)** — [Releases](https://github.com/automatix/receipt-board/releases) → `receipt-board-vX.Y.Z-setup.exe` (installer; private repo: access required)
+- **Download (Windows)** — [Releases](https://github.com/automatix/receipt-board/releases) → `receipt-board-vX.Y.Z-setup.exe` (installer; the repo is public — no login needed)
 - **Installation** — [`docs/INSTALL.md`](docs/INSTALL.md)
 - **Bedienungsanleitung** (user guide) — [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
+
+Once installed, the app **updates itself**: it checks the latest public GitHub Release and,
+on confirmation, downloads and launches the installer (ADR-0013). The GUI is localized
+(English default, German available) with an in-app language switch.
 
 The rest of this README is the **developer** setup (build/run from source, tests, packaging).
 
