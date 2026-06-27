@@ -54,6 +54,14 @@ Source: "dist\receipt-board\*"; DestDir: "{app}"; Flags: recursesubdirs createal
 Name: "{autoprograms}\Receipt Board"; Filename: "{app}\{#AppExeName}"
 Name: "{autodesktop}\Receipt Board"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
+[Run]
+; Offer to launch Receipt Board from the final wizard page, checked by default (no
+; `unchecked` flag). `runasoriginaluser` starts it as the logged-in, non-elevated user so
+; first-run data lands in that user's %LOCALAPPDATA%\receipt-board\ (not the admin's) and
+; the GUI avoids the elevated-launch init artifact noted in docs\dev-testing.md.
+; `skipifsilent` keeps automated/CI installs (/VERYSILENT) from spawning a window.
+Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent runasoriginaluser
+
 [Code]
 const
   DataSubdir = '\receipt-board';
