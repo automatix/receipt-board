@@ -26,13 +26,3 @@ export function applyTheme(mode: ThemeMode): void {
 export function nextTheme(mode: ThemeMode): ThemeMode {
   return ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length]!;
 }
-
-export function themeLabel(mode: ThemeMode): string {
-  if (mode === "dark") {
-    return "🌙 Dark";
-  }
-  if (mode === "light") {
-    return "☀ Light";
-  }
-  return "🌗 System";
-}

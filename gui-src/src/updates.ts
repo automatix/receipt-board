@@ -3,6 +3,7 @@
 // is always explicit — never automatic.
 
 import { ApiError, api } from "./api";
+import { t } from "./i18n";
 import type { UpdateInfo } from "./types";
 import { byId, el, toast } from "./ui";
 
@@ -19,7 +20,7 @@ export function dismissBanner(): void {
 function showBanner(info: UpdateInfo): void {
   const text = el("span", {
     class: "update-banner-text",
-    text: `Neue Version ${info.latest} verfügbar (installiert: ${info.current}).`,
+    text: t("update.available", { latest: info.latest ?? "", current: info.current }),
   });
 
   const actions = el("div", { class: "update-banner-actions" });
@@ -30,16 +31,16 @@ function showBanner(info: UpdateInfo): void {
         href: info.notes_url,
         target: "_blank",
         rel: "noopener noreferrer",
-        text: "Was ist neu?",
+        text: t("update.whatsNew"),
       }),
     );
   }
   const install = el("button", {
     class: "btn btn-primary",
-    text: "Jetzt installieren",
+    text: t("update.installNow"),
   }) as HTMLButtonElement;
   install.addEventListener("click", () => void startInstall(install));
-  const dismiss = el("button", { class: "btn", text: "Später" });
+  const dismiss = el("button", { class: "btn", text: t("update.later") });
   dismiss.addEventListener("click", () => dismissBanner());
   actions.append(install, dismiss);
 
@@ -48,21 +49,18 @@ function showBanner(info: UpdateInfo): void {
 
 async function startInstall(button: HTMLButtonElement): Promise<void> {
   button.setAttribute("disabled", "disabled");
-  button.textContent = "Wird geladen…";
+  button.textContent = t("update.downloading");
   try {
     await api.installUpdate();
     // The backend launches the (UAC-gated) installer and then closes this window.
     bannerHost().replaceChildren(
       el("div", { class: "update-banner" }, [
-        el("span", {
-          class: "update-banner-text",
-          text: "Installer wird gestartet – die App wird geschlossen…",
-        }),
+        el("span", { class: "update-banner-text", text: t("update.launching") }),
       ]),
     );
   } catch (error) {
     button.removeAttribute("disabled");
-    button.textContent = "Jetzt installieren";
+    button.textContent = t("update.installNow");
     toast(error instanceof ApiError ? error.message : String(error), true);
   }
 }
@@ -74,7 +72,7 @@ export async function checkForUpdatesManually(): Promise<void> {
     if (info.update_available) {
       showBanner(info);
     } else {
-      toast(`Aktuell – Version ${info.current} ist die neueste.`);
+      toast(t("update.upToDate", { current: info.current }));
     }
   } catch (error) {
     toast(error instanceof ApiError ? error.message : String(error), true);

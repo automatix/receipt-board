@@ -18,14 +18,8 @@ import type {
   TreeNode,
   VocabEntry,
 } from "./types";
-import {
-  type ThemeMode,
-  applyTheme,
-  loadTheme,
-  nextTheme,
-  saveTheme,
-  themeLabel,
-} from "./theme";
+import { type ThemeMode, applyTheme, loadTheme, nextTheme, saveTheme } from "./theme";
+import { localeLabel, nextLocale, setLocale, t } from "./i18n";
 import {
   byId,
   clear,
@@ -258,7 +252,7 @@ function render(): void {
   } else if (state.view === "vocab") {
     main.append(renderVocab());
   } else if (!state.tree) {
-    main.append(el("p", { class: "empty", text: "Keine Checklist. Lege eine an oder importiere." }));
+    main.append(el("p", { class: "empty", text: t("tree.empty") }));
   } else {
     indexParentMap(state.tree);
     main.append(renderTree(state.tree));
@@ -278,10 +272,13 @@ function renderToolbar(): void {
     selector.append(option);
   }
   if (state.checklists.length === 0) {
-    selector.append(el("option", { text: "(keine)" }));
+    selector.append(el("option", { text: t("common.none") }));
   }
 
-  const search = el("input", { class: "input search", placeholder: "Suchen…" }) as HTMLInputElement;
+  const search = el("input", {
+    class: "input search",
+    placeholder: t("toolbar.search"),
+  }) as HTMLInputElement;
   search.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       void runSearch(search.value.trim());
@@ -291,19 +288,19 @@ function renderToolbar(): void {
   bar.append(
     el("div", { class: "toolbar-group" }, [
       selector,
-      button("Neu", () => void onCreateBlank()),
-      button("Import", () => void onImport()),
-      button("Klonen", () => void onClone()),
-      button("Löschen", () => void onDeleteChecklist(), "btn-danger"),
-      button("Export", () => void onExport()),
+      button(t("toolbar.new"), () => void onCreateBlank()),
+      button(t("toolbar.import"), () => void onImport()),
+      button(t("toolbar.clone"), () => void onClone()),
+      button(t("toolbar.delete"), () => void onDeleteChecklist(), "btn-danger"),
+      button(t("toolbar.export"), () => void onExport()),
     ]),
     el("div", { class: "toolbar-group" }, [
       search,
-      button(state.view === "vocab" ? "Checklist" : "Vokabular", () => {
+      button(t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"), () => {
         state.view = state.view === "vocab" ? "checklist" : "vocab";
         render();
       }),
-      button(state.view === "audit" ? "Checklist" : "Audit", () => {
+      button(t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"), () => {
         if (state.view === "audit") {
           state.view = "checklist";
           render();
@@ -312,8 +309,12 @@ function renderToolbar(): void {
           void loadAudit().then(render);
         }
       }),
-      button("Updates", () => void checkForUpdatesManually()),
-      button(themeLabel(themeMode), () => {
+      button(t("toolbar.updates"), () => void checkForUpdatesManually()),
+      button(localeLabel(), () => {
+        setLocale(nextLocale());
+        render();
+      }),
+      button(t(`theme.${themeMode}`), () => {
         themeMode = nextTheme(themeMode);
         applyTheme(themeMode);
         saveTheme(themeMode);
@@ -338,7 +339,7 @@ function renderTree(tree: ChecklistTree): HTMLElement {
   root.append(list);
   root.append(
     el("div", { class: "node-add" }, [
-      button("+ Kategorie", () => void onAddCategory(null)),
+      button(t("tree.addCategory"), () => void onAddCategory(null)),
     ]),
   );
   return root;
@@ -418,8 +419,8 @@ function renderNode(node: TreeNode): HTMLElement {
   if (isCategory) {
     container.append(
       el("div", { class: "node-add" }, [
-        button("+ Kategorie", () => void onAddCategory(node.id)),
-        button("+ Eintrag", () => void onAddItem(node.id)),
+        button(t("tree.addCategory"), () => void onAddCategory(node.id)),
+        button(t("tree.addItem"), () => void onAddItem(node.id)),
       ]),
     );
   }
@@ -516,9 +517,9 @@ function dropZone(parentId: number | null, position: number): HTMLElement {
 // -- vocabulary view ----------------------------------------------------------
 
 function renderVocab(): HTMLElement {
-  const wrap = el("div", { class: "vocab" }, [el("h2", { text: "Vokabular" })]);
+  const wrap = el("div", { class: "vocab" }, [el("h2", { text: t("vocab.title") })]);
   wrap.append(renderResourceTypeSection(state.resourceTypes));
-  wrap.append(renderVocabSection("Tools", "tool", state.tools));
+  wrap.append(renderVocabSection(t("vocab.tools"), "tool", state.tools));
   return wrap;
 }
 
@@ -544,11 +545,14 @@ function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]):
     section.append(
       el("div", { class: "vocab-row" }, [
         nameInput,
-        button("Entfernen", () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+        button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
       ]),
     );
   }
-  const adder = el("input", { class: "input", placeholder: `Neuer ${title}…` }) as HTMLInputElement;
+  const adder = el("input", {
+    class: "input",
+    placeholder: t("vocab.newTool"),
+  }) as HTMLInputElement;
   const add = (): void => {
     const value = adder.value.trim();
     if (value) {
@@ -563,7 +567,7 @@ function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]):
       add();
     }
   });
-  section.append(el("div", { class: "vocab-row" }, [adder, button("Hinzufügen", add)]));
+  section.append(el("div", { class: "vocab-row" }, [adder, button(t("common.add"), add)]));
   return section;
 }
 
@@ -571,8 +575,10 @@ function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]):
 function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
   const kind = "resource_type" as const;
   const optionalLabel = (box: HTMLInputElement): HTMLElement =>
-    el("label", { class: "tool-check" }, [box, document.createTextNode(" Wert optional")]);
-  const section = el("div", { class: "vocab-section" }, [el("h3", { text: "Resource Types" })]);
+    el("label", { class: "tool-check" }, [box, document.createTextNode(` ${t("vocab.valueOptional")}`)]);
+  const section = el("div", { class: "vocab-section" }, [
+    el("h3", { text: t("vocab.resourceTypes") }),
+  ]);
 
   for (const entry of entries) {
     const nameInput = el("input", { class: "input inline", value: entry.name }) as HTMLInputElement;
@@ -580,7 +586,7 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
     optBox.checked = entry.value_optional ?? false;
     const patternInput = el("input", {
       class: "input",
-      placeholder: "Regex (optional)",
+      placeholder: t("vocab.regexPlaceholder"),
       value: entry.value_pattern ?? "",
     }) as HTMLInputElement;
     const save = (): void => {
@@ -594,7 +600,7 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
       });
     };
     const duplicate = async (): Promise<void> => {
-      const name = await textPrompt(`Duplikat von "${entry.name}" – neuer Key`);
+      const name = await textPrompt(t("vocab.duplicatePrompt", { name: entry.name }));
       if (name) {
         await act(async () => {
           await api.duplicateVocab(kind, entry.id, name);
@@ -607,21 +613,21 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
         nameInput,
         optionalLabel(optBox),
         patternInput,
-        button("Speichern", save, "btn-mini"),
-        button("Duplizieren", () => void duplicate(), "btn-mini"),
-        button("Entfernen", () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+        button(t("common.save"), save, "btn-mini"),
+        button(t("common.duplicate"), () => void duplicate(), "btn-mini"),
+        button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
       ]),
     );
   }
 
   const nameAdd = el("input", {
     class: "input",
-    placeholder: "Neuer Resource Type (Key)…",
+    placeholder: t("vocab.newResourceType"),
   }) as HTMLInputElement;
   const optAdd = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
   const patternAdd = el("input", {
     class: "input",
-    placeholder: "Regex (optional)",
+    placeholder: t("vocab.regexPlaceholder"),
   }) as HTMLInputElement;
   const add = (): void => {
     const value = nameAdd.value.trim();
@@ -646,7 +652,7 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
       nameAdd,
       optionalLabel(optAdd),
       patternAdd,
-      button("Hinzufügen", add),
+      button(t("common.add"), add),
     ]),
   );
   return section;
@@ -656,20 +662,20 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
 
 function renderAudit(): HTMLElement {
   const wrap = el("div", { class: "audit" }, [
-    el("div", { class: "audit-head" }, [el("h2", { text: "Audit-Log" })]),
+    el("div", { class: "audit-head" }, [el("h2", { text: t("audit.title") })]),
   ]);
   if (state.audit.length === 0) {
-    wrap.append(el("p", { class: "empty", text: "Keine Audit-Einträge." }));
+    wrap.append(el("p", { class: "empty", text: t("audit.empty") }));
     return wrap;
   }
   const table = el("table", { class: "audit-table" });
   table.append(
     el("tr", {}, [
-      el("th", { text: "Zeit" }),
-      el("th", { text: "Herkunft" }),
-      el("th", { text: "Aktion" }),
-      el("th", { text: "Ziel" }),
-      el("th", { text: "Betroffen" }),
+      el("th", { text: t("audit.colTime") }),
+      el("th", { text: t("audit.colOrigin") }),
+      el("th", { text: t("audit.colAction") }),
+      el("th", { text: t("audit.colTarget") }),
+      el("th", { text: t("audit.colAffected") }),
     ]),
   );
   for (const entry of state.audit) {
@@ -703,15 +709,15 @@ async function runSearch(query: string): Promise<void> {
     clear(main);
     const panel = el("div", { class: "search-results" }, [
       el("div", { class: "search-head" }, [
-        el("h2", { text: `Suche: "${query}" (${hits.length})` }),
-        button("Schließen", () => render()),
+        el("h2", { text: t("search.heading", { query, count: hits.length }) }),
+        button(t("common.close"), () => render()),
       ]),
     ]);
     if (hits.length === 0) {
-      panel.append(el("p", { class: "empty", text: "Keine Treffer." }));
+      panel.append(el("p", { class: "empty", text: t("search.empty") }));
     }
     for (const hit of hits) {
-      const path = hit.path.length ? hit.path.join(" / ") : "(oberste Ebene)";
+      const path = hit.path.length ? hit.path.join(" / ") : t("search.topLevel");
       panel.append(
         el("div", { class: "hit" }, [
           el("span", { class: "hit-kind", text: hit.kind === "category" ? "📁" : "📄" }),
@@ -750,7 +756,7 @@ async function selectChecklist(): Promise<void> {
 }
 
 async function onCreateBlank(): Promise<void> {
-  const name = await textPrompt("Neue Checklist (leer)");
+  const name = await textPrompt(t("prompt.newChecklist"));
   if (name) {
     await act(async () => {
       const created = await api.createBlank(name);
@@ -773,7 +779,7 @@ async function onClone(): Promise<void> {
   if (state.activeId === null) {
     return;
   }
-  const name = await textPrompt("Klon-Name");
+  const name = await textPrompt(t("prompt.cloneName"));
   if (name) {
     const source = state.activeId;
     await act(async () => {
@@ -787,7 +793,7 @@ async function onDeleteChecklist(): Promise<void> {
   if (state.activeId === null || !state.tree) {
     return;
   }
-  if (await confirmDialog(`Checklist "${state.tree.name}" endgültig löschen?`)) {
+  if (await confirmDialog(t("confirm.deleteChecklist", { name: state.tree.name }))) {
     const id = state.activeId;
     await act(async () => {
       await api.deleteChecklist(id);
@@ -812,7 +818,7 @@ async function onAddCategory(parentId: number | null): Promise<void> {
   if (state.activeId === null) {
     return;
   }
-  const name = await textPrompt("Kategorie-Name");
+  const name = await textPrompt(t("prompt.categoryName"));
   if (name) {
     const cid = state.activeId;
     await act(() => api.addCategory(cid, name, parentId));
@@ -834,7 +840,7 @@ async function onAddItem(categoryId: number): Promise<void> {
     resources: [],
     tools: [],
   };
-  const fields = await itemEditDialog(template, "Eintrag hinzufügen");
+  const fields = await itemEditDialog(template, t("item.addTitle"));
   if (fields && fields.name) {
     const cid = state.activeId;
     await act(() => api.addItem(cid, categoryId, { ...fields, name: fields.name! }));
@@ -850,7 +856,7 @@ async function onToggleDone(node: TreeNode, checkbox: HTMLInputElement): Promise
   if (!desired) {
     const affected = countDoneItems(node);
     const ok = await confirmDialog(
-      `Kategorie "${node.name}" abwählen? ${affected} erledigte(r) Eintrag/Einträge werden zurückgesetzt.`,
+      t("confirm.uncheckCategory", { name: node.name, count: affected }),
     );
     if (!ok) {
       checkbox.checked = true;
@@ -861,8 +867,8 @@ async function onToggleDone(node: TreeNode, checkbox: HTMLInputElement): Promise
 }
 
 async function onRemove(node: TreeNode): Promise<void> {
-  const label = node.kind === "category" ? "Kategorie" : "Eintrag";
-  if (await confirmDialog(`${label} "${node.name}" entfernen?`)) {
+  const confirmKey = node.kind === "category" ? "confirm.removeCategory" : "confirm.removeItem";
+  if (await confirmDialog(t(confirmKey, { name: node.name }))) {
     await act(() => api.removeNode(node.kind, node.id));
   }
 }
@@ -892,7 +898,7 @@ async function onRemoveVocab(kind: "resource_type" | "tool", entry: VocabEntry):
 
 // -- item editor dialog -------------------------------------------------------
 
-function itemEditDialog(node: TreeNode, title = "Eintrag bearbeiten"): Promise<ItemFields | null> {
+function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<ItemFields | null> {
   return new Promise((resolve) => {
     const overlay = el("div", { class: "overlay" });
     const finish = (value: ItemFields | null): void => {
@@ -919,7 +925,7 @@ function itemEditDialog(node: TreeNode, title = "Eintrag bearbeiten"): Promise<I
       }
       const valueInput = el("input", {
         class: "input",
-        placeholder: "value (optional)",
+        placeholder: t("item.valuePlaceholder"),
         value: resource?.value ?? "",
       }) as HTMLInputElement;
       const row = el("div", { class: "resource-row" }, [typeSelect, valueInput]);
@@ -961,20 +967,27 @@ function itemEditDialog(node: TreeNode, title = "Eintrag bearbeiten"): Promise<I
 
     const box = el("div", { class: "modal modal-wide" }, [
       el("h3", { text: title }),
-      labelled("Name", nameInput),
-      labelled("Data", dataInput),
-      labelled("Instructions", instrInput),
+      labelled(t("item.name"), nameInput),
+      labelled(t("item.data"), dataInput),
+      labelled(t("item.instructions"), instrInput),
       el("div", { class: "field" }, [
         el("div", { class: "field-label" }, [
-          el("span", { text: "Resources" }),
-          button("+ Resource", () => addResourceRow(), "btn-mini"),
+          el("span", { text: t("item.resources") }),
+          button(t("item.addResource"), () => addResourceRow(), "btn-mini"),
         ]),
         resourceList,
       ]),
-      el("div", { class: "field" }, [el("div", { class: "field-label", text: "Tools" }), ...toolBoxes]),
+      el("div", { class: "field" }, [
+        el("div", { class: "field-label", text: t("item.tools") }),
+        ...toolBoxes,
+      ]),
       el("div", { class: "modal-actions" }, [
-        el("button", { class: "btn", onclick: () => finish(null), text: "Abbrechen" }),
-        el("button", { class: "btn btn-primary", onclick: () => finish(collect()), text: "Speichern" }),
+        el("button", { class: "btn", onclick: () => finish(null), text: t("common.cancel") }),
+        el("button", {
+          class: "btn btn-primary",
+          onclick: () => finish(collect()),
+          text: t("common.save"),
+        }),
       ]),
     ]);
     overlay.append(box);

@@ -13,9 +13,6 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   dialogs; the Audit Log provides traceability.)
 - **Headless server mode** — let the CLI/AI operate without the GUI window open. (`v1` CLI
   talks HTTP to the running app — see ADR-0011 — so it currently requires the app to run.)
-- **Internationalization (i18n)** — translatable UI strings with a **default language of
-  English** (the app currently ships German strings); aligns with the global
-  English-as-default decision.
 - **Button icons** — add icons to the toolbar/row buttons (distinct from the branded app
   icon above).
 - **Clarify / possibly remove the "Vocabulary" button** — its purpose is unclear; evaluate
