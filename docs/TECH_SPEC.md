@@ -170,8 +170,8 @@ notations-konforme Fixture getestet.
 - **Token (ADR-0009):** nach dem Laden via `pywebview.evaluate_js` als
   `window.__RECEIPT_BOARD__.token` injiziert; an privilegierte Endpunkte als
   `X-Session-Token` gesendet.
-- **Refresh (G4/H3):** aktive `Checklist` nach jeder mutierenden Aktion neu laden +
-  manueller Refresh-Button. Live-Polling → Backlog.
+- **Live-Refresh (G4/H3, ADR-0012):** der Client abonniert `GET /events` (SSE) und lädt bei
+  jeder Änderung neu — auch externe (CLI/REST/Automatisierung). Kein manueller Refresh-Button.
 
 ---
 
@@ -190,7 +190,8 @@ notations-konforme Fixture getestet.
   `X-Receipt-Board-Client: cli` → `CLI`; sonst → `REST`.
 - **Concurrency (ADR-0008):** eine `SQLite`-Transaktion pro Aktion (WAL), last-write-wins,
   kein App-Lock.
-- **GUI-Refresh (H3):** manuell/aktionsbezogen (siehe §7).
+- **GUI-Refresh (H3, ADR-0012):** live via SSE (`GET /events`), getriggert durch den
+  Audit-Commit jeder Aktion (siehe §7).
 
 ---
 
@@ -208,6 +209,7 @@ notations-konforme Fixture getestet.
 | `POST /items/{id}/done` | public | `{done: bool}` — einzige öffentliche Schreib-Op |
 | `POST /import/validate` | public | `{text}` → Dry-Run-Report `{valid,errors,warnings,summary}` (schreibt nichts) |
 | `GET /audit?checklist_id=&limit=` | public | Audit-Log lesen (neueste zuerst; read-only) |
+| `GET /events` | public | SSE-Strom von Change-Markern für Live-Refresh (ADR-0012) |
 | `POST /checklists` (blank/import/clone) | privileged | anlegen |
 | `DELETE /checklists/{id}` | privileged | löschen |
 | `POST/PATCH/DELETE /categories…`, `…/items…` | privileged | CRUD |
