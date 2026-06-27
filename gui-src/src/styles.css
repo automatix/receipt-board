@@ -158,6 +158,19 @@ select.input {
   font-size: 0.85rem;
 }
 
+/* Inline SVG icons on buttons (issue #85). The icon inherits the button text colour. */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 /* Tree */
 .tree h2,
 .vocab h2,
