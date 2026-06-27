@@ -6,7 +6,12 @@ else is privileged and guarded by the session-token dependency (ADR-0009).
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Response
+import asyncio
+import json
+from collections.abc import AsyncIterator, Awaitable, Callable
+
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import StreamingResponse
 
 from receipt_board.api.deps import (
     get_checklist_service,
@@ -29,12 +34,17 @@ from receipt_board.api.schemas import (
     VocabUpdateRequest,
 )
 from receipt_board.core import queries
+from receipt_board.core.events import EventBus
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
 from receipt_board.core.services import ChecklistService, VocabularyService
 from receipt_board.importer.service import build_import_report
 
 public_router = APIRouter(tags=["public"])
 privileged_router = APIRouter(tags=["privileged"], dependencies=[Depends(require_token)])
+
+# Server-Sent Events tuning (live GUI refresh, ADR-0012).
+SSE_KEEPALIVE_SECONDS = 15.0
+SSE_RETRY_MS = 3000
 
 
 def _affected(refs) -> dict:
@@ -78,6 +88,53 @@ def list_audit(
 ) -> list[dict]:
     """Read the append-only audit log (newest first; optionally one checklist)."""
     return queries.list_audit(session, checklist_id=checklist_id, limit=limit)
+
+
+# -- public: live updates (SSE) -----------------------------------------------
+
+
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+async def event_stream(
+    bus: EventBus,
+    is_disconnected: Callable[[], Awaitable[bool]],
+    *,
+    keepalive: float = SSE_KEEPALIVE_SECONDS,
+) -> AsyncIterator[str]:
+    """Yield SSE frames: an initial ``ready`` (baseline revision), then a ``change`` per
+    bus notification, with periodic keepalive comments. Stops when the client disconnects.
+    """
+    subscriber = bus.subscribe()
+    try:
+        yield f"retry: {SSE_RETRY_MS}\n" + _sse("ready", {"revision": bus.revision})
+        while True:
+            if await is_disconnected():
+                break
+            try:
+                revision = await asyncio.wait_for(subscriber.get(), timeout=keepalive)
+            except TimeoutError:
+                yield ": keepalive\n\n"
+                continue
+            yield _sse("change", {"revision": revision})
+    finally:
+        subscriber.close()
+
+
+@public_router.get("/events")
+async def events(request: Request) -> StreamingResponse:
+    """Stream change markers over Server-Sent Events for live GUI refresh (ADR-0012).
+
+    Public on purpose: ``EventSource`` cannot send the session token, and the payload is a
+    non-sensitive revision marker only (never content). Clients reload on each ``change``.
+    """
+    bus: EventBus = request.app.state.event_bus
+    return StreamingResponse(
+        event_stream(bus, request.is_disconnected),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 # -- privileged: checklists ---------------------------------------------------
