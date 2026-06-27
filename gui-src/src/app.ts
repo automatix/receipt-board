@@ -19,6 +19,7 @@ import type {
   VocabEntry,
 } from "./types";
 import { type ThemeMode, applyTheme, loadTheme, nextTheme, saveTheme } from "./theme";
+import { type IconName, icon } from "./icons";
 import { localeLabel, nextLocale, setLocale, t } from "./i18n";
 import {
   byId,
@@ -288,28 +289,38 @@ function renderToolbar(): void {
   bar.append(
     el("div", { class: "toolbar-group" }, [
       selector,
-      button(t("toolbar.new"), () => void onCreateBlank()),
-      button(t("toolbar.import"), () => void onImport()),
-      button(t("toolbar.clone"), () => void onClone()),
-      button(t("toolbar.delete"), () => void onDeleteChecklist(), "btn-danger"),
-      button(t("toolbar.export"), () => void onExport()),
+      button(t("toolbar.new"), () => void onCreateBlank(), "", "new"),
+      button(t("toolbar.import"), () => void onImport(), "", "import"),
+      button(t("toolbar.clone"), () => void onClone(), "", "clone"),
+      button(t("toolbar.delete"), () => void onDeleteChecklist(), "btn-danger", "delete"),
+      button(t("toolbar.export"), () => void onExport(), "", "export"),
     ]),
     el("div", { class: "toolbar-group" }, [
       search,
-      button(t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"), () => {
-        state.view = state.view === "vocab" ? "checklist" : "vocab";
-        render();
-      }),
-      button(t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"), () => {
-        if (state.view === "audit") {
-          state.view = "checklist";
+      button(
+        t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"),
+        () => {
+          state.view = state.view === "vocab" ? "checklist" : "vocab";
           render();
-        } else {
-          state.view = "audit";
-          void loadAudit().then(render);
-        }
-      }),
-      button(t("toolbar.updates"), () => void checkForUpdatesManually()),
+        },
+        "",
+        state.view === "vocab" ? "checklist" : "vocab",
+      ),
+      button(
+        t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
+        () => {
+          if (state.view === "audit") {
+            state.view = "checklist";
+            render();
+          } else {
+            state.view = "audit";
+            void loadAudit().then(render);
+          }
+        },
+        "",
+        state.view === "audit" ? "checklist" : "audit",
+      ),
+      button(t("toolbar.updates"), () => void checkForUpdatesManually(), "", "updates"),
       button(localeLabel(), () => {
         setLocale(nextLocale());
         render();
@@ -324,8 +335,34 @@ function renderToolbar(): void {
   );
 }
 
-function button(label: string, onClick: () => void, extra = ""): HTMLButtonElement {
-  return el("button", { class: `btn ${extra}`.trim(), onclick: onClick, text: label });
+function button(
+  label: string,
+  onClick: () => void,
+  extra = "",
+  iconName?: IconName,
+): HTMLButtonElement {
+  const classes = `btn ${iconName ? "btn-icon" : ""} ${extra}`.replace(/\s+/g, " ").trim();
+  const btn = el("button", { class: classes, onclick: onClick }) as HTMLButtonElement;
+  if (iconName) {
+    btn.append(icon(iconName));
+  }
+  if (label) {
+    btn.append(document.createTextNode(label));
+  }
+  return btn;
+}
+
+// Icon-only button: no visible text, so an aria-label/title carries the meaning (a11y).
+function iconButton(
+  iconName: IconName,
+  ariaLabel: string,
+  onClick: () => void,
+  extra = "",
+): HTMLButtonElement {
+  const btn = button("", onClick, extra, iconName);
+  btn.setAttribute("aria-label", ariaLabel);
+  btn.setAttribute("title", ariaLabel);
+  return btn;
 }
 
 function renderTree(tree: ChecklistTree): HTMLElement {
@@ -339,7 +376,7 @@ function renderTree(tree: ChecklistTree): HTMLElement {
   root.append(list);
   root.append(
     el("div", { class: "node-add" }, [
-      button(t("tree.addCategory"), () => void onAddCategory(null)),
+      button(t("tree.addCategory"), () => void onAddCategory(null), "", "add"),
     ]),
   );
   return root;
@@ -419,8 +456,8 @@ function renderNode(node: TreeNode): HTMLElement {
   if (isCategory) {
     container.append(
       el("div", { class: "node-add" }, [
-        button(t("tree.addCategory"), () => void onAddCategory(node.id)),
-        button(t("tree.addItem"), () => void onAddItem(node.id)),
+        button(t("tree.addCategory"), () => void onAddCategory(node.id), "", "add"),
+        button(t("tree.addItem"), () => void onAddItem(node.id), "", "add"),
       ]),
     );
   }
@@ -493,9 +530,11 @@ function itemSummary(node: TreeNode): HTMLElement {
 function rowActions(node: TreeNode): HTMLElement {
   const actions = el("div", { class: "actions" });
   if (node.kind === "expense_item") {
-    actions.append(button("✎", () => void onEditItem(node), "btn-mini"));
+    actions.append(iconButton("edit", t("common.edit"), () => void onEditItem(node), "btn-mini"));
   }
-  actions.append(button("🗑", () => void onRemove(node), "btn-mini btn-danger"));
+  actions.append(
+    iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
+  );
   return actions;
 }
 
@@ -929,7 +968,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
         value: resource?.value ?? "",
       }) as HTMLInputElement;
       const row = el("div", { class: "resource-row" }, [typeSelect, valueInput]);
-      row.append(button("×", () => row.remove(), "btn-mini btn-danger"));
+      row.append(iconButton("trash", t("common.remove"), () => row.remove(), "btn-mini btn-danger"));
       resourceList.append(row);
     };
     for (const resource of node.resources ?? []) {
@@ -973,7 +1012,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
       el("div", { class: "field" }, [
         el("div", { class: "field-label" }, [
           el("span", { text: t("item.resources") }),
-          button(t("item.addResource"), () => addResourceRow(), "btn-mini"),
+          button(t("item.addResource"), () => addResourceRow(), "btn-mini", "add"),
         ]),
         resourceList,
       ]),

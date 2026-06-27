@@ -18,6 +18,7 @@ const en: Catalog = {
   "common.remove": "Remove",
   "common.close": "Close",
   "common.duplicate": "Duplicate",
+  "common.edit": "Edit",
   "common.none": "(none)",
 
   "toolbar.new": "New",
@@ -36,8 +37,8 @@ const en: Catalog = {
   "theme.light": "☀ Light",
 
   "tree.empty": "No checklist. Create one or import.",
-  "tree.addCategory": "+ Category",
-  "tree.addItem": "+ Item",
+  "tree.addCategory": "Category",
+  "tree.addItem": "Item",
 
   "vocab.title": "Vocabulary",
   "vocab.tools": "Tools",
@@ -66,7 +67,7 @@ const en: Catalog = {
   "item.data": "Data",
   "item.instructions": "Instructions",
   "item.resources": "Resources",
-  "item.addResource": "+ Resource",
+  "item.addResource": "Resource",
   "item.tools": "Tools",
   "item.valuePlaceholder": "value (optional)",
 
@@ -108,6 +109,7 @@ const de: Catalog = {
   "common.remove": "Entfernen",
   "common.close": "Schließen",
   "common.duplicate": "Duplizieren",
+  "common.edit": "Bearbeiten",
   "common.none": "(keine)",
 
   "toolbar.new": "Neu",
@@ -156,7 +158,7 @@ const de: Catalog = {
   "item.data": "Data",
   "item.instructions": "Instructions",
   "item.resources": "Resources",
-  "item.addResource": "+ Resource",
+  "item.addResource": "Resource",
   "item.tools": "Tools",
   "item.valuePlaceholder": "value (optional)",
 
