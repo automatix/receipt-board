@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from sqlalchemy.orm import Session
 
 from receipt_board import __version__
+from receipt_board.core.events import SESSION_DIRTY_KEY
 from receipt_board.core.refs import NodeRef
 from receipt_board.persistence.models import AuditEntry
 
@@ -58,4 +59,7 @@ class AuditService:
         )
         self.session.add(entry)
         self.session.flush()
+        # Flag the transaction as state-changing so the request scope publishes one change
+        # event after it commits (live GUI refresh; see core.events / api.deps).
+        self.session.info[SESSION_DIRTY_KEY] = True
         return entry

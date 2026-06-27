@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from receipt_board import __version__
 from receipt_board.api.errors import register_error_handlers
 from receipt_board.api.routers import privileged_router, public_router
+from receipt_board.core.events import EventBus
 
 
 def create_app(
@@ -24,6 +25,7 @@ def create_app(
     app.state.session_factory = session_factory
     app.state.session_token = session_token
     app.state.app_version = app_version
+    app.state.event_bus = EventBus()
 
     register_error_handlers(app)
     app.include_router(public_router)
