@@ -17,7 +17,7 @@ Receipt Board wird als **Windows-Installer** ausgeliefert (Inno Setup, per-machi
 
 1. Auf der **Releases-Seite** den Installer herunterladen:
    <https://github.com/automatix/receipt-board/releases> →
-   `receipt-board-v1.2.0-setup.exe`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
+   `receipt-board-v1.3.0-setup.exe`. *(Privates Repo: nur Berechtigte mit Zugriff.)*
 2. Die `setup.exe` per Doppelklick starten.
 3. Windows fragt per **Benutzerkontensteuerung (UAC)** nach Administratorrechten —
    bestätigen (die Installation erfolgt nach `C:\Program Files\Receipt Board\`, also
@@ -39,7 +39,7 @@ für eine unsignierte, aus dem Internet geladene Datei erwartbar:
   **Eigenschaften** → unten **„Zulassen"/„Unblock"** ankreuzen → OK; oder per PowerShell:
 
   ```powershell
-  Unblock-File "$HOME\Downloads\receipt-board-v1.2.0-setup.exe"
+  Unblock-File "$HOME\Downloads\receipt-board-v1.3.0-setup.exe"
   ```
 
 > Selbst-signierte Zertifikate helfen SmartScreen **nicht**. Eine vollständig warnungsfreie
