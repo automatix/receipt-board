@@ -17,7 +17,6 @@ import pytest
 
 from receipt_board.api.runtime import read_port
 from receipt_board.api.server import build_server
-from receipt_board.gui.window import static_dir
 from receipt_board.persistence.db import create_db_engine, make_session_factory
 from receipt_board.persistence.models import Base
 from receipt_board.persistence.seeds import seed_vocabularies
@@ -32,13 +31,21 @@ def headless(tmp_path) -> Iterator[str]:
         seed_vocabularies(setup)
         setup.commit()
 
+    # A stand-in GUI dir (the real static/ is only built in the GUI CI job, not here), so the
+    # /app mount test is hermetic. Mirrors how serve() passes gui_dir=static_dir() at runtime.
+    gui_dir = tmp_path / "gui"
+    gui_dir.mkdir()
+    (gui_dir / "index.html").write_text(
+        "<!doctype html><title>Receipt Board</title>", encoding="utf-8"
+    )
+
     runtime = tmp_path / "runtime.json"
     server, port = build_server(
         factory,
         session_token="tok",
         runtime_path=runtime,
         app_version="test",
-        gui_dir=static_dir(),
+        gui_dir=gui_dir,
     )
     assert read_port(runtime) == port  # runtime.json published for the CLI
 
