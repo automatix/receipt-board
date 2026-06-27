@@ -172,6 +172,13 @@ notations-konforme Fixture getestet.
   `X-Session-Token` gesendet.
 - **Live-Refresh (G4/H3, ADR-0012):** der Client abonniert `GET /events` (SSE) und lädt bei
   jeder Änderung neu — auch externe (CLI/REST/Automatisierung). Kein manueller Refresh-Button.
+- **i18n:** framework-freier Message-Katalog (`i18n.ts`); **Default Englisch**, Deutsch als
+  vollständige Locale, Umschalter in der Toolbar (Wahl in `localStorage`). Alle sichtbaren
+  Strings über `t(key)`.
+- **Button-Icons:** Inline-`SVG` (`icons.ts`, `currentColor` → theme-adaptiv) auf Toolbar- und
+  Zeilen-Buttons; Icon-only-Buttons tragen ein `aria-label`.
+- **In-App-Updater (ADR-0013):** Toolbar-Button + stiller Start-Check → nicht-blockierendes
+  Banner; `GET /update/check` / `POST /update/install` (token-gated). Nie Auto-Install.
 
 ---
 
@@ -217,6 +224,8 @@ notations-konforme Fixture getestet.
 | `POST /nodes/{kind}/{id}/move` | privileged | Re-Parent/Reorder |
 | `GET/POST/PATCH/DELETE /vocab/{kind}…` | privileged | Vokabular-Pflege (resource_type trägt `value_optional`/`value_pattern`) |
 | `POST /vocab/{kind}/{id}/duplicate` | privileged | `{name}` — Vokabular-Eintrag duplizieren |
+| `GET /update/check` | privileged | neueste **öffentliche** GitHub-Release prüfen → `{current,latest,update_available,notes_url,asset_url}` (ADR-0013) |
+| `POST /update/install` | privileged | `setup.exe` der neuesten Release laden, starten und App beenden (ADR-0013) |
 
 > Die gebaute GUI wird (sofern vorhanden) unter `/app` ausgeliefert (StaticFiles, §7).
 

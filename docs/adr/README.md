@@ -30,5 +30,6 @@ Each ADR uses a lightweight [MADR](https://adr.github.io/madr/)-style template:
 | [0010](./0010-integer-primary-keys-instead-of-uuids.md) | Integer primary keys instead of UUIDs (supersedes the UUID note in 0007) | Accepted |
 | [0011](./0011-cli-communicates-over-local-http.md) | The CLI communicates with the app over local HTTP | Accepted |
 | [0012](./0012-gui-live-updates-via-sse.md) | GUI live updates via Server-Sent Events (no manual refresh) | Accepted |
+| [0013](./0013-in-app-updater-via-public-github-releases.md) | In-app updater via public GitHub Releases | Accepted |
 
 > Terms used in ADRs are defined in [`../GLOSSARY.md`](../GLOSSARY.md).

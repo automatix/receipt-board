@@ -134,6 +134,12 @@ Symmetrisch, mit Invariante **`Category.done ⇔ ganzer Teilbaum done`**:
 - Auswahl der aktiven `Checklist`; Freitextsuche; JSON-Export anstoßbar.
 - Die GUI ist die **einzige** Oberfläche für privilegierte Operationen
   ([`Privileged Operation`](./GLOSSARY.md)).
+- **Live-Refresh** ohne manuellen Knopf (`v1.3`, [`ADR-0012`](./adr/0012-gui-live-updates-via-sse.md)).
+- **Lokalisierung** (`v1.4`): Default **Englisch**, **Deutsch** als Locale, Umschalter in der
+  Toolbar; Buttons mit Inline-`SVG`-Icons.
+- **In-App-Updater** (`v1.4`, [`ADR-0013`](./adr/0013-in-app-updater-via-public-github-releases.md)):
+  prüft die neueste **öffentliche** GitHub-Release und installiert sie nach Bestätigung
+  (nie automatisch).
 
 ### 4.2 Programmatische Schnittstelle (`REST` + `CLI`) & Berechtigungen
 
