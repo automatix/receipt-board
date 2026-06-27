@@ -164,12 +164,44 @@ export function importDialog(
   return new Promise((resolve) => {
     let dismiss = (): void => {};
     const name = el("input", { class: "input", placeholder: t("import.namePlaceholder") });
-    const text = el("textarea", { class: "textarea", placeholder: t("import.textPlaceholder") });
+    const text = el("textarea", {
+      class: "textarea",
+      placeholder: t("import.textPlaceholder"),
+    }) as HTMLTextAreaElement;
     const report = el("div", { class: "import-report" });
     const finish = (value: ImportInput | null): void => {
       dismiss();
       resolve(value);
     };
+
+    // Load a checklist from a file (issue #106): the "Browse" button and dropping a file onto
+    // the dialog both fill the textarea with the content and show the file name beside it.
+    const fileLabel = el("span", { class: "import-filename" });
+    const fileInput = el("input", {
+      type: "file",
+      class: "hidden",
+      accept: ".md,.markdown,.txt,text/markdown,text/plain",
+    }) as HTMLInputElement;
+    const loadFile = async (file: File): Promise<void> => {
+      text.value = await file.text();
+      fileLabel.textContent = file.name;
+    };
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file) {
+        void loadFile(file);
+      }
+    });
+    const fileRow = el("div", { class: "import-filerow" }, [
+      el("button", {
+        class: "btn",
+        onclick: () => fileInput.click(),
+        text: t("import.browse"),
+      }),
+      fileLabel,
+      fileInput,
+    ]);
+
     const onCheck = async (): Promise<void> => {
       report.replaceChildren(el("p", { class: "empty", text: t("import.checking") }));
       try {
@@ -186,6 +218,7 @@ export function importDialog(
     const box = el("div", { class: "modal modal-wide" }, [
       el("h3", { text: t("import.title") }),
       name,
+      fileRow,
       text,
       report,
       el("div", { class: "modal-actions" }, [
@@ -198,6 +231,23 @@ export function importDialog(
         }),
       ]),
     ]);
+    // Drop a file anywhere on the dialog to load it (the window-level handler ignores drops
+    // elsewhere, issue #105).
+    box.addEventListener("dragover", (event: DragEvent) => {
+      if (event.dataTransfer && Array.from(event.dataTransfer.types).includes("Files")) {
+        event.preventDefault();
+        box.classList.add("dropping");
+      }
+    });
+    box.addEventListener("dragleave", () => box.classList.remove("dropping"));
+    box.addEventListener("drop", (event: DragEvent) => {
+      const file = event.dataTransfer?.files?.[0];
+      if (file) {
+        event.preventDefault();
+        box.classList.remove("dropping");
+        void loadFile(file);
+      }
+    });
     dismiss = mountModal(box, () => finish(null));
   });
 }

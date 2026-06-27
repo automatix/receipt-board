@@ -91,6 +91,10 @@ const en: Catalog = {
   "import.issue": "Line {line} · {token} · {message}",
   "import.warning": "Warning line {line}: {message}",
   "import.error": "Error: {message}",
+  "import.browse": "Choose file…",
+
+  "nav.back": "Back",
+  "nav.forward": "Forward",
 
   "update.available": "New version {latest} available (installed: {current}).",
   "update.whatsNew": "What's new?",
@@ -184,6 +188,10 @@ const de: Catalog = {
   "import.issue": "Zeile {line} · {token} · {message}",
   "import.warning": "Warnung Zeile {line}: {message}",
   "import.error": "Fehler: {message}",
+  "import.browse": "Datei wählen…",
+
+  "nav.back": "Zurück",
+  "nav.forward": "Vorwärts",
 
   "update.available": "Neue Version {latest} verfügbar (installiert: {current}).",
   "update.whatsNew": "Was ist neu?",

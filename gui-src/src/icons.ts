@@ -14,7 +14,9 @@ export type IconName =
   | "audit"
   | "edit"
   | "trash"
-  | "add";
+  | "add"
+  | "back"
+  | "forward";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -40,6 +42,8 @@ const PATHS: Record<IconName, string> = {
   vocab: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01",
   audit: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 6v6l4 2",
   edit: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
+  back: "M15 18l-6-6 6-6",
+  forward: "M9 18l6-6-6-6",
 };
 
 export function icon(name: IconName): SVGSVGElement {
