@@ -78,6 +78,19 @@ entfernt das Programm und die Verknüpfungen.
 - Bei einer **stillen** Deinstallation (`/VERYSILENT`) erscheint **keine** Abfrage und es
   werden **keine** Daten gelöscht.
 
+## Kommandozeile (CLI) & Headless-Modus
+
+Die Installation enthält auch die **Kommandozeile** `receipt-board-cli` und legt das
+Programmverzeichnis in den `PATH`, sodass sie aus jedem Terminal aufrufbar ist:
+
+```powershell
+receipt-board-cli serve         # Server ohne GUI-Fenster starten (Strg+C beendet)
+receipt-board-cli export        # Checklists lesen (--json für maschinenlesbar)
+```
+
+Details und alle Befehle: [Bedienungsanleitung §11](./USER_GUIDE.md#11-für-fortgeschrittene-kommandozeile-cli).
+*(Nach der Installation ggf. ein neues Terminal öffnen, damit der aktualisierte `PATH` greift.)*
+
 ## Datenspeicherort & Backup
 
 Alle Daten liegen in `%LOCALAPPDATA%\receipt-board\`:

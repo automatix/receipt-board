@@ -171,16 +171,29 @@ zuerst) sowie per CLI (`receipt-board audit`). Backup: siehe [`INSTALL.md`](./IN
 
 ## 11. Für Fortgeschrittene: Kommandozeile (CLI)
 
-Bei **laufender** App kann eine Kommandozeile lesend zugreifen und das `done` eines Eintrags
-umschalten (z. B. für Automatisierung/KI):
+Eine Kommandozeile kann lesend zugreifen und das `done` eines Eintrags umschalten (z. B. für
+Automatisierung/KI). Die CLI ist **in der normalen Installation enthalten** als
+`receipt-board-cli` und liegt im `PATH`, ist also aus jedem Terminal aufrufbar (in der
+Entwickler-Installation: `uv run receipt-board …`):
 
 ```bash
-receipt-board export [--checklist ID] [--json]
-receipt-board search "Begriff" [--json]
-receipt-board item done|undone ID
+receipt-board-cli export [--checklist ID] [--json]
+receipt-board-cli search "Begriff" [--json]
+receipt-board-cli item done|undone ID
+receipt-board-cli validate DATEI
+receipt-board-cli audit [--checklist ID] [--limit N]
 ```
 
-Die CLI ist in der Entwickler-Installation enthalten (siehe [`README.md`](../README.md));
+Die Schreib-Befehle setzen einen **laufenden Server** voraus — entweder die geöffnete
+Desktop-App **oder** der **Headless-Modus**:
+
+```bash
+receipt-board-cli serve        # startet den Server ohne GUI-Fenster (Strg+C beendet)
+```
+
+`serve` initialisiert dieselben Daten/DB wie die App und schreibt `runtime.json`, sodass die
+anderen CLI-Befehle (und beliebige REST-Clients) ihn finden. Der Server bleibt **alleiniger
+Besitzer der Datenbank** — die CLI spricht ausschließlich die REST-API an, nie direkt die DB.
 Struktur-Änderungen bleiben der GUI vorbehalten.
 
 ## 12. Updates (aus der App heraus)

@@ -27,8 +27,11 @@ The orchestrator (hardened for Windows PowerShell 5.1 — `Invoke-Native` + expl
 
 Output:
 
-- `dist/receipt-board/` — the frozen `onedir` (also usable as a portable folder).
-- `dist/installer/receipt-board-v<VERSION>-setup.exe` — the installer.
+- `dist/receipt-board/` — the frozen `onedir` (also usable as a portable folder). Contains
+  **both** `receipt-board.exe` (windowed GUI) and `receipt-board-cli.exe` (console CLI +
+  headless `serve`).
+- `dist/installer/receipt-board-v<VERSION>-setup.exe` — the installer (adds the install dir
+  to the system `PATH` so `receipt-board-cli` is callable from any terminal).
 
 The application identity is fixed in `packaging/receipt-board.iss` (AppId GUID
 `{6E5EAF6B-4A26-4DCC-AD31-D72D47D602E4}`, reverse-DNS `com.automatix.receipt-board`) and is
