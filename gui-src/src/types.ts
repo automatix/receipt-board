@@ -91,6 +91,20 @@ export interface ImportReport {
   summary: { categories: number; items: number };
 }
 
+export interface UpdateInfo {
+  current: string;
+  latest: string | null;
+  update_available: boolean;
+  notes_url: string | null;
+  asset_url: string | null;
+}
+
+export interface InstallResult {
+  launched: boolean;
+  version: string | null;
+  installer: string;
+}
+
 declare global {
   interface Window {
     __RECEIPT_BOARD__?: RbConfig;

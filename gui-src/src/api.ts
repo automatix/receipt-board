@@ -6,9 +6,11 @@ import type {
   ChecklistSummary,
   ChecklistTree,
   ImportReport,
+  InstallResult,
   ItemFields,
   NodeKind,
   SearchHit,
+  UpdateInfo,
   VocabEntry,
   VocabKind,
 } from "./types";
@@ -106,4 +108,7 @@ export const api = {
   duplicateVocab: (kind: VocabKind, id: number, name: string) =>
     request<VocabEntry>("POST", `/vocab/${kind}/${id}/duplicate`, { name }),
   removeVocab: (kind: VocabKind, id: number) => request<void>("DELETE", `/vocab/${kind}/${id}`),
+
+  checkUpdate: () => request<UpdateInfo>("GET", "/update/check"),
+  installUpdate: () => request<InstallResult>("POST", "/update/install"),
 };
