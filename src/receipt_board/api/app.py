@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from receipt_board import __version__
 from receipt_board.api.errors import register_error_handlers
 from receipt_board.api.routers import privileged_router, public_router
+from receipt_board.api.updates import update_router
 from receipt_board.core.events import EventBus
 
 
@@ -30,6 +31,7 @@ def create_app(
     register_error_handlers(app)
     app.include_router(public_router)
     app.include_router(privileged_router)
+    app.include_router(update_router)
 
     # Serve the bundled GUI same-origin at /app (only when it has been built).
     if gui_dir is not None and (Path(gui_dir) / "index.html").exists():

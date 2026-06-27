@@ -74,3 +74,11 @@ class DuplicateVocabRequest(BaseModel):
 
 class ValidateImportRequest(BaseModel):
     text: str
+
+
+class UpdateCheckResponse(BaseModel):
+    current: str
+    latest: str | None
+    update_available: bool
+    notes_url: str | None
+    asset_url: str | None
