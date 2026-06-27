@@ -40,6 +40,7 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 
 | Element | Funktion |
 | ------- | -------- |
+| **‹ / ›** (Zurück/Vorwärts) | im Navigations-Verlauf zurück/vorwärts (Ansicht, aktive Checklist, offene Suche) — auch per `Alt`+`←`/`→` und den **Maus-Seitentasten** |
 | **Auswahl** (Dropdown) | aktive Checklist wählen |
 | **Neu** | leere Checklist anlegen |
 | **Import** | Checklist aus Markdown importieren (siehe §6) |
@@ -98,7 +99,10 @@ Drei Wege (alle in der GUI):
 
 ## 6. Checklist importieren (Markdown-Format)
 
-Über **Import** den Namen vergeben und die Markdown-Checkliste einfügen. Regeln:
+Über **Import** den Namen vergeben und die Markdown-Checkliste einfügen — entweder direkt in
+das Textfeld **einfügen**, oder eine Datei **laden**: per Button **„Datei wählen…"** oder
+indem du die Datei **in den Dialog ziehst**. Der Dateiname erscheint dann neben dem Button,
+der Inhalt im Textfeld (beides bleibt vor dem Import editierbar). Regeln:
 
 - Jede Zeile: `- [ ] Name …` (bzw. `- [x]` = erledigt). Die **Einrückung** bestimmt die
   Hierarchie.
