@@ -128,8 +128,8 @@ const de: Catalog = {
   "theme.light": "☀ Light",
 
   "tree.empty": "Keine Checklist. Lege eine an oder importiere.",
-  "tree.addCategory": "+ Kategorie",
-  "tree.addItem": "+ Eintrag",
+  "tree.addCategory": "Kategorie",
+  "tree.addItem": "Eintrag",
 
   "vocab.title": "Vokabular",
   "vocab.tools": "Tools",
