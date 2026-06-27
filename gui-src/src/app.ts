@@ -63,6 +63,20 @@ const parentOf = new Map<string, number | null>();
 
 const key = (kind: NodeKind, id: number): string => `${kind}:${id}`;
 
+const LIVE_DEBOUNCE_MS = 80;
+
+// Live-update controller (issue #73): SSE connection state, the last seen server revision,
+// and guards that keep a background refresh from clobbering an inline edit or search results.
+const live = {
+  source: null as EventSource | null,
+  connected: false,
+  revision: null as number | null,
+  editing: false,
+  searching: false,
+  pending: false,
+  timer: null as number | null,
+};
+
 // -- data loading -------------------------------------------------------------
 
 async function loadVocab(): Promise<void> {
@@ -88,30 +102,118 @@ async function loadAudit(): Promise<void> {
   state.audit = await api.listAudit(state.activeId ?? undefined, 100);
 }
 
-async function reload(): Promise<void> {
+// Load exactly the data the current view needs (no render).
+async function loadForView(): Promise<void> {
   await loadChecklists();
   await loadActiveTree();
+  if (state.view === "vocab") {
+    await loadVocab();
+  }
+  if (state.view === "audit") {
+    await loadAudit();
+  }
+}
+
+// Initial load + any explicit (re)load: fetch the current view's data and render.
+async function reload(): Promise<void> {
+  await loadForView();
   render();
 }
 
-// Run a mutating action, surfacing API errors as toasts and reloading on success.
-// Reloads the checklist list too so the toolbar dropdown stays current after a
-// create/import/clone/delete (and reflects the active selection after any action).
+// Run a mutating action and surface API errors as toasts. The reload is driven by the
+// live SSE change event (single reload path, no double render); only when the live
+// connection is down do we reload directly as a fallback.
 async function act(action: () => Promise<unknown>): Promise<void> {
   try {
     await action();
-    await loadChecklists();
-    await loadActiveTree();
-    if (state.view === "audit") {
-      await loadAudit();
+    if (!live.connected) {
+      await reload();
     }
-    render();
   } catch (error) {
-    if (error instanceof ApiError) {
-      toast(error.message, true);
-    } else {
-      toast(String(error), true);
+    toast(error instanceof ApiError ? error.message : String(error), true);
+  }
+}
+
+// -- live updates (SSE) -------------------------------------------------------
+
+// Coalesce a burst of change events into a single refresh.
+function scheduleLiveRefresh(): void {
+  if (live.timer !== null) {
+    return;
+  }
+  live.timer = window.setTimeout(() => {
+    live.timer = null;
+    void liveRefresh();
+  }, LIVE_DEBOUNCE_MS);
+}
+
+// Refresh from a live change event. Defer while an inline edit is in progress, and keep
+// search results in place (load fresh data but do not re-render over them).
+async function liveRefresh(): Promise<void> {
+  if (live.editing) {
+    live.pending = true;
+    return;
+  }
+  live.pending = false;
+  try {
+    await loadForView();
+  } catch {
+    return; // transient; the next change event will retry
+  }
+  if (!live.searching) {
+    render();
+  }
+}
+
+// Called when an inline edit ends; runs a deferred refresh if one arrived meanwhile.
+function endEditing(): void {
+  if (!live.editing) {
+    return;
+  }
+  live.editing = false;
+  if (live.pending) {
+    scheduleLiveRefresh();
+  }
+}
+
+// Subscribe to server-sent change markers so the GUI reflects every change (including
+// external CLI/REST/automation edits) with no manual refresh. EventSource reconnects on
+// its own; on (re)connect we catch up when the revision advanced during a gap.
+function connectEvents(): void {
+  let source: EventSource;
+  try {
+    source = new EventSource("/events");
+  } catch {
+    return; // no EventSource in this runtime: stay on the per-action fallback reload
+  }
+  live.source = source;
+  source.addEventListener("ready", (event) => {
+    live.connected = true;
+    const revision = parseRevision((event as MessageEvent).data);
+    if (live.revision !== null && revision !== live.revision) {
+      scheduleLiveRefresh();
     }
+    live.revision = revision;
+  });
+  source.addEventListener("change", (event) => {
+    live.connected = true;
+    live.revision = parseRevision((event as MessageEvent).data);
+    scheduleLiveRefresh();
+  });
+  source.onopen = (): void => {
+    live.connected = true;
+  };
+  source.onerror = (): void => {
+    live.connected = false;
+  };
+}
+
+function parseRevision(data: string): number | null {
+  try {
+    const value = JSON.parse(data) as { revision?: number };
+    return typeof value.revision === "number" ? value.revision : null;
+  } catch {
+    return null;
   }
 }
 
@@ -145,6 +247,7 @@ function indexParentMap(tree: ChecklistTree): void {
 // -- rendering ----------------------------------------------------------------
 
 function render(): void {
+  live.searching = false; // rendering a normal view leaves any search-results state
   renderToolbar();
   const main = byId("app");
   clear(main);
@@ -330,21 +433,38 @@ function nameElement(node: TreeNode): HTMLElement {
 
 function startInlineRename(node: TreeNode, span: HTMLElement): void {
   const input = el("input", { class: "input inline", value: node.name }) as HTMLInputElement;
+  live.editing = true; // pause live refresh so an incoming change can't drop this input
+  let done = false;
   const commit = (): void => {
+    if (done) {
+      return; // guard against Enter + the blur it triggers running twice
+    }
+    done = true;
+    endEditing();
     const value = input.value.trim();
     if (value && value !== node.name) {
       void act(() =>
-        node.kind === "category" ? api.editCategory(node.id, value) : api.editItem(node.id, { name: value }),
+        node.kind === "category"
+          ? api.editCategory(node.id, value)
+          : api.editItem(node.id, { name: value }),
       );
     } else {
       render();
     }
   };
+  const cancel = (): void => {
+    if (done) {
+      return;
+    }
+    done = true;
+    endEditing();
+    render();
+  };
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       commit();
     } else if (event.key === "Escape") {
-      render();
+      cancel();
     }
   });
   input.addEventListener("blur", commit);
@@ -602,6 +722,7 @@ async function runSearch(query: string): Promise<void> {
       );
     }
     main.append(panel);
+    live.searching = true; // keep results visible across background live refreshes
   } catch (error) {
     toast(error instanceof ApiError ? error.message : String(error), true);
   }
@@ -615,8 +736,18 @@ function onSelectChecklist(event: Event): void {
   if (!Number.isNaN(id)) {
     state.activeId = id;
     state.collapsed.clear();
-    void act(async () => {});
+    void selectChecklist();
   }
+}
+
+// Selecting a checklist is a local view change (not a server mutation → no SSE event),
+// so it loads the chosen tree and renders directly.
+async function selectChecklist(): Promise<void> {
+  await loadActiveTree();
+  if (state.view === "audit") {
+    await loadAudit();
+  }
+  render();
 }
 
 async function onCreateBlank(): Promise<void> {
@@ -862,6 +993,7 @@ export async function start(): Promise<void> {
   try {
     await loadVocab();
     await reload();
+    connectEvents();
   } catch (error) {
     toast(error instanceof ApiError ? error.message : String(error), true);
   }
