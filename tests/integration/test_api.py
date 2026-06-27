@@ -299,6 +299,37 @@ def test_audit_log_is_public(client):
     assert len(filtered) <= 5
 
 
+# -- live-update revision -----------------------------------------------------
+
+
+def test_mutation_bumps_event_revision(client):
+    bus = client.app.state.event_bus
+    before = bus.revision
+    _blank(client)
+    assert bus.revision == before + 1
+
+
+def test_public_done_write_bumps_event_revision(client):
+    cid = _blank(client)
+    cat = client.post(f"/checklists/{cid}/categories", json={"name": "Cat"}, headers=AUTH).json()
+    item = client.post(
+        f"/checklists/{cid}/items", json={"category_id": cat["id"], "name": "a"}, headers=AUTH
+    ).json()
+    bus = client.app.state.event_bus
+    before = bus.revision
+    client.post(f"/items/{item['id']}/done", json={"done": True})  # public write
+    assert bus.revision == before + 1
+
+
+def test_reads_do_not_bump_event_revision(client):
+    _blank(client)
+    bus = client.app.state.event_bus
+    before = bus.revision
+    client.get("/checklists")
+    client.get("/audit")
+    assert bus.revision == before
+
+
 # -- errors -------------------------------------------------------------------
 
 

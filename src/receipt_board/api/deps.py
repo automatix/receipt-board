@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from receipt_board.api.errors import ApiError
 from receipt_board.core.audit import ORIGIN_CLI, ORIGIN_GUI, ORIGIN_REST, AuditService
+from receipt_board.core.events import SESSION_DIRTY_KEY
 from receipt_board.core.services import ChecklistService, VocabularyService
 
 CLIENT_HEADER = "X-Receipt-Board-Client"
@@ -27,11 +28,20 @@ def get_session(request: Request) -> Iterator[Session]:
     try:
         yield session
         session.commit()
+        if session.info.get(SESSION_DIRTY_KEY):
+            _publish_change(request)
     except Exception:
         session.rollback()
         raise
     finally:
         session.close()
+
+
+def _publish_change(request: Request) -> None:
+    """Notify live subscribers that committed state changed (best-effort; never fails)."""
+    bus = getattr(request.app.state, "event_bus", None)
+    if bus is not None:
+        bus.publish()
 
 
 def _token_is_valid(request: Request) -> bool:
