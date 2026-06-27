@@ -22,8 +22,10 @@ Receipt Board wird als **Windows-Installer** ausgeliefert (Inno Setup, per-machi
 3. Windows fragt per **Benutzerkontensteuerung (UAC)** nach Administratorrechten —
    bestätigen (die Installation erfolgt nach `C:\Program Files\Receipt Board\`, also
    per-machine).
-4. Dem Assistenten folgen (optional ein **Desktop-Symbol** anhaken). Nach Abschluss liegt
-   **Receipt Board** im **Startmenü** (und ggf. auf dem Desktop).
+4. Dem Assistenten folgen (optional ein **Desktop-Symbol** anhaken). Auf der **letzten
+   Seite** ist **„Launch Receipt Board"** standardmäßig angehakt — die App startet damit
+   direkt nach dem Klick auf **Fertigstellen** (Häkchen entfernen, falls nicht gewünscht).
+   Nach Abschluss liegt **Receipt Board** im **Startmenü** (und ggf. auf dem Desktop).
 5. Beim **ersten Start** legt die App ihren Datenordner an:
    `%LOCALAPPDATA%\receipt-board\` (Datenbank, `config.toml`, `runtime.json`, Log). Der
    Programmordner unter `Program Files` bleibt unverändert (schreibgeschützt-tauglich).

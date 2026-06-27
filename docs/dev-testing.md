@@ -55,6 +55,11 @@ Start-Process "$env:ProgramFiles\Receipt Board\unins000.exe" -ArgumentList '/VER
 
 Checks:
 
+- An **interactive** install ends on a final page with **"Launch Receipt Board" checked by
+  default**; clicking **Finish** starts the app **as the logged-in, non-elevated user** (Inno
+  `runasoriginaluser`), so first-run data lands in *your* `%LOCALAPPDATA%\receipt-board\`. A
+  `/VERYSILENT` install never launches it (`skipifsilent`). *(Elevated, interactive — not part
+  of the autonomous test path.)*
 - The app appears in **Settings → Apps → Installed apps** (and classic Programs and
   Features).
 - An **interactive** uninstall shows the **keep-vs-remove** prompt for
