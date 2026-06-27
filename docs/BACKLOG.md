@@ -11,10 +11,10 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
 - **Undo** for destructive operations (Category uncheck, node remove, Checklist delete),
   including a dedicated **"Undo" button** in the GUI. (`v1` guards with confirmation
   dialogs; the Audit Log provides traceability.)
-- **Headless server mode** — let the CLI/AI operate without the GUI window open. (`v1` CLI
-  talks HTTP to the running app — see ADR-0011 — so it currently requires the app to run.)
 - **Clarify / possibly remove the "Vocabulary" button** — its purpose is unclear; evaluate
   folding it into the resource-type / vocabulary management or dropping it.
+- **Home button** — a toolbar button that returns to a default view (the active checklist's
+  tree, with search/overlays closed). Complements the back/forward navigation (issue #107).
 
 ## Out of scope for `v1` (tracked elsewhere)
 
