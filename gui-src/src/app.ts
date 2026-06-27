@@ -684,9 +684,17 @@ function renderVocab(): HTMLElement {
   return wrap;
 }
 
-// Tools (and any name-only vocabulary): rename on Enter, remove, add.
+// Tools (name-only vocabulary) as a table: a header row carries the column names once, then
+// one row per entry (rename on Enter, remove) and a trailing add row (issue #108).
 function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]): HTMLElement {
   const section = el("div", { class: "vocab-section" }, [el("h3", { text: title })]);
+  const table = el("table", { class: "vocab-table" });
+  table.append(
+    el("tr", {}, [
+      el("th", { text: t("vocab.colName") }),
+      el("th", { class: "col-actions", text: t("vocab.colActions") }),
+    ]),
+  );
   for (const entry of entries) {
     const nameInput = el("input", { class: "input inline", value: entry.name }) as HTMLInputElement;
     const renameCommit = (): void => {
@@ -703,10 +711,12 @@ function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]):
         renameCommit();
       }
     });
-    section.append(
-      el("div", { class: "vocab-row" }, [
-        nameInput,
-        button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+    table.append(
+      el("tr", {}, [
+        el("td", {}, [nameInput]),
+        el("td", { class: "col-actions" }, [
+          button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+        ]),
       ]),
     );
   }
@@ -728,18 +738,32 @@ function renderVocabSection(title: string, kind: "tool", entries: VocabEntry[]):
       add();
     }
   });
-  section.append(el("div", { class: "vocab-row" }, [adder, button(t("common.add"), add)]));
+  table.append(
+    el("tr", { class: "vocab-add" }, [
+      el("td", {}, [adder]),
+      el("td", { class: "col-actions" }, [button(t("common.add"), add)]),
+    ]),
+  );
+  section.append(table);
   return section;
 }
 
 // Resource types carry a key, value-optionality and a value regex; full CRUD + duplicate.
+// A table so the columns (incl. "value optional") are labelled once in the header (issue #108).
 function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
   const kind = "resource_type" as const;
-  const optionalLabel = (box: HTMLInputElement): HTMLElement =>
-    el("label", { class: "tool-check" }, [box, document.createTextNode(` ${t("vocab.valueOptional")}`)]);
   const section = el("div", { class: "vocab-section" }, [
     el("h3", { text: t("vocab.resourceTypes") }),
   ]);
+  const table = el("table", { class: "vocab-table" });
+  table.append(
+    el("tr", {}, [
+      el("th", { text: t("vocab.colName") }),
+      el("th", { class: "col-check", text: t("vocab.valueOptional") }),
+      el("th", { text: t("vocab.colRegex") }),
+      el("th", { class: "col-actions", text: t("vocab.colActions") }),
+    ]),
+  );
 
   for (const entry of entries) {
     const nameInput = el("input", { class: "input inline", value: entry.name }) as HTMLInputElement;
@@ -769,14 +793,16 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
         });
       }
     };
-    section.append(
-      el("div", { class: "vocab-row" }, [
-        nameInput,
-        optionalLabel(optBox),
-        patternInput,
-        button(t("common.save"), save, "btn-mini"),
-        button(t("common.duplicate"), () => void duplicate(), "btn-mini"),
-        button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+    table.append(
+      el("tr", {}, [
+        el("td", {}, [nameInput]),
+        el("td", { class: "col-check" }, [optBox]),
+        el("td", {}, [patternInput]),
+        el("td", { class: "col-actions" }, [
+          button(t("common.save"), save, "btn-mini"),
+          button(t("common.duplicate"), () => void duplicate(), "btn-mini"),
+          button(t("common.remove"), () => void onRemoveVocab(kind, entry), "btn-mini btn-danger"),
+        ]),
       ]),
     );
   }
@@ -808,14 +834,15 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
       add();
     }
   });
-  section.append(
-    el("div", { class: "vocab-row" }, [
-      nameAdd,
-      optionalLabel(optAdd),
-      patternAdd,
-      button(t("common.add"), add),
+  table.append(
+    el("tr", { class: "vocab-add" }, [
+      el("td", {}, [nameAdd]),
+      el("td", { class: "col-check" }, [optAdd]),
+      el("td", {}, [patternAdd]),
+      el("td", { class: "col-actions" }, [button(t("common.add"), add)]),
     ]),
   );
+  section.append(table);
   return section;
 }
 

@@ -300,6 +300,37 @@ select.input {
   margin: 0.25rem 0;
 }
 
+/* Vocabulary tables (issue #108): labelled columns, no per-row repeated labels. */
+.vocab-table {
+  border-collapse: collapse;
+}
+
+.vocab-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.vocab-table td {
+  padding: 0.2rem 0.6rem 0.2rem 0;
+  vertical-align: middle;
+}
+
+.vocab-table .col-check {
+  text-align: center;
+}
+
+.vocab-table .col-actions {
+  white-space: nowrap;
+}
+
+.vocab-table .col-actions .btn + .btn {
+  margin-left: 0.4rem;
+}
+
 /* Search */
 .search-head {
   display: flex;
