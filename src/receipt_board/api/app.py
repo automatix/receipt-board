@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -21,12 +22,16 @@ def create_app(
     session_token: str,
     app_version: str = __version__,
     gui_dir: str | Path | None = None,
+    shutdown_hook: Callable[[], None] | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Receipt Board", version=app_version)
     app.state.session_factory = session_factory
     app.state.session_token = session_token
     app.state.app_version = app_version
     app.state.event_bus = EventBus()
+    # Set by the GUI launcher so the updater can close the window after launching the
+    # installer; ``None`` in tests / headless runs (the updater then just doesn't quit).
+    app.state.shutdown_hook = shutdown_hook
 
     register_error_handlers(app)
     app.include_router(public_router)

@@ -8,7 +8,9 @@ page can call privileged endpoints.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 
 def static_dir() -> Path:
@@ -25,11 +27,19 @@ def config_script(token: str) -> str:
     return f"window.__RECEIPT_BOARD__ = {{ token: {json.dumps(token)} }};"
 
 
-def open_window(url: str, token: str, *, title: str = "Receipt Board") -> None:  # pragma: no cover
+def open_window(  # pragma: no cover
+    url: str,
+    token: str,
+    *,
+    title: str = "Receipt Board",
+    on_window: Callable[[Any], None] | None = None,
+) -> None:
     """Open the native window and inject the token once the page has loaded.
 
     ``text_select=True`` enables document text selection (pywebview disables it by
     default), so text can be selected and copied with ``Ctrl+C`` like in a browser.
+    ``on_window`` (if given) receives the window so the caller can wire a shutdown hook
+    (e.g. the updater closing the window after launching the installer).
     """
     import webview
 
@@ -39,4 +49,6 @@ def open_window(url: str, token: str, *, title: str = "Receipt Board") -> None: 
         window.evaluate_js(config_script(token))
 
     window.events.loaded += _inject
+    if on_window is not None:
+        on_window(window)
     webview.start()

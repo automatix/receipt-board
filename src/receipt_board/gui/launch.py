@@ -49,8 +49,14 @@ def launch(  # pragma: no cover
     thread.start()
     while not server.started:
         time.sleep(0.05)
+
+    def _register_shutdown(window: object) -> None:
+        # Let the updater (POST /update/install) close the window after launching the
+        # installer, so the running app releases its files for replacement.
+        app.state.shutdown_hook = window.destroy
+
     try:
-        open_window(gui_url(bound_port), session_token, title=title)
+        open_window(gui_url(bound_port), session_token, title=title, on_window=_register_shutdown)
     finally:
         server.should_exit = True
         thread.join(timeout=5)

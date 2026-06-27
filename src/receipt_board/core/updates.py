@@ -12,7 +12,9 @@ with a mock transport (no real network in CI).
 from __future__ import annotations
 
 import os
+import subprocess
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 import httpx
 
@@ -97,3 +99,34 @@ def check_for_update(
     """Fetch the latest release and compare it to ``current``."""
     release = fetch_latest_release(client, repo_name=repo_name)
     return build_update_info(current, release)
+
+
+def is_trusted_asset_url(url: str) -> bool:
+    """Only download installers served by GitHub (release pages + asset CDN).
+
+    Guards against following an attacker-controlled URL: GitHub release assets live on
+    ``github.com`` and redirect to ``*.githubusercontent.com``.
+    """
+    host = (httpx.URL(url).host or "").lower()
+    return host == "github.com" or host.endswith(".githubusercontent.com")
+
+
+def download_installer(url: str, dest_dir: Path, *, client: httpx.Client) -> Path:
+    """Stream the installer to ``dest_dir`` and return the written path."""
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    filename = url.rsplit("/", 1)[-1] or "receipt-board-setup.exe"
+    dest = dest_dir / filename
+    with client.stream("GET", url, follow_redirects=True) as response:
+        response.raise_for_status()
+        with open(dest, "wb") as handle:
+            for chunk in response.iter_bytes():
+                handle.write(chunk)
+    return dest
+
+
+def launch_installer(path: Path) -> subprocess.Popen:
+    """Start the downloaded installer detached so it survives this process exiting."""
+    creationflags = 0
+    if os.name == "nt":  # pragma: no cover - Windows-only flags
+        creationflags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+    return subprocess.Popen([str(path)], creationflags=creationflags, close_fds=True)

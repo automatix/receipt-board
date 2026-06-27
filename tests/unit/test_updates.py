@@ -122,3 +122,52 @@ def test_repo_env_override(monkeypatch):
     assert updates.repo() == "fork/rb"
     monkeypatch.delenv(updates.ENV_REPO, raising=False)
     assert updates.repo() == updates.DEFAULT_REPO
+
+
+# -- download / launch (issue #82) --------------------------------------------
+
+
+def test_is_trusted_asset_url():
+    base = "https://github.com/automatix/receipt-board/releases/download/v1.4.0"
+    assert updates.is_trusted_asset_url(f"{base}/receipt-board-v1.4.0-setup.exe")
+    assert updates.is_trusted_asset_url("https://objects.githubusercontent.com/x")
+    assert not updates.is_trusted_asset_url("https://evil.example.com/x-setup.exe")
+    assert not updates.is_trusted_asset_url("https://github.com.evil.com/x-setup.exe")
+
+
+def test_download_installer_writes_file(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=b"INSTALLER-BYTES")
+
+    url = (
+        "https://github.com/automatix/receipt-board/releases/download/"
+        "v1.4.0/receipt-board-v1.4.0-setup.exe"
+    )
+    with _client(handler) as client:
+        dest = updates.download_installer(url, tmp_path / "updates", client=client)
+    assert dest.name == "receipt-board-v1.4.0-setup.exe"
+    assert dest.read_bytes() == b"INSTALLER-BYTES"
+
+
+def test_download_installer_raises_on_http_error(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404)
+
+    with _client(handler) as client, pytest.raises(httpx.HTTPStatusError):
+        updates.download_installer("https://github.com/x/setup.exe", tmp_path, client=client)
+
+
+def test_launch_installer_invokes_popen(monkeypatch, tmp_path):
+    calls: dict = {}
+
+    class FakePopen:
+        def __init__(self, args, **kwargs):
+            calls["args"] = args
+            calls["kwargs"] = kwargs
+
+    monkeypatch.setattr(updates.subprocess, "Popen", FakePopen)
+    path = tmp_path / "receipt-board-setup.exe"
+    path.write_text("x")
+    updates.launch_installer(path)
+    assert calls["args"] == [str(path)]
+    assert calls["kwargs"]["close_fds"] is True
