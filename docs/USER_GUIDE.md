@@ -42,7 +42,6 @@ Oben die **Werkzeugleiste**:
 | **Klonen** | aktive Checklist kopieren (Struktur + Felder, alle Häkchen zurückgesetzt) |
 | **Löschen** | aktive Checklist löschen (mit Bestätigung) |
 | **Export** | aktive Checklist als JSON-Datei herunterladen |
-| **Aktualisieren** | Ansicht neu laden |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
 | **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
 
@@ -74,8 +73,9 @@ Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
     **Position** umsortieren bzw. umhängen.
   - Eine Kategorie kann **nicht** in ihren eigenen Teilbaum verschoben werden.
 
-Nach jeder Aktion wird die aktive Checklist neu geladen. Externe Änderungen (z. B. per CLI)
-erscheinen nach **Aktualisieren**.
+Die Ansicht aktualisiert sich **automatisch live**: Eigene Aktionen und externe Änderungen
+(z. B. per CLI oder Automatisierung) erscheinen ohne Zutun innerhalb weniger Sekunden – ein
+manuelles Aktualisieren ist nicht nötig.
 
 ## 5. Checklists anlegen
 

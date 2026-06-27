@@ -4,7 +4,8 @@
 // with cascade (category uncheck confirmed with the affected count), inline rename, an
 // item editor (data/instructions/resources/tools), native HTML5 drag & drop for
 // reorder/re-parent, vocabulary management, search, and checklist create/import/clone/
-// delete/export. The active checklist is reloaded after every mutating action.
+// delete/export. All views refresh live via Server-Sent Events (issue #73), so external
+// changes (CLI/REST/automation) appear with no manual refresh.
 
 import { ApiError, api } from "./api";
 import type {
@@ -294,7 +295,6 @@ function renderToolbar(): void {
       button("Klonen", () => void onClone()),
       button("Löschen", () => void onDeleteChecklist(), "btn-danger"),
       button("Export", () => void onExport()),
-      button("Aktualisieren", () => void reload()),
     ]),
     el("div", { class: "toolbar-group" }, [
       search,
@@ -654,10 +654,7 @@ function renderResourceTypeSection(entries: VocabEntry[]): HTMLElement {
 
 function renderAudit(): HTMLElement {
   const wrap = el("div", { class: "audit" }, [
-    el("div", { class: "audit-head" }, [
-      el("h2", { text: "Audit-Log" }),
-      button("Aktualisieren", () => void loadAudit().then(render)),
-    ]),
+    el("div", { class: "audit-head" }, [el("h2", { text: "Audit-Log" })]),
   ]);
   if (state.audit.length === 0) {
     wrap.append(el("p", { class: "empty", text: "Keine Audit-Einträge." }));

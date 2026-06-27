@@ -8,8 +8,6 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
 - **DB indexes & search tuning** — add indexes on FK columns (`checklist_id`, `parent_id`,
   `category_id`, `item_id`) and a `name` index; evaluate `FTS5` for search. (`v1` ships a
   minimal schema: PKs + `UNIQUE` on vocabulary names only.)
-- **GUI live updates** — reflect external changes (CLI/AI) while the GUI is open, via
-  polling or WebSocket/SSE. (`v1` uses after-action reload + a manual refresh button.)
 - **Undo** for destructive operations (Category uncheck, node remove, Checklist delete),
   including a dedicated **"Undo" button** in the GUI. (`v1` guards with confirmation
   dialogs; the Audit Log provides traceability.)
@@ -22,8 +20,6 @@ done "later", it is recorded here (not silently dropped). See the project `CLAUD
   icon above).
 - **Clarify / possibly remove the "Vocabulary" button** — its purpose is unclear; evaluate
   folding it into the resource-type / vocabulary management or dropping it.
-- **Clarify / possibly remove the "Refresh" button** — once the checklist dropdown stays
-  current automatically (#45), the manual refresh may be redundant.
 
 ## Out of scope for `v1` (tracked elsewhere)
 
