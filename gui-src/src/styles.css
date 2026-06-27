@@ -163,6 +163,38 @@ select.input {
   font-size: 0.85rem;
 }
 
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn:disabled:hover {
+  background: var(--btn-bg);
+}
+
+/* Hidden control (e.g. the import file <input>, triggered by the Browse button). */
+.hidden {
+  display: none;
+}
+
+/* Import dialog: Browse + dropped-file name (issue #106). */
+.import-filerow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.import-filename {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Highlight the import dialog while a file is dragged over it. */
+.modal.dropping {
+  outline: 2px dashed var(--accent);
+  outline-offset: -6px;
+}
+
 /* Inline SVG icons on buttons (issue #85). The icon inherits the button text colour. */
 .btn-icon {
   display: inline-flex;

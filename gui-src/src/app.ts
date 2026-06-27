@@ -74,6 +74,130 @@ const live = {
   timer: null as number | null,
 };
 
+// -- navigation history (issue #107) ------------------------------------------
+// Browser-like back/forward over meaningful navigations: the active view, the active
+// checklist and an open search. Driven by toolbar buttons, Alt+Left/Right and the mouse
+// side buttons. An in-app stack (not the History API) so it can never navigate the webview
+// away from the app page.
+type View = State["view"];
+interface NavEntry {
+  view: View;
+  activeId: number | null;
+  search: string | null;
+}
+const navStack: NavEntry[] = [];
+let navIndex = -1;
+let navigating = false; // suppress pushes while applying a history entry
+let currentSearch: string | null = null; // the query when the search overlay is open, else null
+let navInputsBound = false;
+
+function canBack(): boolean {
+  return navIndex > 0;
+}
+
+function canForward(): boolean {
+  return navIndex < navStack.length - 1;
+}
+
+function pushHistory(): void {
+  if (navigating) {
+    return;
+  }
+  const entry: NavEntry = { view: state.view, activeId: state.activeId, search: currentSearch };
+  const top = navStack[navIndex];
+  if (top && top.view === entry.view && top.activeId === entry.activeId && top.search === entry.search) {
+    return; // collapse no-op navigations
+  }
+  navStack.splice(navIndex + 1); // drop the forward branch
+  navStack.push(entry);
+  navIndex = navStack.length - 1;
+}
+
+async function applyNav(entry: NavEntry): Promise<void> {
+  state.view = entry.view;
+  state.activeId = entry.activeId;
+  await loadForView();
+  if (entry.search) {
+    await runSearch(entry.search, false);
+  } else {
+    currentSearch = null;
+    render();
+  }
+}
+
+async function navGo(delta: number): Promise<void> {
+  const target = navIndex + delta;
+  if (target < 0 || target >= navStack.length) {
+    return;
+  }
+  navIndex = target;
+  navigating = true;
+  try {
+    await applyNav(navStack[navIndex]!);
+  } finally {
+    navigating = false;
+  }
+}
+
+// Switch the top-level view (checklist/vocab/audit) and record it in history.
+function switchView(view: View): void {
+  state.view = view;
+  pushHistory();
+  if (view === "audit") {
+    void loadAudit().then(render);
+  } else {
+    render();
+  }
+}
+
+// Refresh just the Back/Forward enabled state in place (the search overlay doesn't re-render
+// the toolbar, so it can't clobber the user's search box).
+function updateNavButtons(): void {
+  const back = document.getElementById("nav-back") as HTMLButtonElement | null;
+  const forward = document.getElementById("nav-forward") as HTMLButtonElement | null;
+  if (back) {
+    back.disabled = !canBack();
+  }
+  if (forward) {
+    forward.disabled = !canForward();
+  }
+}
+
+function setupNavInputs(): void {
+  if (navInputsBound) {
+    return;
+  }
+  navInputsBound = true;
+  document.addEventListener("keydown", (event) => {
+    if (!event.altKey) {
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      void navGo(-1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      void navGo(1);
+    }
+  });
+  // Mouse side buttons: X1 (button 3) = back, X2 (button 4) = forward. Navigate on mouseup;
+  // also swallow auxclick so the webview never tries its own (page) back/forward.
+  window.addEventListener("mouseup", (event) => {
+    if (event.button === 3) {
+      event.preventDefault();
+      void navGo(-1);
+    } else if (event.button === 4) {
+      event.preventDefault();
+      void navGo(1);
+    }
+  });
+  window.addEventListener("auxclick", (event) => {
+    if (event.button === 3 || event.button === 4) {
+      event.preventDefault();
+    }
+  });
+}
+
 // -- data loading -------------------------------------------------------------
 
 async function loadVocab(): Promise<void> {
@@ -245,6 +369,7 @@ function indexParentMap(tree: ChecklistTree): void {
 
 function render(): void {
   live.searching = false; // rendering a normal view leaves any search-results state
+  currentSearch = null; // a normal view is not the search overlay
   renderToolbar();
   const main = byId("app");
   clear(main);
@@ -263,6 +388,13 @@ function render(): void {
 function renderToolbar(): void {
   const bar = byId("toolbar");
   clear(bar);
+
+  const back = iconButton("back", t("nav.back"), () => void navGo(-1), "btn-nav");
+  const forward = iconButton("forward", t("nav.forward"), () => void navGo(1), "btn-nav");
+  back.id = "nav-back";
+  forward.id = "nav-forward";
+  back.disabled = !canBack();
+  forward.disabled = !canForward();
 
   const selector = el("select", { class: "input", onchange: onSelectChecklist }) as HTMLSelectElement;
   for (const checklist of state.checklists) {
@@ -287,6 +419,7 @@ function renderToolbar(): void {
   });
 
   bar.append(
+    el("div", { class: "toolbar-group" }, [back, forward]),
     el("div", { class: "toolbar-group" }, [
       selector,
       button(t("toolbar.new"), () => void onCreateBlank(), "", "new"),
@@ -299,24 +432,13 @@ function renderToolbar(): void {
       search,
       button(
         t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"),
-        () => {
-          state.view = state.view === "vocab" ? "checklist" : "vocab";
-          render();
-        },
+        () => switchView(state.view === "vocab" ? "checklist" : "vocab"),
         "",
         state.view === "vocab" ? "checklist" : "vocab",
       ),
       button(
         t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
-        () => {
-          if (state.view === "audit") {
-            state.view = "checklist";
-            render();
-          } else {
-            state.view = "audit";
-            void loadAudit().then(render);
-          }
-        },
+        () => switchView(state.view === "audit" ? "checklist" : "audit"),
         "",
         state.view === "audit" ? "checklist" : "audit",
       ),
@@ -737,9 +859,9 @@ function renderAudit(): HTMLElement {
 
 // -- search -------------------------------------------------------------------
 
-async function runSearch(query: string): Promise<void> {
+async function runSearch(query: string, push = true): Promise<void> {
   if (!query) {
-    render();
+    closeSearch();
     return;
   }
   try {
@@ -749,7 +871,7 @@ async function runSearch(query: string): Promise<void> {
     const panel = el("div", { class: "search-results" }, [
       el("div", { class: "search-head" }, [
         el("h2", { text: t("search.heading", { query, count: hits.length }) }),
-        button(t("common.close"), () => render()),
+        button(t("common.close"), () => closeSearch()),
       ]),
     ]);
     if (hits.length === 0) {
@@ -767,9 +889,21 @@ async function runSearch(query: string): Promise<void> {
     }
     main.append(panel);
     live.searching = true; // keep results visible across background live refreshes
+    currentSearch = query;
+    if (push) {
+      pushHistory();
+    }
+    updateNavButtons(); // the overlay didn't go through render(), so refresh nav state
   } catch (error) {
     toast(error instanceof ApiError ? error.message : String(error), true);
   }
+}
+
+// Leave the search overlay back to the normal view (a navigation in its own right).
+function closeSearch(): void {
+  currentSearch = null;
+  pushHistory();
+  render();
 }
 
 // -- actions ------------------------------------------------------------------
@@ -780,6 +914,8 @@ function onSelectChecklist(event: Event): void {
   if (!Number.isNaN(id)) {
     state.activeId = id;
     state.collapsed.clear();
+    currentSearch = null;
+    pushHistory();
     void selectChecklist();
   }
 }
@@ -1057,9 +1193,12 @@ function renderStatusbar(): void {
 
 export async function start(): Promise<void> {
   renderStatusbar();
+  setupNavInputs();
   try {
     await loadVocab();
     await reload();
+    pushHistory(); // seed the history with the initial view
+    updateNavButtons();
     connectEvents();
     void checkForUpdatesOnStartup();
   } catch (error) {
