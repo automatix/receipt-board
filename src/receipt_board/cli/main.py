@@ -66,6 +66,11 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--checklist", type=int, default=None, metavar="ID")
     audit.add_argument("--limit", type=int, default=50, metavar="N")
 
+    serve = sub.add_parser(
+        "serve", help="run the local server without the GUI window (headless; Ctrl+C to stop)"
+    )
+    serve.add_argument("--port", type=int, default=0, metavar="PORT", help="0 = ephemeral port")
+
     return parser
 
 
@@ -169,8 +174,32 @@ def _dispatch(args: argparse.Namespace, client: ApiClient) -> int:
     return 0
 
 
+def _serve(port: int) -> int:  # pragma: no cover (blocking; wiring covered via build_server)
+    """Headless server: initialise like the app, then run uvicorn in the foreground.
+
+    The CLI stays a pure REST client elsewhere; ``serve`` is the one command that *is* the
+    server. It still goes through the same app/DB layer (ADR-0011) — no direct DB access.
+    """
+    from receipt_board import __version__, bootstrap
+    from receipt_board.api import server
+    from receipt_board.gui.window import static_dir
+
+    prepared = bootstrap.prepare()
+    server.serve(
+        prepared.session_factory,
+        prepared.token,
+        port=port or prepared.cfg.port,
+        runtime_path=config.runtime_path(),
+        app_version=__version__,
+        gui_dir=static_dir(),
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "serve":
+        return _serve(args.port)
     try:
         with ApiClient.from_runtime(config.runtime_path()) as client:
             return _dispatch(args, client)

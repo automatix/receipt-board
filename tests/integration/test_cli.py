@@ -190,6 +190,18 @@ def test_audit_command(live, capsys):
     assert "add_item" in capsys.readouterr().out
 
 
+# -- serve (headless) parsing -------------------------------------------------
+
+
+def test_serve_subcommand_parses():
+    args = cli.build_parser().parse_args(["serve"])
+    assert args.command == "serve"
+    assert args.port == 0  # ephemeral by default
+
+    args = cli.build_parser().parse_args(["serve", "--port", "8123"])
+    assert args.port == 8123
+
+
 # -- offline error paths (no fixture / no server) -----------------------------
 
 
