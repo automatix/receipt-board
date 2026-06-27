@@ -5,6 +5,7 @@ export type VocabKind = "resource_type" | "tool";
 
 export interface RbConfig {
   token: string;
+  version?: string;
 }
 
 export interface ResourceRef {
@@ -109,4 +110,7 @@ declare global {
   interface Window {
     __RECEIPT_BOARD__?: RbConfig;
   }
+  // Build-time version baked by esbuild (gui-src/build.mjs) from package.json; used as the
+  // status-bar fallback when the pywebview runtime config is absent (dev/browser).
+  const __APP_VERSION__: string;
 }

@@ -56,7 +56,13 @@ def launch(  # pragma: no cover
         app.state.shutdown_hook = window.destroy
 
     try:
-        open_window(gui_url(bound_port), session_token, title=title, on_window=_register_shutdown)
+        open_window(
+            gui_url(bound_port),
+            session_token,
+            version=app_version,
+            title=title,
+            on_window=_register_shutdown,
+        )
     finally:
         server.should_exit = True
         thread.join(timeout=5)

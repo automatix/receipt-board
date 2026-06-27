@@ -99,6 +99,8 @@ const en: Catalog = {
   "update.downloading": "Downloading…",
   "update.launching": "Launching installer – the app will close…",
   "update.upToDate": "Up to date – version {current} is the latest.",
+
+  "status.version": "Version {version}",
 };
 
 const de: Catalog = {
@@ -190,6 +192,8 @@ const de: Catalog = {
   "update.downloading": "Wird geladen…",
   "update.launching": "Installer wird gestartet – die App wird geschlossen…",
   "update.upToDate": "Aktuell – Version {current} ist die neueste.",
+
+  "status.version": "Version {version}",
 };
 
 const catalogs: Record<Locale, Catalog> = { en, de };
