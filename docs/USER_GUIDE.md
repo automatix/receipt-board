@@ -75,6 +75,9 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   Vokabular + optionaler Wert; *„+ Ressource“* für weitere Zeilen) und **Werkzeuge**
   (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
   übernimmt.
+- **Feld-Vorschau:** hinter dem Eintrags-Namen fasst eine graue Vorschau die Felder in
+  ihrer Import-Notation zusammen (siehe §6): `(Ressourcen)`, `{Werkzeuge}`, `[Daten]`,
+  `<Anweisungen>`.
 - **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
   Überfahren einer **Kategorie-Zeile** (rechts, bei den Aktionen); auf oberster Ebene sitzt
   **„+ Kategorie“** neben dem **Checklist-Titel** (Einträge liegen immer unter einer
