@@ -258,7 +258,9 @@ Struktur-Änderungen bleiben der GUI vorbehalten.
 
 Die App kann sich **selbst aktualisieren**: Beim Start prüft sie still, ob auf GitHub eine
 neuere Version vorliegt, und zeigt dann ein **Hinweis-Banner** (Version + „Was ist neu?").
-Manuell startest du die Prüfung über den Button **„Updates"**.
+Manuell startest du die Prüfung über den Button **„Updates"** — ein bereits angezeigtes
+Hinweis-Banner verschwindet dabei kurz und kommt mit dem (ggf. frischen) Ergebnis zurück,
+sodass sichtbar ist, dass neu geprüft wurde.
 
 Mit **„Jetzt installieren"** lädt die App die neue `setup.exe` herunter und startet sie;
 Windows fragt per **UAC** nach Adminrechten, dann beendet sich die App, damit der Installer

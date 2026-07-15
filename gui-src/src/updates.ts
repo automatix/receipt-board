@@ -65,8 +65,11 @@ async function startInstall(button: HTMLButtonElement): Promise<void> {
   }
 }
 
-// Manual check (toolbar): always gives feedback, success or failure.
+// Manual check (toolbar): always gives feedback, success or failure. An already-shown
+// banner is hidden up front so the re-check is visible — it disappears on click and
+// returns with the (possibly fresh) result (issue #191).
 export async function checkForUpdatesManually(): Promise<void> {
+  dismissBanner();
   try {
     const info = await api.checkUpdate();
     if (info.update_available) {
