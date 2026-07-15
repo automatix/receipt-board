@@ -100,6 +100,8 @@ const en: Catalog = {
   "import.nameRequired": "Please enter a name for the new checklist.",
   "import.textRequired": "Please provide the checklist content (paste it or load a file).",
 
+  "export.title": "Export checklist",
+
   "form.required": "Required",
   "form.requiredError": "This field is required.",
 
@@ -212,6 +214,8 @@ const de: Catalog = {
   "import.browse": "Datei wählen…",
   "import.nameRequired": "Bitte einen Namen für die neue Checklist angeben.",
   "import.textRequired": "Bitte den Checklist-Inhalt angeben (einfügen oder Datei laden).",
+
+  "export.title": "Checklist exportieren",
 
   "form.required": "Pflichtfeld",
   "form.requiredError": "Dieses Feld ist ein Pflichtfeld.",

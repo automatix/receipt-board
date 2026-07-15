@@ -220,6 +220,7 @@ notations-konforme Fixture getestet.
 | -------------- | ---- | ----- |
 | `GET /checklists` | public | Liste der Checklists |
 | `GET /checklists/{id}` | public | **nested** Export (§Export) |
+| `GET /checklists/{id}/export/markdown` | public | Checklist in der **Import-Notation** (§6, kanonische Form; Issue `#171`) |
 | `GET /search?q=` | public | flache Treffer |
 | `POST /items/{id}/done` | public | `{done: bool}` — einzige öffentliche Schreib-Op |
 | `POST /import/validate` | public | `{text}` → Dry-Run-Report `{valid,errors,warnings,summary}` (schreibt nichts) |

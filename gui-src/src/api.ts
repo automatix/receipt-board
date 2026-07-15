@@ -53,9 +53,20 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T;
 }
 
+// Plain-text GET (the Markdown export endpoint returns text/markdown, not JSON).
+async function requestText(path: string): Promise<string> {
+  const response = await fetch(path, { headers: headers() });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new ApiError(`HTTP ${response.status}`, "error", text);
+  }
+  return text;
+}
+
 export const api = {
   listChecklists: () => request<ChecklistSummary[]>("GET", "/checklists"),
   exportChecklist: (id: number) => request<ChecklistTree>("GET", `/checklists/${id}`),
+  exportChecklistMarkdown: (id: number) => requestText(`/checklists/${id}/export/markdown`),
   search: (q: string) => request<SearchHit[]>("GET", `/search?q=${encodeURIComponent(q)}`),
   listAudit: (checklistId?: number, limit = 100) =>
     request<AuditEntry[]>(

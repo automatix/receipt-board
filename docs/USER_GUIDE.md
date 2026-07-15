@@ -46,7 +46,7 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 | **Import** | Checklist aus Markdown importieren (siehe §6) |
 | **Klonen** | aktive Checklist kopieren (Struktur + Felder, alle Häkchen zurückgesetzt) |
 | **Löschen** | aktive Checklist löschen (mit Bestätigung) |
-| **Export** | aktive Checklist als JSON-Datei speichern (öffnet den „Speichern unter“-Dialog) |
+| **Export** | aktive Checklist speichern — Format-Dialog **Markdown** (vorausgewählt) oder **JSON**, dann „Speichern unter“ |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
 | **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
 | **Audit** | das Audit-Log einsehen (siehe §10) |
@@ -199,8 +199,16 @@ kehrt zum Baum zurück.
 
 ## 9. Export
 
-**Export** lädt die aktive Checklist als vollständigen, **verschachtelten JSON-Baum**
-herunter (alle Felder).
+**Export** öffnet einen Dialog mit der Formatwahl (**Markdown**, vorausgewählt, oder
+**JSON**) und lädt dann die aktive Checklist herunter:
+
+- **Markdown** — die Checklist in der **Import-Notation** (§6, kanonische Form: Tabs,
+  `- [ ]`/`- [x]`, `~manually~`, Feldgruppen `( ) { } [ ] < >`). Eine unverändert
+  importierte, notationskonforme Datei exportiert **eins zu eins**. Ausnahmen: beim Import
+  **ignorierte** Kategorie-Felder fehlen (§6-Warnung); Zeilenumbrüche in Daten/Anweisungen
+  (nur über die GUI möglich) werden zu Leerzeichen; über die GUI eingegebene Namen mit
+  Steuerzeichen exportieren zwar, sind aber nicht re-importierbar.
+- **JSON** — der vollständige, **verschachtelte JSON-Baum** (alle Felder).
 
 ## 10. Daten & Nachvollziehbarkeit
 
