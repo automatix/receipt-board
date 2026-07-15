@@ -130,6 +130,7 @@ class ChecklistService:
                 done=False,
                 data=src.data,
                 instructions=src.instructions,
+                manually=src.manually,
             )
             self.session.add(item)
             self.session.flush()
@@ -227,6 +228,7 @@ class ChecklistService:
         tools: list[str] | None = None,
         data: str | None = None,
         instructions: str | None = None,
+        manually: bool = False,
         position: int | None = None,
     ) -> ExpenseItem:
         self._get_checklist(checklist_id)
@@ -240,6 +242,7 @@ class ChecklistService:
             done=False,
             data=data,
             instructions=instructions,
+            manually=manually,
             position=0,  # placeholder; _place assigns the real position
         )
         self.session.add(item)
@@ -397,13 +400,20 @@ class ChecklistService:
 
     def _edit_item(self, node_id: int, fields: dict) -> ExpenseItem:
         item = self._get_item(node_id)
-        old = {"name": item.name, "data": item.data, "instructions": item.instructions}
+        old = {
+            "name": item.name,
+            "data": item.data,
+            "instructions": item.instructions,
+            "manually": item.manually,
+        }
         if "name" in fields:
             item.name = _require_name(fields["name"])
         if "data" in fields:
             item.data = fields["data"]
         if "instructions" in fields:
             item.instructions = fields["instructions"]
+        if "manually" in fields:
+            item.manually = bool(fields["manually"])
         if "resources" in fields:
             self._set_resources(item, fields["resources"] or [])
         if "tools" in fields:
@@ -416,7 +426,12 @@ class ChecklistService:
             checklist_id=item.checklist_id,
             payload={
                 "old": old,
-                "new": {"name": item.name, "data": item.data, "instructions": item.instructions},
+                "new": {
+                    "name": item.name,
+                    "data": item.data,
+                    "instructions": item.instructions,
+                    "manually": item.manually,
+                },
             },
         )
         return item

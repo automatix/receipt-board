@@ -685,6 +685,10 @@ function resourceLabel(resource: ResourceRef): string {
 // with contents abbreviated (issue #119).
 function itemSummary(node: TreeNode): HTMLElement {
   const parts: string[] = [];
+  if (node.manually) {
+    // Item-level manual flag in its import notation (marker outside the groups).
+    parts.push("~manually~");
+  }
   if (node.resources?.length) {
     parts.push(`(${node.resources.map(resourceLabel).join(", ")})`);
   }
@@ -1087,6 +1091,7 @@ async function onAddItem(categoryId: number): Promise<void> {
     done: false,
     data: null,
     instructions: null,
+    manually: false,
     resources: [],
     tools: [],
   };
@@ -1174,6 +1179,17 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
     }) as HTMLTextAreaElement;
     instrInput.value = node.instructions ?? "";
 
+    // Item-level "manually" flag (issue #156): the whole entry is handled manually
+    // (import marker ~manually~ outside the bracket groups).
+    const itemManualBox = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+    itemManualBox.checked = node.manually ?? false;
+    const itemManualField = el("div", { class: "field" }, [
+      el("label", { class: "manual-check", title: t("item.manuallyHint") }, [
+        itemManualBox,
+        document.createTextNode(` ${t("item.manually")}`),
+      ]),
+    ]);
+
     const resourceList = el("div", { class: "resource-list" });
     const addResourceRow = (resource?: ResourceRef): void => {
       const typeSelect = el("select", { class: "input" }) as HTMLSelectElement;
@@ -1229,6 +1245,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
         name: nameInput.value.trim() || node.name,
         data: dataInput.value.trim() || null,
         instructions: instrInput.value.trim() || null,
+        manually: itemManualBox.checked,
         resources,
         tools,
       };
@@ -1239,6 +1256,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
       labelled(t("item.name"), nameInput),
       labelled(t("item.data"), dataInput),
       labelled(t("item.instructions"), instrInput),
+      itemManualField,
       el("div", { class: "field" }, [
         el("div", { class: "field-label" }, [
           el("span", { text: t("item.resources") }),

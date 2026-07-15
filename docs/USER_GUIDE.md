@@ -79,13 +79,15 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
 - **Eintrag bearbeiten:** ein **Klick auf die Eintrags-Zeile** öffnet den Bearbeiten-Dialog
   (die Überschrift zeigt den **Eintragsnamen** und folgt dem Namensfeld live beim Tippen)
   für **Name**, **Daten**, **Anweisungen** (mehrzeiliges, in der Höhe
-  vergrößerbares Textfeld), **Ressourcen** (Typ aus dem
+  vergrößerbares Textfeld), die Checkbox **„manuell“** auf Eintragsebene (der ganze
+  Eintrag ist manuell zu bearbeiten, Import-Marker `~manually~` außerhalb der Klammern),
+  **Ressourcen** (Typ aus dem
   Vokabular + optionaler Wert + Checkbox **„manuell“** = nicht automatisierbar;
   *„+ Ressource“* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
   übernimmt; `Esc`, **Abbrechen** oder ein Klick neben den Dialog verwerfen die Eingaben.
 - **Feld-Vorschau:** hinter dem Eintrags-Namen fasst eine graue Vorschau die Felder in
-  ihrer Import-Notation zusammen (siehe §6): `(Ressourcen)`, `{Werkzeuge}`, `[Daten]`,
-  `<Anweisungen>`. Die Inhalte werden abgekürzt: `URL`-Ressourcen als `URL:...`,
+  ihrer Import-Notation zusammen (siehe §6): `~manually~` (falls gesetzt), `(Ressourcen)`,
+  `{Werkzeuge}`, `[Daten]`, `<Anweisungen>`. Die Inhalte werden abgekürzt: `URL`-Ressourcen als `URL:...`,
   Ressourcen ohne Wert nur mit dem Typnamen (z. B. `Email`), sonst `Typ:Wert`; **Daten**
   maximal `25` Zeichen, **Anweisungen** maximal `50` Zeichen (jeweils mit `…`).
 - **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
@@ -141,11 +143,15 @@ der Inhalt im Textfeld (beides bleibt vor dem Import editierbar). Regeln:
     `(https://… ~manually~ | Email)`) markiert die Ressource als **manuell zu bearbeiten**
     (nicht automatisierbar); andere `~…~`-Marker sind ungültig.
   - **tools:** müssen bereits im **Vokabular** stehen (sonst Abbruch).
+- **Eintrag als „manuell“ markieren:** `~manually~` **außerhalb** der Klammern — nach dem
+  Namen oder zwischen den Feldern — markiert den **ganzen Eintrag** als manuell zu
+  bearbeiten, z. B. `- [ ] Taxi ~manually~` (im Dialog: die Checkbox **„manuell“** auf
+  Eintragsebene).
 - **Reservierte Zeichen:** Die neun Zeichen `( ) [ ] { } < > ~` sind **Steuerzeichen** und
   im **Freitext** (Namen, Werte) **nicht erlaubt**. Beispiel: `Taxi (klassisch)` ist
   ungültig — die Klammer würde als resources-Feld gelesen. Die Tilde ist nur als
-  `~manually~`-Marker innerhalb von `( … )` erlaubt (eine URL mit `~` ist daher nicht
-  importierbar).
+  `~manually~`-Marker erlaubt — pro Ressource innerhalb von `( … )` oder pro Eintrag
+  außerhalb der Klammern (eine URL mit `~` ist daher nicht importierbar).
 - **Alles-oder-nichts:** Bei **irgendeinem** Fehler wird **nichts** importiert; du erhältst
   einen genauen Bericht (Zeile + Wert). Behebe die Werte oder erweitere das Vokabular und
   importiere erneut.

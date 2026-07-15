@@ -24,6 +24,8 @@ export interface TreeNode {
   children?: TreeNode[];
   data?: string | null;
   instructions?: string | null;
+  // The whole entry is handled manually (import marker ~manually~ outside the groups).
+  manually?: boolean;
   resources?: ResourceRef[];
   tools?: string[];
 }
@@ -62,6 +64,7 @@ export interface ItemFields {
   name?: string;
   data?: string | null;
   instructions?: string | null;
+  manually?: boolean;
   resources?: ResourceRef[];
   tools?: string[];
 }
