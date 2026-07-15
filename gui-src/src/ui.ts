@@ -85,27 +85,67 @@ export function confirmDialog(message: string, danger = true): Promise<boolean> 
   });
 }
 
+// Mark a form control as required: subtle "*" in the placeholder plus a tooltip and the
+// aria attribute (issue #161).
+function markRequired(field: HTMLInputElement | HTMLTextAreaElement): void {
+  if (field.placeholder) {
+    field.placeholder = `${field.placeholder} *`;
+  }
+  field.title = t("form.required");
+  field.setAttribute("aria-required", "true");
+}
+
+// Flag a field as invalid until the user edits it again (issue #161).
+function flagInvalid(field: HTMLElement, onEdit?: () => void): void {
+  field.classList.add("input-invalid");
+  field.addEventListener(
+    "input",
+    () => {
+      field.classList.remove("input-invalid");
+      onEdit?.();
+    },
+    { once: true },
+  );
+}
+
 export function textPrompt(title: string, initial = ""): Promise<string | null> {
   return new Promise((resolve) => {
     let dismiss = (): void => {};
-    const input = el("input", { class: "input", value: initial });
+    const input = el("input", { class: "input" }) as HTMLInputElement;
+    input.value = initial;
+    markRequired(input);
+    const error = el("div", { class: "form-error" });
     const finish = (value: string | null): void => {
       dismiss();
       resolve(value);
     };
+    // The name is required: an empty submit keeps the dialog open and says why,
+    // instead of silently closing (issue #161).
+    const submit = (): void => {
+      const value = input.value.trim();
+      if (!value) {
+        error.textContent = t("form.requiredError");
+        flagInvalid(input, () => {
+          error.textContent = "";
+        });
+        return;
+      }
+      finish(value);
+    };
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
-        finish(input.value.trim());
+        submit();
       }
     });
     const box = el("div", { class: "modal" }, [
       el("h3", { text: title }),
       input,
+      error,
       el("div", { class: "modal-actions" }, [
         el("button", { class: "btn", onclick: () => finish(null), text: t("common.cancel") }),
         el("button", {
           class: "btn btn-primary",
-          onclick: () => finish(input.value.trim()),
+          onclick: () => submit(),
           text: t("common.ok"),
         }),
       ]),
@@ -165,11 +205,16 @@ export function importDialog(
 ): Promise<ImportInput | null> {
   return new Promise((resolve) => {
     let dismiss = (): void => {};
-    const name = el("input", { class: "input", placeholder: t("import.namePlaceholder") });
+    const name = el("input", {
+      class: "input",
+      placeholder: t("import.namePlaceholder"),
+    }) as HTMLInputElement;
     const text = el("textarea", {
       class: "textarea",
       placeholder: t("import.textPlaceholder"),
     }) as HTMLTextAreaElement;
+    markRequired(name);
+    markRequired(text);
     const report = el("div", { class: "import-report" });
     const finish = (value: ImportInput | null): void => {
       dismiss();
@@ -217,6 +262,43 @@ export function importDialog(
         );
       }
     };
+
+    // "Import" validates before closing (issue #161): both fields are required, and the
+    // content must pass the same dry-run as "Check". On any problem the dialog stays open
+    // and shows the errors in the report area; it only closes when the import can run.
+    const onRun = async (): Promise<void> => {
+      const nameValue = name.value.trim();
+      const problems: string[] = [];
+      if (!nameValue) {
+        problems.push(t("import.nameRequired"));
+        flagInvalid(name);
+      }
+      if (!text.value.trim()) {
+        problems.push(t("import.textRequired"));
+        flagInvalid(text);
+      }
+      if (problems.length > 0) {
+        report.replaceChildren(...problems.map((p) => el("p", { class: "import-bad", text: p })));
+        return;
+      }
+      report.replaceChildren(el("p", { class: "empty", text: t("import.checking") }));
+      try {
+        const result = await validate(text.value);
+        if (!result.valid) {
+          renderReport(report, result);
+          return;
+        }
+      } catch (error) {
+        report.replaceChildren(
+          el("p", {
+            class: "import-bad",
+            text: t("import.error", { message: (error as Error).message }),
+          }),
+        );
+        return;
+      }
+      finish({ name: nameValue, text: text.value });
+    };
     const box = el("div", { class: "modal modal-wide" }, [
       el("h3", { text: t("import.title") }),
       name,
@@ -228,7 +310,7 @@ export function importDialog(
         el("button", { class: "btn", onclick: () => void onCheck(), text: t("import.check") }),
         el("button", {
           class: "btn btn-primary",
-          onclick: () => finish({ name: name.value.trim(), text: text.value }),
+          onclick: () => void onRun(),
           text: t("import.run"),
         }),
       ]),

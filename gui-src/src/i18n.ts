@@ -97,6 +97,11 @@ const en: Catalog = {
   "import.warning": "Warning line {line}: {message}",
   "import.error": "Error: {message}",
   "import.browse": "Choose file…",
+  "import.nameRequired": "Please enter a name for the new checklist.",
+  "import.textRequired": "Please provide the checklist content (paste it or load a file).",
+
+  "form.required": "Required",
+  "form.requiredError": "This field is required.",
 
   "nav.back": "Back",
   "nav.forward": "Forward",
@@ -205,6 +210,11 @@ const de: Catalog = {
   "import.warning": "Warnung Zeile {line}: {message}",
   "import.error": "Fehler: {message}",
   "import.browse": "Datei wählen…",
+  "import.nameRequired": "Bitte einen Namen für die neue Checklist angeben.",
+  "import.textRequired": "Bitte den Checklist-Inhalt angeben (einfügen oder Datei laden).",
+
+  "form.required": "Pflichtfeld",
+  "form.requiredError": "Dieses Feld ist ein Pflichtfeld.",
 
   "nav.back": "Zurück",
   "nav.forward": "Vorwärts",
