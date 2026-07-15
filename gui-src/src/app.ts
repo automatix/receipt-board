@@ -1159,6 +1159,12 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
     };
 
     const nameInput = el("input", { class: "input", value: node.name }) as HTMLInputElement;
+    // The dialog heading shows the item name and follows the name field live while
+    // typing; the generic title is the fallback while the name is empty (issue #148).
+    const heading = el("h3", { text: node.name.trim() || title });
+    nameInput.addEventListener("input", () => {
+      heading.textContent = nameInput.value.trim() || title;
+    });
     const dataInput = el("input", { class: "input", value: node.data ?? "" }) as HTMLInputElement;
     // Instructions is a multiline, vertically resizable textarea (issue #147) — the
     // column is TEXT and the JSON export carries newlines as-is.
@@ -1229,7 +1235,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
     };
 
     const box = el("div", { class: "modal modal-wide" }, [
-      el("h3", { text: title }),
+      heading,
       labelled(t("item.name"), nameInput),
       labelled(t("item.data"), dataInput),
       labelled(t("item.instructions"), instrInput),
