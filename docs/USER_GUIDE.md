@@ -96,7 +96,9 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   Kategorie). **„+ Eintrag“** öffnet denselben Dialog wie *„Eintrag bearbeiten“* — alle
   Felder (Name, Data, Instructions, Resources, Tools) lassen sich direkt in einem Schritt
   setzen.
-- **Entfernen:** das **Papierkorb-Symbol 🗑** (mit Bestätigung).
+- **Entfernen:** das **Papierkorb-Symbol 🗑** (mit Bestätigung) — es erscheint beim
+  Überfahren direkt hinter dem Zeileninhalt: bei Kategorien in der Reihe der
+  `+`-Buttons, bei Einträgen hinter der Feld-Vorschau.
 - **Verschieben / Umsortieren (Drag & Drop):**
   - einen Knoten auf eine **Kategorie-Zeile** ziehen → **in** diese Kategorie verschieben
     (ans Ende);

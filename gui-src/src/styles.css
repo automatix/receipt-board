@@ -82,7 +82,7 @@ body {
 .btn,
 .toggle,
 .toolbar-group,
-.actions,
+.row-actions,
 .checkbox {
   user-select: none;
   -webkit-user-select: none;
@@ -357,22 +357,15 @@ select.input {
   font-size: 0.82rem;
 }
 
-.actions {
-  margin-left: auto;
+/* Inline row actions (issues #145/#176): the category add buttons and the delete button
+   sit directly after the row content (no right alignment), hover-revealed. */
+.row-actions {
   display: flex;
   gap: 0.2rem;
   opacity: 0;
 }
 
-/* Category add buttons directly after the name (issue #145), hover-revealed like .actions. */
-.add-actions {
-  display: flex;
-  gap: 0.2rem;
-  opacity: 0;
-}
-
-.row:hover .actions,
-.row:hover .add-actions {
+.row:hover .row-actions {
   opacity: 1;
 }
 

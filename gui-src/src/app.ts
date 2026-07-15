@@ -548,18 +548,26 @@ function renderNode(node: TreeNode): HTMLElement {
   row.append(nameElement(node));
 
   if (isCategory) {
-    // The add buttons sit directly after the category name (issue #145), hover-revealed
-    // like the other row actions; the delete button stays right-aligned in rowActions.
+    // The add buttons sit directly after the category name (issue #145) with the delete
+    // button inline in the same row of buttons (issue #176), all hover-revealed.
     row.append(
-      el("div", { class: "add-actions" }, [
+      el("div", { class: "row-actions" }, [
         button(t("tree.addCategory"), () => void onAddCategory(node.id), "btn-mini btn-ghost", "add"),
         button(t("tree.addItem"), () => void onAddItem(node.id), "btn-mini btn-ghost", "add"),
+        iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
       ]),
     );
   }
 
   if (node.kind === "expense_item") {
     row.append(itemSummary(node));
+    // The delete button follows the row content inline (issue #176), like the trash in
+    // the item editor's resource rows — no right alignment.
+    row.append(
+      el("div", { class: "row-actions" }, [
+        iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
+      ]),
+    );
     // Clicking the entry opens the editor directly (issue #117). Interactive children
     // (checkbox, buttons) keep their own behavior, and an active text selection (the row
     // text is selectable/copyable) does not trigger the dialog.
@@ -576,8 +584,6 @@ function renderNode(node: TreeNode): HTMLElement {
       void onEditItem(node);
     });
   }
-
-  row.append(rowActions(node));
 
   // Drop INTO a category (append) lands on the row itself.
   if (isCategory) {
@@ -702,14 +708,6 @@ function itemSummary(node: TreeNode): HTMLElement {
     parts.push(`<${truncate(node.instructions, SUMMARY_INSTRUCTIONS_MAX)}>`);
   }
   return el("span", { class: "summary", text: parts.join("  ") });
-}
-
-function rowActions(node: TreeNode): HTMLElement {
-  // Right-aligned, hover-revealed row actions: just the delete button — the category add
-  // buttons sit after the category name instead (issue #145).
-  return el("div", { class: "actions" }, [
-    iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
-  ]);
 }
 
 function dropZone(parentId: number | null, position: number): HTMLElement {
