@@ -13,9 +13,10 @@
   --hover: #eceef2;
   --input-bg: #ffffff;
   --btn-bg: #eaecef;
-  --find-bg: #fff3a3;
+  /* Browser-like find marks (issue #166): every match clearly yellow, current orange. */
+  --find-bg: #ffeb3b;
   --find-fg: #1c1e21;
-  --find-current-bg: #ffab40;
+  --find-current-bg: #ff9632;
   --find-current-fg: #1c1e21;
 }
 
@@ -31,10 +32,11 @@
   --hover: #2f2f2f;
   --input-bg: #1a1a1a;
   --btn-bg: #333333;
-  --find-bg: #8a6d00;
-  --find-fg: #ffffff;
-  --find-current-bg: #b25e00;
-  --find-current-fg: #ffffff;
+  /* Same browser-like find marks in dark mode (issue #166) — saturated, dark text. */
+  --find-bg: #ffd600;
+  --find-fg: #1c1e21;
+  --find-current-bg: #ff9632;
+  --find-current-fg: #1c1e21;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,10 +52,10 @@
     --hover: #2f2f2f;
     --input-bg: #1a1a1a;
     --btn-bg: #333333;
-    --find-bg: #8a6d00;
-    --find-fg: #ffffff;
-    --find-current-bg: #b25e00;
-    --find-current-fg: #ffffff;
+    --find-bg: #ffd600;
+    --find-fg: #1c1e21;
+    --find-current-bg: #ff9632;
+    --find-current-fg: #1c1e21;
   }
 }
 
