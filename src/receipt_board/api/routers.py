@@ -37,6 +37,7 @@ from receipt_board.core import queries
 from receipt_board.core.events import EventBus
 from receipt_board.core.refs import CATEGORY, EXPENSE_ITEM
 from receipt_board.core.services import ChecklistService, VocabularyService
+from receipt_board.exporter.markdown import export_markdown
 from receipt_board.importer.service import build_import_report
 
 public_router = APIRouter(tags=["public"])
@@ -62,6 +63,13 @@ def list_checklists(session=Depends(get_session)) -> list[dict]:
 @public_router.get("/checklists/{checklist_id}")
 def export_checklist(checklist_id: int, session=Depends(get_session)) -> dict:
     return queries.export_checklist(session, checklist_id)
+
+
+@public_router.get("/checklists/{checklist_id}/export/markdown")
+def export_checklist_markdown(checklist_id: int, session=Depends(get_session)) -> Response:
+    """The checklist in the canonical import notation (issue #171) — see TECH_SPEC §6."""
+    text = export_markdown(session, checklist_id)
+    return Response(content=text, media_type="text/markdown; charset=utf-8")
 
 
 @public_router.get("/search")

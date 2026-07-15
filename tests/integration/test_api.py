@@ -472,3 +472,19 @@ def test_item_manually_roundtrip_rest_and_import(client):
         headers=AUTH,
     )
     assert bad.status_code == 400
+
+
+def test_markdown_export_endpoint(client):
+    """GET /checklists/{id}/export/markdown returns the canonical notation (issue #171)."""
+    text = "- [ ] Top\n\t- [ ] Taxi ~manually~ (https://x | Email) {Browser} [d] <i>\n"
+    created = client.post(
+        "/checklists", json={"mode": "import", "name": "MD", "text": text}, headers=AUTH
+    )
+    assert created.status_code == 201
+    response = client.get(f"/checklists/{created.json()['id']}/export/markdown")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/markdown")
+    assert response.text == text
+
+    missing = client.get("/checklists/99999/export/markdown")
+    assert missing.status_code == 404

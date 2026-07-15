@@ -1,0 +1,10 @@
+- [ ] Verbindung
+	- [ ] Festnetz&DSL
+		- [ ] 1&1 (https://control-center.1und1.de/invoice.html#/current | Email) {Browser | Thunderbird} [Login 588791127] <öffne den Link im Browser und lade die Rechnungen runter>
+		- [x] sim.de (https://service.sim.de/mytariff/invoice/showAll | Email ~manually~) {Browser | Thunderbird} [Login simex] <öffne den Link im Browser und lade die Rechnungen runter>
+	- [ ] Services
+		- [ ] YouTube Premium [https://payments.google.com]
+		- [ ] Squarespace ~manually~ [https://account.squarespace.com/domains/managed/billing/settings]
+- [ ] LinkedIn
+	- [x] Membership ~manually~
+	- [ ] Premium Abos (Email)

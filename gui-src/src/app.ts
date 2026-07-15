@@ -1056,16 +1056,65 @@ async function onDeleteChecklist(): Promise<void> {
   }
 }
 
+// Format picker for Export (issue #171): horizontal Markdown/JSON radios, Markdown
+// preselected. Resolves with the chosen format, or null on cancel.
+function exportFormatDialog(): Promise<"markdown" | "json" | null> {
+  return new Promise((resolve) => {
+    let dismiss = (): void => {};
+    const finish = (value: "markdown" | "json" | null): void => {
+      dismiss();
+      resolve(value);
+    };
+    const mdRadio = el("input", { type: "radio", name: "export-format", value: "markdown" }) as HTMLInputElement;
+    mdRadio.checked = true;
+    const jsonRadio = el("input", { type: "radio", name: "export-format", value: "json" }) as HTMLInputElement;
+    const box = el("div", { class: "modal" }, [
+      el("h3", { text: t("export.title") }),
+      el("div", { class: "radio-row" }, [
+        el("label", { class: "radio-option" }, [mdRadio, document.createTextNode(" Markdown")]),
+        el("label", { class: "radio-option" }, [jsonRadio, document.createTextNode(" JSON")]),
+      ]),
+      el("div", { class: "modal-actions" }, [
+        el("button", { class: "btn", onclick: () => finish(null), text: t("common.cancel") }),
+        el("button", {
+          class: "btn btn-primary",
+          onclick: () => finish(mdRadio.checked ? "markdown" : "json"),
+          text: t("toolbar.export"),
+        }),
+      ]),
+    ]);
+    dismiss = mountModal(box, () => finish(null));
+  });
+}
+
+function download(content: string, mime: string, filename: string): void {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const anchor = el("a", { href: url, download: filename });
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 async function onExport(): Promise<void> {
   if (state.activeId === null) {
     return;
   }
-  const tree = await api.exportChecklist(state.activeId);
-  const blob = new Blob([JSON.stringify(tree, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const anchor = el("a", { href: url, download: `${tree.name || "checklist"}.json` });
-  anchor.click();
-  URL.revokeObjectURL(url);
+  const format = await exportFormatDialog();
+  if (format === null) {
+    return;
+  }
+  await act(async () => {
+    if (state.activeId === null) {
+      return;
+    }
+    if (format === "markdown") {
+      const tree = state.tree;
+      const text = await api.exportChecklistMarkdown(state.activeId);
+      download(text, "text/markdown", `${tree?.name || "checklist"}.md`);
+    } else {
+      const tree = await api.exportChecklist(state.activeId);
+      download(JSON.stringify(tree, null, 2), "application/json", `${tree.name || "checklist"}.json`);
+    }
+  });
 }
 
 async function onAddCategory(parentId: number | null): Promise<void> {
