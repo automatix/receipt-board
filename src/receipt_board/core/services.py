@@ -474,6 +474,11 @@ class ChecklistService:
                 raise ValidationError(f"Duplicate tool: {tool_name!r}")
             seen.add(tool.id)
             new_links.append(ItemTool(tool_id=tool.id, position=position))
+        # Delete the old links before inserting the new ones (issue #138): assigning the
+        # new collection directly lets the flush emit the INSERTs before the DELETEs,
+        # which violates UNIQUE(item_id, tool_id) whenever a tool is kept.
+        item.tools.clear()
+        self.session.flush()
         item.tools = new_links
 
     def _get_checklist(self, checklist_id: int) -> Checklist:

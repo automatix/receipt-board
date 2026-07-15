@@ -424,3 +424,18 @@ def test_resource_manually_flag_set_edit_and_clone(svc, session):
         select(ExpenseItem).where(ExpenseItem.checklist_id == clone.id)
     ).one()
     assert [(r.resource_type.name, r.manually) for r in copied.resources] == [("Email", True)]
+
+
+def test_edit_item_keeping_its_tools_does_not_violate_unique(svc, session):
+    """Regression (issue #138): re-sending an unchanged tool selection must not 500."""
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    item = svc.add_item(cl.id, cat.id, "x", tools=["Browser"])
+    svc.edit_node(EXPENSE_ITEM, item.id, {"tools": ["Browser"]})
+    session.refresh(item)
+    assert [t.tool.name for t in item.tools] == ["Browser"]
+
+    # overlapping replacement (kept + added) works too
+    svc.edit_node(EXPENSE_ITEM, item.id, {"tools": ["Thunderbird", "Browser"]})
+    session.refresh(item)
+    assert [t.tool.name for t in item.tools] == ["Thunderbird", "Browser"]
