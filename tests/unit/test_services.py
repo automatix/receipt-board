@@ -420,9 +420,7 @@ def test_resource_manually_flag_set_edit_and_clone(svc, session):
 
     # clone preserves the flag
     clone = svc.clone(cl.id, "Copy")
-    copied = session.scalars(
-        select(ExpenseItem).where(ExpenseItem.checklist_id == clone.id)
-    ).one()
+    copied = session.scalars(select(ExpenseItem).where(ExpenseItem.checklist_id == clone.id)).one()
     assert [(r.resource_type.name, r.manually) for r in copied.resources] == [("Email", True)]
 
 
