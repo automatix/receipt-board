@@ -435,6 +435,11 @@ function renderToolbar(): void {
     }
   });
 
+  // Next view in the cycle button's circle (issue #196); pure function of the current
+  // view so history navigation and the Audit toggle stay consistent.
+  const cycleTarget =
+    state.view === "vocab" ? "resources" : state.view === "resources" ? "checklist" : "vocab";
+
   // Two sections so the toolbar wraps at most once — nav + checklist actions on the
   // first row, search + view/system buttons on the second (issue #181).
   bar.append(
@@ -452,19 +457,11 @@ function renderToolbar(): void {
     el("div", { class: "toolbar-section" }, [
       el("div", { class: "toolbar-group" }, [
         search,
-        button(
-          t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"),
-          () => switchView(state.view === "vocab" ? "checklist" : "vocab"),
-          "",
-          state.view === "vocab" ? "checklist" : "vocab",
-        ),
-        // Third in the view-switcher trio [Vocabulary|Checklist|Resources] (issue #186).
-        button(
-          t(state.view === "resources" ? "toolbar.checklist" : "toolbar.resources"),
-          () => switchView(state.view === "resources" ? "checklist" : "resources"),
-          "",
-          state.view === "resources" ? "checklist" : "resources",
-        ),
+        // One slot cycles the three views (issue #196): the label names the view a
+        // click opens — the next in the circle checklist → vocab → resources →
+        // checklist. From the audit view (own toggle below) it offers Vocabulary,
+        // like the checklist view.
+        button(t(`toolbar.${cycleTarget}`), () => switchView(cycleTarget), "", cycleTarget),
         button(
           t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
           () => switchView(state.view === "audit" ? "checklist" : "audit"),

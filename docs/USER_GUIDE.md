@@ -48,8 +48,7 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 | **Löschen** | aktive Checklist löschen (mit Bestätigung) |
 | **Export** | aktive Checklist speichern — Format-Dialog **Markdown** (vorausgewählt) oder **JSON**, dann „Speichern unter“ |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
-| **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
-| **Ressourcen / Checklist** | alle **URL-Ressourcen** der aktiven Checklist als Tabelle (`URL` / Eintrag / Pfad, in Baum-Reihenfolge) — dritter im Bunde der Ansichts-Umschalter |
+| **Vokabular / Ressourcen / Checklist** | ein Platz, drei Ansichten im Kreis: der Button öffnet die angezeigte Ansicht, danach erscheint die jeweils nächste (Checklist → Vokabular → Ressourcen → Checklist). Die Ressourcen-Ansicht listet alle **URL-Ressourcen** der aktiven Checklist (`URL` / Eintrag / Pfad, in Baum-Reihenfolge) |
 | **Audit** | das Audit-Log einsehen (siehe §10) |
 | **Updates** | nach einer neuen Version suchen (siehe §12) |
 | **🌐 EN/DE** | Sprache umschalten (Englisch ↔ Deutsch) |
