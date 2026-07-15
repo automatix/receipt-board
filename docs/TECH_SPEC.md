@@ -221,6 +221,7 @@ notations-konforme Fixture getestet.
 | `GET /checklists` | public | Liste der Checklists |
 | `GET /checklists/{id}` | public | **nested** Export (§Export) |
 | `GET /checklists/{id}/export/markdown` | public | Checklist in der **Import-Notation** (§6, kanonische Form; Issue `#171`) |
+| `GET /checklists/{id}/urls` | public | alle **URL-Ressourcen** der Checklist, flach in Baum-Reihenfolge (`{url,item_id,item_name,path,done,manually}`; Issue `#186`) |
 | `GET /search?q=` | public | flache Treffer |
 | `POST /items/{id}/done` | public | `{done: bool}` — einzige öffentliche Schreib-Op |
 | `POST /import/validate` | public | `{text}` → Dry-Run-Report `{valid,errors,warnings,summary}` (schreibt nichts) |
@@ -244,6 +245,7 @@ notations-konforme Fixture getestet.
 
 - HTTP-Client gegen den laufenden Server (Public-Surface); Port aus `runtime.json`.
 - Befehle (F1): `receipt-board export [--checklist ID]`, `search QUERY`,
+  `urls CHECKLIST_ID` (alle URL-Ressourcen einer Checklist, Baum-Reihenfolge),
   `item done ID`, `item undone ID`, `validate PATH` (Dry-Run-Importprüfung),
   `audit [--checklist ID] [--limit N]` (Audit-Log lesen); Ausgabe `--json`.
 - Exit-Code `0` ok, `≠0` bei Fehler (`validate` → `1`, wenn die Datei nicht importierbar ist).

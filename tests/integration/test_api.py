@@ -488,3 +488,30 @@ def test_markdown_export_endpoint(client):
 
     missing = client.get("/checklists/99999/export/markdown")
     assert missing.status_code == 404
+
+
+def test_list_urls_endpoint(client):
+    """GET /checklists/{id}/urls lists URL resources flat, in tree order (issue #186)."""
+    text = (
+        "- [ ] Top\n"
+        "\t- [x] One (https://one.example ~manually~ | Email) {Browser}\n"
+        "\t- [ ] NoUrl (Email)\n"
+        "\t- [ ] Two (https://two.example)\n"
+    )
+    created = client.post(
+        "/checklists", json={"mode": "import", "name": "Urls", "text": text}, headers=AUTH
+    )
+    assert created.status_code == 201
+
+    response = client.get(f"/checklists/{created.json()['id']}/urls")
+    assert response.status_code == 200
+    rows = response.json()
+    assert [row["url"] for row in rows] == ["https://one.example", "https://two.example"]
+    assert rows[0]["item_name"] == "One"
+    assert rows[0]["path"] == ["Top"]
+    assert rows[0]["done"] is True
+    assert rows[0]["manually"] is True
+    assert rows[1]["manually"] is False
+
+    missing = client.get("/checklists/99999/urls")
+    assert missing.status_code == 404

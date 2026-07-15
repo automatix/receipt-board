@@ -16,6 +16,7 @@ import type {
   NodeKind,
   ResourceRef,
   TreeNode,
+  UrlResource,
   VocabEntry,
 } from "./types";
 import { type ThemeMode, applyTheme, loadTheme, nextTheme, saveTheme } from "./theme";
@@ -38,10 +39,11 @@ interface State {
   checklists: ChecklistSummary[];
   activeId: number | null;
   tree: ChecklistTree | null;
-  view: "checklist" | "vocab" | "audit";
+  view: "checklist" | "vocab" | "audit" | "resources";
   resourceTypes: VocabEntry[];
   tools: VocabEntry[];
   audit: AuditEntry[];
+  urls: UrlResource[];
   collapsed: Set<number>;
 }
 
@@ -53,6 +55,7 @@ const state: State = {
   resourceTypes: [],
   tools: [],
   audit: [],
+  urls: [],
   collapsed: new Set(),
 };
 
@@ -141,12 +144,14 @@ async function navGo(delta: number): Promise<void> {
   }
 }
 
-// Switch the top-level view (checklist/vocab/audit) and record it in history.
+// Switch the top-level view (checklist/vocab/audit/resources) and record it in history.
 function switchView(view: View): void {
   state.view = view;
   pushHistory();
   if (view === "audit") {
     void loadAudit().then(render);
+  } else if (view === "resources") {
+    void loadUrls().then(render);
   } else {
     render();
   }
@@ -225,6 +230,10 @@ async function loadAudit(): Promise<void> {
   state.audit = await api.listAudit(state.activeId ?? undefined, 100);
 }
 
+async function loadUrls(): Promise<void> {
+  state.urls = state.activeId === null ? [] : await api.listUrls(state.activeId);
+}
+
 // Load exactly the data the current view needs (no render).
 async function loadForView(): Promise<void> {
   await loadChecklists();
@@ -234,6 +243,9 @@ async function loadForView(): Promise<void> {
   }
   if (state.view === "audit") {
     await loadAudit();
+  }
+  if (state.view === "resources") {
+    await loadUrls();
   }
 }
 
@@ -377,6 +389,8 @@ function render(): void {
   clear(main);
   if (state.view === "audit") {
     main.append(renderAudit());
+  } else if (state.view === "resources") {
+    main.append(renderResources());
   } else if (state.view === "vocab") {
     main.append(renderVocab());
   } else if (!state.tree) {
@@ -443,6 +457,13 @@ function renderToolbar(): void {
           () => switchView(state.view === "vocab" ? "checklist" : "vocab"),
           "",
           state.view === "vocab" ? "checklist" : "vocab",
+        ),
+        // Third in the view-switcher trio [Vocabulary|Checklist|Resources] (issue #186).
+        button(
+          t(state.view === "resources" ? "toolbar.checklist" : "toolbar.resources"),
+          () => switchView(state.view === "resources" ? "checklist" : "resources"),
+          "",
+          state.view === "resources" ? "checklist" : "resources",
         ),
         button(
           t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
@@ -940,6 +961,38 @@ function renderAudit(): HTMLElement {
   return wrap;
 }
 
+// URL resources of the active checklist as a flat table in tree order (issue #186).
+function renderResources(): HTMLElement {
+  const name = state.tree?.name ?? "";
+  const wrap = el("div", { class: "resources" }, [
+    el("div", { class: "audit-head" }, [el("h2", { text: t("resources.title", { name }) })]),
+  ]);
+  if (state.urls.length === 0) {
+    wrap.append(el("p", { class: "empty", text: t("resources.empty") }));
+    return wrap;
+  }
+  const table = el("table", { class: "audit-table resources-table" });
+  table.append(
+    el("tr", {}, [
+      el("th", { text: t("resources.colUrl") }),
+      el("th", { text: t("resources.colItem") }),
+      el("th", { text: t("resources.colPath") }),
+    ]),
+  );
+  for (const row of state.urls) {
+    const path = row.path.length ? row.path.join(" / ") : t("search.topLevel");
+    table.append(
+      el("tr", {}, [
+        el("td", { class: "url-cell", text: row.url }),
+        el("td", { text: row.item_name }),
+        el("td", { text: path }),
+      ]),
+    );
+  }
+  wrap.append(table);
+  return wrap;
+}
+
 // -- search -------------------------------------------------------------------
 
 async function runSearch(query: string, push = true): Promise<void> {
@@ -1009,6 +1062,9 @@ async function selectChecklist(): Promise<void> {
   await loadActiveTree();
   if (state.view === "audit") {
     await loadAudit();
+  }
+  if (state.view === "resources") {
+    await loadUrls();
   }
   render();
 }

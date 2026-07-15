@@ -76,6 +76,9 @@ class ApiClient:
     def search(self, query: str) -> list[dict]:
         return self._request("GET", "/search", params={"q": query})
 
+    def list_urls(self, checklist_id: int) -> list[dict]:
+        return self._request("GET", f"/checklists/{checklist_id}/urls")
+
     def set_item_done(self, item_id: int, done: bool) -> dict:
         return self._request("POST", f"/items/{item_id}/done", json={"done": done})
 

@@ -82,6 +82,41 @@ def export_checklist(session: Session, checklist_id: int) -> dict:
     }
 
 
+def list_urls(session: Session, checklist_id: int) -> list[dict]:
+    """All URL resources of a checklist, flat, in tree order (issue #186).
+
+    A "URL resource" is a resource whose vocabulary type is named ``URL`` (type-based,
+    not value-sniffing). Rows without a value are skipped — the seeded ``URL`` type
+    requires one, but the vocabulary is user-editable and a valueless row carries no URL.
+    """
+    checklist = session.get(Checklist, checklist_id)
+    if checklist is None:
+        raise NotFoundError(f"Checklist {checklist_id} not found")
+
+    rows: list[dict] = []
+
+    def walk(parent_id: int | None, path: list[str]) -> None:
+        for kind, node in ordered_children(session, checklist_id, parent_id):
+            if kind == CATEGORY:
+                walk(node.id, [*path, node.name])
+                continue
+            for resource in node.resources:
+                if resource.resource_type.name == "URL" and resource.value:
+                    rows.append(
+                        {
+                            "url": resource.value,
+                            "item_id": node.id,
+                            "item_name": node.name,
+                            "path": path,
+                            "done": node.done,
+                            "manually": resource.manually,
+                        }
+                    )
+
+    walk(None, [])
+    return rows
+
+
 def _serialize_audit(entry: AuditEntry) -> dict:
     return {
         "id": entry.id,

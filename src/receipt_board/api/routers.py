@@ -72,6 +72,12 @@ def export_checklist_markdown(checklist_id: int, session=Depends(get_session)) -
     return Response(content=text, media_type="text/markdown; charset=utf-8")
 
 
+@public_router.get("/checklists/{checklist_id}/urls")
+def list_checklist_urls(checklist_id: int, session=Depends(get_session)) -> list[dict]:
+    """All URL resources of the checklist, flat, in tree order (issue #186)."""
+    return queries.list_urls(session, checklist_id)
+
+
 @public_router.get("/search")
 def search(q: str, checklist_id: int | None = None, session=Depends(get_session)) -> list[dict]:
     return queries.search(session, q, checklist_id=checklist_id)

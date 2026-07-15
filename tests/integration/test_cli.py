@@ -18,6 +18,7 @@ from receipt_board.api.runtime import write_runtime
 from receipt_board.api.server import pick_ephemeral_port
 from receipt_board.cli import main as cli
 from receipt_board.core.audit import AuditService
+from receipt_board.core.refs import EXPENSE_ITEM
 from receipt_board.core.services import ChecklistService
 from receipt_board.persistence.db import create_db_engine, make_session_factory
 from receipt_board.persistence.models import AuditEntry, Base
@@ -178,6 +179,38 @@ def test_validate_command(live, tmp_path, capsys):
 def test_validate_missing_file(live, capsys):
     assert cli.main(["validate", "does-not-exist.md"]) == 1
     assert "Cannot read" in capsys.readouterr().err
+
+
+def test_urls_command(live, capsys):
+    # The CLI is read-only, so the URL resource is seeded through the service layer.
+    with live.factory() as setup:
+        svc = ChecklistService(setup, AuditService(setup, origin="GUI"))
+        svc.edit_node(
+            EXPENSE_ITEM,
+            live.item_id,
+            {"resources": [{"type": "URL", "value": "https://one.example/login"}]},
+        )
+        setup.commit()
+
+    assert cli.main(["urls", str(live.checklist_id)]) == 0
+    out = capsys.readouterr().out
+    assert "https://one.example/login\t1&1\t[Verbindung]" in out
+
+    assert cli.main(["--json", "urls", str(live.checklist_id)]) == 0
+    rows = json.loads(capsys.readouterr().out)
+    assert rows == [
+        {
+            "url": "https://one.example/login",
+            "item_id": live.item_id,
+            "item_name": "1&1",
+            "path": ["Verbindung"],
+            "done": False,
+            "manually": False,
+        }
+    ]
+
+    assert cli.main(["urls", "99999"]) == 1
+    assert "error:" in capsys.readouterr().err
 
 
 def test_audit_command(live, capsys):

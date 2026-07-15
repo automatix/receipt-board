@@ -83,6 +83,16 @@ export interface AuditEntry {
   session_id: string | null;
 }
 
+// One URL resource of a checklist, flat with item context (issue #186).
+export interface UrlResource {
+  url: string;
+  item_id: number;
+  item_name: string;
+  path: string[];
+  done: boolean;
+  manually: boolean;
+}
+
 export interface ImportIssueDto {
   line: number;
   token: string;

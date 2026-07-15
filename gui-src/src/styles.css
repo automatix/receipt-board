@@ -658,6 +658,13 @@ select.input {
   font-weight: 600;
 }
 
+/* URL resources view (issue #186): same table skin as the audit log, but URLs can be
+   long — let the URL cell wrap instead of forcing the table wide. */
+.resources-table td.url-cell {
+  white-space: normal;
+  word-break: break-all;
+}
+
 /* Update banner (issue #83): non-blocking, shown above the main view. */
 .update-banner {
   display: flex;
