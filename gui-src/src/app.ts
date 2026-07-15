@@ -421,41 +421,47 @@ function renderToolbar(): void {
     }
   });
 
+  // Two sections so the toolbar wraps at most once — nav + checklist actions on the
+  // first row, search + view/system buttons on the second (issue #181).
   bar.append(
-    el("div", { class: "toolbar-group" }, [back, forward]),
-    el("div", { class: "toolbar-group" }, [
-      selector,
-      button(t("toolbar.new"), () => void onCreateBlank(), "", "new"),
-      button(t("toolbar.import"), () => void onImport(), "", "import"),
-      button(t("toolbar.clone"), () => void onClone(), "", "clone"),
-      button(t("toolbar.delete"), () => void onDeleteChecklist(), "btn-danger", "delete"),
-      button(t("toolbar.export"), () => void onExport(), "", "export"),
+    el("div", { class: "toolbar-section" }, [
+      el("div", { class: "toolbar-group toolbar-nav" }, [back, forward]),
+      el("div", { class: "toolbar-group" }, [
+        selector,
+        button(t("toolbar.new"), () => void onCreateBlank(), "", "new"),
+        button(t("toolbar.import"), () => void onImport(), "", "import"),
+        button(t("toolbar.clone"), () => void onClone(), "", "clone"),
+        button(t("toolbar.delete"), () => void onDeleteChecklist(), "btn-danger", "delete"),
+        button(t("toolbar.export"), () => void onExport(), "", "export"),
+      ]),
     ]),
-    el("div", { class: "toolbar-group" }, [
-      search,
-      button(
-        t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"),
-        () => switchView(state.view === "vocab" ? "checklist" : "vocab"),
-        "",
-        state.view === "vocab" ? "checklist" : "vocab",
-      ),
-      button(
-        t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
-        () => switchView(state.view === "audit" ? "checklist" : "audit"),
-        "",
-        state.view === "audit" ? "checklist" : "audit",
-      ),
-      button(t("toolbar.updates"), () => void checkForUpdatesManually(), "", "updates"),
-      button(localeLabel(), () => {
-        setLocale(nextLocale());
-        render();
-      }),
-      button(t(`theme.${themeMode}`), () => {
-        themeMode = nextTheme(themeMode);
-        applyTheme(themeMode);
-        saveTheme(themeMode);
-        renderToolbar();
-      }),
+    el("div", { class: "toolbar-section" }, [
+      el("div", { class: "toolbar-group" }, [
+        search,
+        button(
+          t(state.view === "vocab" ? "toolbar.checklist" : "toolbar.vocab"),
+          () => switchView(state.view === "vocab" ? "checklist" : "vocab"),
+          "",
+          state.view === "vocab" ? "checklist" : "vocab",
+        ),
+        button(
+          t(state.view === "audit" ? "toolbar.checklist" : "toolbar.audit"),
+          () => switchView(state.view === "audit" ? "checklist" : "audit"),
+          "",
+          state.view === "audit" ? "checklist" : "audit",
+        ),
+        button(t("toolbar.updates"), () => void checkForUpdatesManually(), "", "updates"),
+        button(localeLabel(), () => {
+          setLocale(nextLocale());
+          render();
+        }),
+        button(t(`theme.${themeMode}`), () => {
+          themeMode = nextTheme(themeMode);
+          applyTheme(themeMode);
+          saveTheme(themeMode);
+          renderToolbar();
+        }),
+      ]),
     ]),
   );
 }
