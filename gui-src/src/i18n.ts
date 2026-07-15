@@ -31,6 +31,7 @@ const en: Catalog = {
   "toolbar.checklist": "Checklist",
   "toolbar.vocab": "Vocabulary",
   "toolbar.audit": "Audit",
+  "toolbar.resources": "Resources",
 
   "theme.system": "🌗 System",
   "theme.dark": "🌙 Dark",
@@ -59,6 +60,12 @@ const en: Catalog = {
   "audit.colAction": "Action",
   "audit.colTarget": "Target",
   "audit.colAffected": "Affected",
+
+  "resources.title": 'URL resources: "{name}"',
+  "resources.empty": "No URL resources.",
+  "resources.colUrl": "URL",
+  "resources.colItem": "Item",
+  "resources.colPath": "Path",
 
   "search.heading": 'Search: "{query}" ({count})',
   "search.empty": "No matches.",
@@ -145,6 +152,7 @@ const de: Catalog = {
   "toolbar.checklist": "Checklist",
   "toolbar.vocab": "Vokabular",
   "toolbar.audit": "Audit",
+  "toolbar.resources": "Ressourcen",
 
   "theme.system": "🌗 System",
   "theme.dark": "🌙 Dunkel",
@@ -173,6 +181,12 @@ const de: Catalog = {
   "audit.colAction": "Aktion",
   "audit.colTarget": "Ziel",
   "audit.colAffected": "Betroffen",
+
+  "resources.title": 'URL-Ressourcen: "{name}"',
+  "resources.empty": "Keine URL-Ressourcen.",
+  "resources.colUrl": "URL",
+  "resources.colItem": "Eintrag",
+  "resources.colPath": "Pfad",
 
   "search.heading": 'Suche: "{query}" ({count})',
   "search.empty": "Keine Treffer.",

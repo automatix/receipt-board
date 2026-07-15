@@ -4,6 +4,7 @@ Read-only plus the leaf done-toggle (public surface). Commands::
 
     receipt-board export [--checklist ID]
     receipt-board search QUERY
+    receipt-board urls CHECKLIST_ID    # all URL resources of a checklist (tree order)
     receipt-board item done ID
     receipt-board item undone ID
     receipt-board validate PATH        # dry-run: is a Markdown file importable?
@@ -51,6 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     search = sub.add_parser("search", parents=[json_flag], help="search node names (flat hits)")
     search.add_argument("query")
+
+    urls = sub.add_parser(
+        "urls", parents=[json_flag], help="list all URL resources of a checklist (tree order)"
+    )
+    urls.add_argument("checklist", type=int, metavar="CHECKLIST_ID")
 
     item = sub.add_parser("item", help="toggle an expense item's done checkbox")
     item_sub = item.add_subparsers(dest="item_command", required=True)
@@ -111,6 +117,16 @@ def _format_hits(hits: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _format_urls(rows: list[dict]) -> str:
+    if not rows:
+        return "(no URL resources)"
+    lines = []
+    for row in rows:
+        path = " / ".join(row["path"]) if row["path"] else "(top level)"
+        lines.append(f"{row['url']}\t{row['item_name']}\t[{path}]")
+    return "\n".join(lines)
+
+
 def _format_audit(rows: list[dict]) -> str:
     if not rows:
         return "(no audit entries)"
@@ -152,6 +168,9 @@ def _dispatch(args: argparse.Namespace, client: ApiClient) -> int:
     elif args.command == "search":
         hits = client.search(args.query)
         _emit(args.json, hits, _format_hits(hits))
+    elif args.command == "urls":
+        rows = client.list_urls(args.checklist)
+        _emit(args.json, rows, _format_urls(rows))
     elif args.command == "item":
         done = args.item_command == "done"
         result = client.set_item_done(args.id, done)

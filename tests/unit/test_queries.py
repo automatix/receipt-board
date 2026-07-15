@@ -5,7 +5,13 @@ from __future__ import annotations
 import pytest
 
 from receipt_board.core.errors import NotFoundError
-from receipt_board.core.queries import export_checklist, list_audit, list_checklists, search
+from receipt_board.core.queries import (
+    export_checklist,
+    list_audit,
+    list_checklists,
+    list_urls,
+    search,
+)
 
 
 def _sample(svc):
@@ -103,3 +109,55 @@ def test_search_can_scope_to_checklist(svc):
 def test_search_empty_query_returns_empty(svc):
     _sample(svc)
     assert search(svc.session, "   ") == []
+
+
+def test_list_urls_flat_tree_order_with_context(svc, session):
+    cl, _top, _sub, item = _sample(svc)
+    other = svc.add_category(cl.id, "Sonstiges")
+    svc.add_item(cl.id, other.id, "NoUrl", resources=[{"type": "Email", "value": None}])
+    svc.add_item(
+        cl.id,
+        other.id,
+        "Zwei",
+        resources=[
+            {"type": "URL", "value": "https://a.example", "manually": True},
+            {"type": "URL", "value": "https://b.example"},
+        ],
+    )
+    svc.set_item_done(item.id, True)
+
+    rows = list_urls(session, cl.id)
+
+    assert [r["url"] for r in rows] == ["https://x", "https://a.example", "https://b.example"]
+    assert rows[0] == {
+        "url": "https://x",
+        "item_id": item.id,
+        "item_name": "1&1",
+        "path": ["Verbindung", "Festnetz&DSL"],
+        "done": True,
+        "manually": False,
+    }
+    assert rows[1]["manually"] is True
+    assert rows[1]["path"] == ["Sonstiges"]
+    assert rows[2]["manually"] is False
+
+
+def test_list_urls_skips_valueless_url_resources(svc, session, vocab):
+    # The seeded URL type requires a value, but the vocabulary is user-editable —
+    # a valueless URL resource carries no URL and must be skipped.
+    url_id = next(e["id"] for e in vocab.list("resource_type") if e["name"] == "URL")
+    vocab.update("resource_type", url_id, {"value_optional": True, "value_pattern": None})
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    svc.add_item(cl.id, cat.id, "bare", resources=[{"type": "URL", "value": None}])
+    assert list_urls(session, cl.id) == []
+
+
+def test_list_urls_empty_checklist(svc, session):
+    cl = svc.create_blank("Empty")
+    assert list_urls(session, cl.id) == []
+
+
+def test_list_urls_not_found(session):
+    with pytest.raises(NotFoundError):
+        list_urls(session, 999)

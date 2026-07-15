@@ -49,6 +49,7 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 | **Export** | aktive Checklist speichern — Format-Dialog **Markdown** (vorausgewählt) oder **JSON**, dann „Speichern unter“ |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
 | **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
+| **Ressourcen / Checklist** | alle **URL-Ressourcen** der aktiven Checklist als Tabelle (`URL` / Eintrag / Pfad, in Baum-Reihenfolge) — dritter im Bunde der Ansichts-Umschalter |
 | **Audit** | das Audit-Log einsehen (siehe §10) |
 | **Updates** | nach einer neuen Version suchen (siehe §12) |
 | **🌐 EN/DE** | Sprache umschalten (Englisch ↔ Deutsch) |
@@ -235,6 +236,7 @@ Entwickler-Installation: `uv run receipt-board …`):
 ```bash
 receipt-board-cli export [--checklist ID] [--json]
 receipt-board-cli search "Begriff" [--json]
+receipt-board-cli urls CHECKLIST_ID [--json]   # alle URL-Ressourcen der Checklist
 receipt-board-cli item done|undone ID
 receipt-board-cli validate DATEI
 receipt-board-cli audit [--checklist ID] [--limit N]

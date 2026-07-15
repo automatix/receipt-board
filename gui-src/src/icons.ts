@@ -12,6 +12,7 @@ export type IconName =
   | "checklist"
   | "vocab"
   | "audit"
+  | "resources"
   | "edit"
   | "trash"
   | "add"
@@ -41,6 +42,10 @@ const PATHS: Record<IconName, string> = {
   checklist: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
   vocab: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01",
   audit: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 6v6l4 2",
+  // Chain link — the Resources (URL list) view (issue #186).
+  resources:
+    "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 " +
+    "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
   edit: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
   back: "M15 18l-6-6 6-6",
   forward: "M9 18l6-6-6-6",

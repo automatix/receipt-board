@@ -11,6 +11,7 @@ import type {
   NodeKind,
   SearchHit,
   UpdateInfo,
+  UrlResource,
   VocabEntry,
   VocabKind,
 } from "./types";
@@ -68,6 +69,8 @@ export const api = {
   exportChecklist: (id: number) => request<ChecklistTree>("GET", `/checklists/${id}`),
   exportChecklistMarkdown: (id: number) => requestText(`/checklists/${id}/export/markdown`),
   search: (q: string) => request<SearchHit[]>("GET", `/search?q=${encodeURIComponent(q)}`),
+  listUrls: (checklistId: number) =>
+    request<UrlResource[]>("GET", `/checklists/${checklistId}/urls`),
   listAudit: (checklistId?: number, limit = 100) =>
     request<AuditEntry[]>(
       "GET",
