@@ -56,6 +56,12 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 
 Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
 
+> **Textsuche auf der Seite:** `Strg`+`F` öffnet die übliche Suchleiste (oben rechts) für
+> den gerade angezeigten Inhalt — alle Treffer werden hervorgehoben, ein Zähler zeigt
+> `aktuell/gesamt`. `Enter` bzw. `F3` springt zum nächsten, `Umschalt`+`Enter` bzw.
+> `Umschalt`+`F3` zum vorigen Treffer, `Esc` schließt. (Das **Suchfeld** in der
+> Werkzeugleiste durchsucht dagegen die ganze Checklist inkl. zugeklappter Kategorien.)
+
 Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **App-Version**
 (z. B. `v1.6.0`).
 

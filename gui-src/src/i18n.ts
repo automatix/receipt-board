@@ -99,6 +99,11 @@ const en: Catalog = {
   "nav.back": "Back",
   "nav.forward": "Forward",
 
+  "find.placeholder": "Find on page…",
+  "find.prev": "Previous match",
+  "find.next": "Next match",
+  "find.close": "Close",
+
   "update.available": "New version {latest} available (installed: {current}).",
   "update.whatsNew": "What's new?",
   "update.installNow": "Install now",
@@ -198,6 +203,11 @@ const de: Catalog = {
 
   "nav.back": "Zurück",
   "nav.forward": "Vorwärts",
+
+  "find.placeholder": "Auf der Seite suchen…",
+  "find.prev": "Voriger Treffer",
+  "find.next": "Nächster Treffer",
+  "find.close": "Schließen",
 
   "update.available": "Neue Version {latest} verfügbar (installiert: {current}).",
   "update.whatsNew": "Was ist neu?",
