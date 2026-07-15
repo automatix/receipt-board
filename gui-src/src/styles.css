@@ -159,6 +159,19 @@ select.input {
   min-width: 180px;
 }
 
+/* Required-field validation (issue #161): subtle invalid outline that clears on typing,
+   and the inline error line under a single-field prompt. */
+.input.input-invalid,
+.textarea.input-invalid {
+  border-color: var(--danger);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  min-height: 1.1em;
+}
+
 .textarea {
   width: 100%;
   min-height: 220px;

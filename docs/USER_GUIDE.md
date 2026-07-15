@@ -116,12 +116,20 @@ Drei Wege (alle in der GUI):
 - **Import** — aus dem Markdown-Format (siehe §6).
 - **Klonen** — Tiefenkopie der aktiven Checklist; alle Häkchen werden zurückgesetzt.
 
+Der **Name ist überall Pflicht**: Ein leeres Namensfeld schließt den Dialog nicht mehr,
+sondern markiert das Feld und zeigt einen Hinweis (gilt auch für neue Kategorien und das
+Duplizieren von Vokabular-Einträgen).
+
 ## 6. Checklist importieren (Markdown-Format)
 
 Über **Import** den Namen vergeben und die Markdown-Checkliste einfügen — entweder direkt in
 das Textfeld **einfügen**, oder eine Datei **laden**: per Button **„Datei wählen…"** oder
 indem du die Datei **in den Dialog ziehst**. Der Dateiname erscheint dann neben dem Button,
-der Inhalt im Textfeld (beides bleibt vor dem Import editierbar). Regeln:
+der Inhalt im Textfeld (beides bleibt vor dem Import editierbar). **Name und Inhalt sind
+Pflichtfelder** (mit `*` markiert): **„Importieren"** prüft die Eingaben zuerst — genau wie
+**„Prüfen"** — und schließt den Dialog nur, wenn der Import wirklich läuft; bei leeren
+Pflichtfeldern oder Fehlern im Inhalt bleibt der Dialog offen und zeigt die Meldungen an.
+Regeln:
 
 - Jede Zeile: `- [ ] Name …` (bzw. `- [x]` = erledigt). Die **Einrückung** bestimmt die
   Hierarchie.
