@@ -49,6 +49,11 @@ def open_window(  # pragma: no cover
     """
     import webview
 
+    # Allow file downloads (issue #134): pywebview cancels every WebView2 download while
+    # ALLOW_DOWNLOADS is False (the default), which silently dropped the Export button's
+    # blob-URL download. With it enabled, pywebview shows a native "Save as" dialog.
+    webview.settings["ALLOW_DOWNLOADS"] = True
+
     window = webview.create_window(title, url=url, text_select=True)
 
     def _inject() -> None:
