@@ -646,16 +646,23 @@ function startInlineRename(node: TreeNode, span: HTMLElement): void {
   input.select();
 }
 
+// Each field keeps its import-notation bracket type — `(resources)` `{tools}` `[data]`
+// `<instructions>` (TECH_SPEC §6) — so the row summary stays recognizable (issue #118).
 function itemSummary(node: TreeNode): HTMLElement {
   const parts: string[] = [];
   if (node.resources?.length) {
-    parts.push(node.resources.map((r) => (r.value ? `${r.type}:${r.value}` : r.type)).join(", "));
+    parts.push(
+      `(${node.resources.map((r) => (r.value ? `${r.type}:${r.value}` : r.type)).join(", ")})`,
+    );
   }
   if (node.tools?.length) {
     parts.push(`{${node.tools.join(", ")}}`);
   }
   if (node.data) {
     parts.push(`[${node.data}]`);
+  }
+  if (node.instructions) {
+    parts.push(`<${node.instructions}>`);
   }
   return el("span", { class: "summary", text: parts.join("  ") });
 }
