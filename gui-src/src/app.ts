@@ -546,6 +546,21 @@ function renderNode(node: TreeNode): HTMLElement {
 
   if (node.kind === "expense_item") {
     row.append(itemSummary(node));
+    // Clicking the entry opens the editor directly (issue #117). Interactive children
+    // (checkbox, buttons) keep their own behavior, and an active text selection (the row
+    // text is selectable/copyable) does not trigger the dialog.
+    row.classList.add("row-clickable");
+    row.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("input, button, select")) {
+        return;
+      }
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        return;
+      }
+      void onEditItem(node);
+    });
   }
 
   row.append(rowActions(node));
@@ -581,7 +596,11 @@ function renderNode(node: TreeNode): HTMLElement {
 
 function nameElement(node: TreeNode): HTMLElement {
   const span = el("span", { class: "name", text: node.name });
-  span.addEventListener("dblclick", () => startInlineRename(node, span));
+  // Inline rename stays for categories only; item names are edited in the item editor,
+  // which already opens on the first click (issue #117).
+  if (node.kind === "category") {
+    span.addEventListener("dblclick", () => startInlineRename(node, span));
+  }
   return span;
 }
 
@@ -650,9 +669,6 @@ function rowActions(node: TreeNode): HTMLElement {
       button(t("tree.addCategory"), () => void onAddCategory(node.id), "btn-mini btn-ghost", "add"),
       button(t("tree.addItem"), () => void onAddItem(node.id), "btn-mini btn-ghost", "add"),
     );
-  }
-  if (node.kind === "expense_item") {
-    actions.append(iconButton("edit", t("common.edit"), () => void onEditItem(node), "btn-mini"));
   }
   actions.append(
     iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
@@ -1194,6 +1210,12 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
     ]);
     overlay.append(box);
     document.body.append(overlay);
+    // Start editing in the topmost field, cursor at the end of the value (issue #117).
+    setTimeout(() => {
+      nameInput.focus();
+      const end = nameInput.value.length;
+      nameInput.setSelectionRange(end, end);
+    }, 0);
   });
 }
 
