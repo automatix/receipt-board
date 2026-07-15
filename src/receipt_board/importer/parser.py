@@ -11,9 +11,13 @@ in resources/tools split on ``|`` (``data``/``instructions`` are free text, kept
 Because Categories carry no action fields (ADR-0007), any bracket content on a node that
 turns out to be a Category is ignored and reported as a warning.
 
-The eight characters ``()[]{}<>`` are **reserved control characters**: they delimit
-fields and are not permitted inside free text (names or field values). A reserved
+The nine characters ``()[]{}<>~`` are **reserved control characters**: they delimit
+fields/markers and are not permitted inside free text (names or field values). A reserved
 character appearing inside a field value is a syntax error (and aborts the atomic import).
+The tilde is the marker delimiter and is only meaningful inside a ``(...)`` resources
+group: a ``~manually~`` marker on a resource token flags that resource as
+not-automatable/manual (issue #135); any other ``~...~`` marker or an unpaired ``~`` is a
+syntax error.
 """
 
 from __future__ import annotations
@@ -27,13 +31,15 @@ _LINE_RE = re.compile(r"^(?P<indent>[ \t]*)-\s\[(?P<check>[ xX])\]\s+(?P<text>.*
 
 _OPENERS = {"(": ")", "{": "}", "[": "]", "<": ">"}
 _FIELD_BY_OPENER = {"(": "resources", "{": "tools", "[": "data", "<": "instructions"}
-_RESERVED = set("()[]{}<>")
+_RESERVED = set("()[]{}<>~")
+_MARKER_RE = re.compile(r"~([^~]*)~")
 
 
 @dataclass
 class ParsedResource:
     type: str
     value: str | None
+    manually: bool = False
 
 
 @dataclass
@@ -111,7 +117,9 @@ def extract_fields(text: str) -> tuple[str, list[tuple[str, str]], list[str]]:
             if cj == closer:
                 terminated = True
                 break
-            if cj in _RESERVED:
+            # The tilde is legal only inside a resources group, where it delimits markers
+            # such as ~manually~ (validated per token in split_resource_markers).
+            if cj in _RESERVED and not (ch == "(" and cj == "~"):
                 problems.append(f"reserved control character {cj!r} is not allowed in free text")
                 bad = True
                 break
@@ -125,6 +133,23 @@ def extract_fields(text: str) -> tuple[str, list[tuple[str, str]], list[str]]:
         groups.append((ch, "".join(content).strip()))
         i = j + 1
     return name, groups, problems
+
+
+def split_resource_markers(token: str) -> tuple[str, bool, str | None]:
+    """Strip ``~...~`` markers off a resource token.
+
+    Returns ``(base_token, manually, problem)``. The only known marker is ``~manually~``
+    (case-insensitive); an unknown marker or an unpaired ``~`` is a syntax problem.
+    """
+    if token.count("~") % 2 == 1:
+        return token, False, f"unpaired '~' in resource token {token!r}"
+    manually = False
+    for marker in _MARKER_RE.findall(token):
+        if marker.strip().lower() == "manually":
+            manually = True
+        else:
+            return token, False, f"unknown marker {f'~{marker}~'!r} in resource token"
+    return _MARKER_RE.sub(" ", token).strip(), manually, None
 
 
 def _value_matches(rt: ResourceTypeDef, value: str) -> bool:
@@ -188,7 +213,13 @@ def _parse_item_fields(
             instruction_parts.append(content.strip())
 
     for token in resource_tokens:
-        typed, problem = type_resource(token, resource_types)
+        base, manually, marker_problem = split_resource_markers(token)
+        if marker_problem is not None:
+            errors.append(
+                ImportIssue(line=node.line, token=token, kind="syntax", message=marker_problem)
+            )
+            continue
+        typed, problem = type_resource(base, resource_types)
         if typed is None:
             errors.append(
                 ImportIssue(
@@ -199,6 +230,7 @@ def _parse_item_fields(
                 )
             )
         else:
+            typed.manually = manually
             node.resources.append(typed)
 
     for token in tool_tokens:

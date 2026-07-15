@@ -7,6 +7,7 @@ from receipt_board.importer.parser import (
     ResourceTypeDef,
     extract_fields,
     parse,
+    split_resource_markers,
     type_resource,
 )
 
@@ -141,3 +142,39 @@ def test_unknown_tool_and_resource_collected_not_raised():
 def test_syntax_error_for_non_list_line():
     result = _parse("This is not a list item\n")
     assert result.errors[0].kind == "syntax"
+
+
+# -- ~manually~ resource marker (issue #135) -----------------------------------
+
+
+def test_split_resource_markers_forms():
+    assert split_resource_markers("URL: https://x ~manually~") == ("URL: https://x", True, None)
+    assert split_resource_markers("~MANUALLY~ Email") == ("Email", True, None)
+    assert split_resource_markers("Email") == ("Email", False, None)
+
+
+def test_resource_manually_marker_is_parsed_per_resource():
+    text = "- [ ] Top\n\t- [ ] Leaf (URL: https://x ~manually~ | Email)\n"
+    result = _parse(text)
+    assert not result.errors
+    leaf = result.roots[0].children[0]
+    assert [(r.type, r.manually) for r in leaf.resources] == [("URL", True), ("Email", False)]
+
+
+def test_unknown_marker_is_a_syntax_error():
+    result = _parse("- [ ] Top\n\t- [ ] Leaf (https://x ~later~)\n")
+    assert any(e.kind == "syntax" and "unknown marker" in e.message for e in result.errors)
+
+
+def test_unpaired_tilde_in_resource_is_a_syntax_error():
+    result = _parse("- [ ] Top\n\t- [ ] Leaf (https://x.com/~user)\n")
+    assert any(e.kind == "syntax" and "unpaired" in e.message for e in result.errors)
+
+
+def test_tilde_is_reserved_outside_resource_groups():
+    # ... in data/instructions/tools group content
+    _, _, problems = extract_fields("Name [data ~x~]")
+    assert any("reserved control character '~'" in p for p in problems)
+    # ... and in free-text names
+    _, _, problems = extract_fields("Na~me")
+    assert any("reserved control character '~'" in p for p in problems)

@@ -78,8 +78,8 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   bricht ab). Einträge werden im Bearbeiten-Dialog umbenannt.
 - **Eintrag bearbeiten:** ein **Klick auf die Eintrags-Zeile** öffnet den Dialog *„Eintrag
   bearbeiten“* für **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem
-  Vokabular + optionaler Wert; *„+ Ressource“* für weitere Zeilen) und **Werkzeuge**
-  (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
+  Vokabular + optionaler Wert + Checkbox **„manuell“** = nicht automatisierbar;
+  *„+ Ressource“* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
   übernimmt.
 - **Feld-Vorschau:** hinter dem Eintrags-Namen fasst eine graue Vorschau die Felder in
   ihrer Import-Notation zusammen (siehe §6): `(Ressourcen)`, `{Werkzeuge}`, `[Daten]`,
@@ -135,11 +135,15 @@ der Inhalt im Textfeld (beides bleibt vor dem Import editierbar). Regeln:
 
   - Mehrere Werte mit `|` trennen.
   - **resources:** `https://…` → Typ `URL`; `Email` (optional gefolgt von einem Postfach) →
-    Typ `Email`.
+    Typ `Email`. Der Marker **`~manually~`** im Token (z. B.
+    `(https://… ~manually~ | Email)`) markiert die Ressource als **manuell zu bearbeiten**
+    (nicht automatisierbar); andere `~…~`-Marker sind ungültig.
   - **tools:** müssen bereits im **Vokabular** stehen (sonst Abbruch).
-- **Reservierte Zeichen:** Die acht Zeichen `( ) [ ] { } < >` sind **Steuerzeichen** und im
-  **Freitext** (Namen, Werte) **nicht erlaubt**. Beispiel: `Taxi (klassisch)` ist ungültig —
-  die Klammer würde als resources-Feld gelesen.
+- **Reservierte Zeichen:** Die neun Zeichen `( ) [ ] { } < > ~` sind **Steuerzeichen** und
+  im **Freitext** (Namen, Werte) **nicht erlaubt**. Beispiel: `Taxi (klassisch)` ist
+  ungültig — die Klammer würde als resources-Feld gelesen. Die Tilde ist nur als
+  `~manually~`-Marker innerhalb von `( … )` erlaubt (eine URL mit `~` ist daher nicht
+  importierbar).
 - **Alles-oder-nichts:** Bei **irgendeinem** Fehler wird **nichts** importiert; du erhältst
   einen genauen Bericht (Zeile + Wert). Behebe die Werte oder erweitere das Vokabular und
   importiere erneut.

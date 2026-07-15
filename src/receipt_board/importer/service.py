@@ -134,6 +134,7 @@ class ImportService:
                         resource_type_id=type_ids[resource.type],
                         value=resource.value,
                         position=index,
+                        manually=resource.manually,
                     )
                 )
             for index, tool_name in enumerate(node.tools):

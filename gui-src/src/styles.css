@@ -459,8 +459,21 @@ select.input {
 
 .resource-row {
   display: flex;
+  align-items: center;
   gap: 0.3rem;
   margin: 0.2rem 0;
+}
+
+/* Per-resource "manually" flag (issue #135). */
+.manual-check {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tool-check {

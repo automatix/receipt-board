@@ -11,6 +11,8 @@ export interface RbConfig {
 export interface ResourceRef {
   type: string;
   value: string | null;
+  // The element cannot be automated / must be handled manually (import marker ~manually~).
+  manually?: boolean;
 }
 
 export interface TreeNode {

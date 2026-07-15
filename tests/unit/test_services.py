@@ -390,3 +390,37 @@ def test_audit_one_entry_per_action(svc, session):
     svc.add_item(cl.id, cat.id, "a")  # 3
     count = len(session.scalars(select(AuditEntry)).all())
     assert count == 3
+
+
+# -- resource "manually" flag (issue #135) --------------------------------------
+
+
+def test_resource_manually_flag_set_edit_and_clone(svc, session):
+    cl = svc.create_blank("CL")
+    cat = svc.add_category(cl.id, "Cat")
+    item = svc.add_item(
+        cl.id,
+        cat.id,
+        "x",
+        resources=[
+            {"type": "URL", "value": "https://u", "manually": True},
+            {"type": "Email"},
+        ],
+    )
+    assert [r.manually for r in item.resources] == [True, False]
+
+    # edit_node replaces the resource list; the flag round-trips
+    svc.edit_node(
+        EXPENSE_ITEM,
+        item.id,
+        {"resources": [{"type": "Email", "manually": True}]},
+    )
+    session.refresh(item)
+    assert [(r.resource_type.name, r.manually) for r in item.resources] == [("Email", True)]
+
+    # clone preserves the flag
+    clone = svc.clone(cl.id, "Copy")
+    copied = session.scalars(
+        select(ExpenseItem).where(ExpenseItem.checklist_id == clone.id)
+    ).one()
+    assert [(r.resource_type.name, r.manually) for r in copied.resources] == [("Email", True)]

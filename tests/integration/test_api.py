@@ -82,8 +82,8 @@ def test_create_add_and_nested_export(client):
     node = tree["children"][0]["children"][0]
     assert node["id"] == item["id"]
     assert node["resources"] == [
-        {"type": "URL", "value": "https://x"},
-        {"type": "Email", "value": None},
+        {"type": "URL", "value": "https://x", "manually": False},
+        {"type": "Email", "value": None, "manually": False},
     ]
     assert node["tools"] == ["Browser"]
 
@@ -380,3 +380,59 @@ def test_origin_detection_in_audit(client):
             )
         ]
     assert origins == ["GUI", "CLI", "REST"]
+
+
+# -- resource "manually" flag (issue #135) -------------------------------------
+
+
+def test_resource_manually_roundtrip_rest_and_import(client):
+    cid = _blank(client)
+    cat = client.post(f"/checklists/{cid}/categories", json={"name": "Cat"}, headers=AUTH).json()
+    item = client.post(
+        f"/checklists/{cid}/items",
+        json={
+            "category_id": cat["id"],
+            "name": "flagged",
+            "resources": [
+                {"type": "URL", "value": "https://x", "manually": True},
+                {"type": "Email"},
+            ],
+        },
+        headers=AUTH,
+    ).json()
+    node = client.get(f"/checklists/{cid}").json()["children"][0]["children"][0]
+    assert node["resources"] == [
+        {"type": "URL", "value": "https://x", "manually": True},
+        {"type": "Email", "value": None, "manually": False},
+    ]
+
+    # edit toggles the flag
+    resp = client.patch(
+        f"/items/{item['id']}",
+        json={"resources": [{"type": "URL", "value": "https://x", "manually": False}]},
+        headers=AUTH,
+    )
+    assert resp.status_code == 200
+    node = client.get(f"/checklists/{cid}").json()["children"][0]["children"][0]
+    assert node["resources"] == [{"type": "URL", "value": "https://x", "manually": False}]
+
+    # markdown import with the ~manually~ marker
+    text = "- [ ] Top\n\t- [ ] Leaf (URL: https://y ~manually~ | Email)\n"
+    created = client.post(
+        "/checklists", json={"mode": "import", "name": "Marked", "text": text}, headers=AUTH
+    )
+    assert created.status_code == 201
+    tree = client.get(f"/checklists/{created.json()['id']}").json()
+    leaf = tree["children"][0]["children"][0]
+    assert leaf["resources"] == [
+        {"type": "URL", "value": "https://y", "manually": True},
+        {"type": "Email", "value": None, "manually": False},
+    ]
+
+    # an unknown marker aborts the import atomically
+    bad = client.post(
+        "/checklists",
+        json={"mode": "import", "name": "Bad", "text": "- [ ] T\n\t- [ ] L (https://z ~nope~)\n"},
+        headers=AUTH,
+    )
+    assert bad.status_code == 400

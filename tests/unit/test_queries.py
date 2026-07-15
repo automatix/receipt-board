@@ -63,8 +63,8 @@ def test_export_is_nested_with_all_fields(svc):
     assert item_node["name"] == "1&1"
     assert item_node["data"] == "Login 1"
     assert item_node["resources"] == [
-        {"type": "URL", "value": "https://x"},
-        {"type": "Email", "value": None},
+        {"type": "URL", "value": "https://x", "manually": False},
+        {"type": "Email", "value": None, "manually": False},
     ]
     assert item_node["tools"] == ["Browser"]
 
