@@ -272,6 +272,12 @@ select.input {
   cursor: text;
 }
 
+/* Item rows open the editor on click (issue #117). */
+.row-clickable,
+.row-clickable .name {
+  cursor: pointer;
+}
+
 .row-category .name {
   font-weight: 600;
 }

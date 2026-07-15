@@ -68,10 +68,12 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
     wird die Kategorie automatisch erledigt; ein offenes Kind hält sie offen.
   - **Eine Kategorie abwählen** ist destruktiv (setzt den Teilbaum zurück) und wird mit
     einem Dialog bestätigt, der die **Anzahl betroffener erledigter Einträge** zeigt.
-- **Umbenennen:** **Doppelklick** auf den Namen → tippen → `Enter` (`Esc` bricht ab).
-- **Eintrag bearbeiten:** das **Stift-Symbol ✎** am Eintrag öffnet den Dialog *„Eintrag bearbeiten"* für
-  **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem Vokabular + optionaler
-  Wert; *„+ Ressource"* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). **Speichern**
+- **Umbenennen (Kategorie):** **Doppelklick** auf den Namen → tippen → `Enter` (`Esc`
+  bricht ab). Einträge werden im Bearbeiten-Dialog umbenannt.
+- **Eintrag bearbeiten:** ein **Klick auf die Eintrags-Zeile** öffnet den Dialog *„Eintrag
+  bearbeiten“* für **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem
+  Vokabular + optionaler Wert; *„+ Ressource“* für weitere Zeilen) und **Werkzeuge**
+  (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
   übernimmt.
 - **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
   Überfahren einer **Kategorie-Zeile** (rechts, bei den Aktionen); auf oberster Ebene sitzt
