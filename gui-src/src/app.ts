@@ -646,23 +646,42 @@ function startInlineRename(node: TreeNode, span: HTMLElement): void {
   input.select();
 }
 
+// Row-summary abbreviation limits (issue #119).
+const SUMMARY_DATA_MAX = 25;
+const SUMMARY_INSTRUCTIONS_MAX = 50;
+
+function truncate(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+// A resource without a value shows only its type; a URL value is elided to `...` (it is
+// long and rarely readable inline); other types show `Type:value` (issue #119).
+function resourceLabel(resource: ResourceRef): string {
+  if (!resource.value) {
+    return resource.type;
+  }
+  if (resource.type.toLowerCase() === "url") {
+    return `${resource.type}:...`;
+  }
+  return `${resource.type}:${resource.value}`;
+}
+
 // Each field keeps its import-notation bracket type — `(resources)` `{tools}` `[data]`
-// `<instructions>` (TECH_SPEC §6) — so the row summary stays recognizable (issue #118).
+// `<instructions>` (TECH_SPEC §6) — so the row summary stays recognizable (issue #118),
+// with contents abbreviated (issue #119).
 function itemSummary(node: TreeNode): HTMLElement {
   const parts: string[] = [];
   if (node.resources?.length) {
-    parts.push(
-      `(${node.resources.map((r) => (r.value ? `${r.type}:${r.value}` : r.type)).join(", ")})`,
-    );
+    parts.push(`(${node.resources.map(resourceLabel).join(", ")})`);
   }
   if (node.tools?.length) {
     parts.push(`{${node.tools.join(", ")}}`);
   }
   if (node.data) {
-    parts.push(`[${node.data}]`);
+    parts.push(`[${truncate(node.data, SUMMARY_DATA_MAX)}]`);
   }
   if (node.instructions) {
-    parts.push(`<${node.instructions}>`);
+    parts.push(`<${truncate(node.instructions, SUMMARY_INSTRUCTIONS_MAX)}>`);
   }
   return el("span", { class: "summary", text: parts.join("  ") });
 }
