@@ -27,6 +27,7 @@ import {
   confirmDialog,
   el,
   importDialog,
+  mountModal,
   textPrompt,
   toast,
 } from "./ui";
@@ -1149,9 +1150,11 @@ async function onRemoveVocab(kind: "resource_type" | "tool", entry: VocabEntry):
 
 function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<ItemFields | null> {
   return new Promise((resolve) => {
-    const overlay = el("div", { class: "overlay" });
+    // Mounted via the shared modal helper so Esc (and a backdrop click) cancels and
+    // discards the input, exactly like the Cancel button (issue #146).
+    let dismiss = (): void => {};
     const finish = (value: ItemFields | null): void => {
-      overlay.remove();
+      dismiss();
       resolve(value);
     };
 
@@ -1247,8 +1250,7 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
         }),
       ]),
     ]);
-    overlay.append(box);
-    document.body.append(overlay);
+    dismiss = mountModal(box, () => finish(null));
     // Start editing in the topmost field, cursor at the end of the value (issue #117).
     setTimeout(() => {
       nameInput.focus();
