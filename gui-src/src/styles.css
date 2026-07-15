@@ -102,18 +102,40 @@ header h1 {
   margin: 0;
 }
 
+/* Responsive toolbar (issue #181): wrapping is only allowed between the two sections,
+   so a narrow window yields at most two rows (nav + actions / search + view-system). */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
   justify-content: space-between;
+}
+
+/* Each section is one clipped control row. The groups inside wrap at button granularity,
+   but the huge row-gap pushes any wrapped line far below the fixed row height, so a
+   button that no longer fits disappears as a whole instead of being half-cut. */
+.toolbar-section {
+  display: flex;
+  gap: 1rem;
+  min-width: 0;
+  /* One control row, matched to the tallest control (the checklist <select>, measured
+     33px in Chromium/WebView2; buttons are 28px, the search input 31px). */
+  height: 33px;
+  overflow: hidden;
 }
 
 .toolbar-group {
   display: flex;
-  gap: 0.35rem;
+  column-gap: 0.35rem;
+  row-gap: 999px;
   align-items: center;
+  align-content: flex-start;
   flex-wrap: wrap;
+}
+
+/* Shrinking must eat the action buttons from the right, never the nav arrows. */
+.toolbar-nav {
+  flex-shrink: 0;
 }
 
 main {

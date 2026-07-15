@@ -54,6 +54,12 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 | **🌐 EN/DE** | Sprache umschalten (Englisch ↔ Deutsch) |
 | **Design** (System/Hell/Dunkel) | Farbschema umschalten |
 
+> **Schmale Fenster:** Reicht die Breite nicht für eine Zeile, bricht die Werkzeugleiste
+> in **maximal zwei Zeilen** um — Navigation und Checklist-Aktionen oben, Suchfeld und
+> Ansichts-/System-Buttons darunter. Wird das Fenster noch schmaler, werden am rechten
+> Rand so viele Buttons ausgeblendet wie nötig (nie mehr als zwei Zeilen); beim
+> Verbreitern erscheinen sie wieder.
+
 Darunter der **Baum** der aktiven Checklist (bzw. die Vokabular-Verwaltung).
 
 > **Textsuche auf der Seite:** `Strg`+`F` öffnet die übliche Suchleiste (oben rechts) für
