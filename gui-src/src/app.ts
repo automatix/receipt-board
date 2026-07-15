@@ -546,6 +546,17 @@ function renderNode(node: TreeNode): HTMLElement {
 
   row.append(nameElement(node));
 
+  if (isCategory) {
+    // The add buttons sit directly after the category name (issue #145), hover-revealed
+    // like the other row actions; the delete button stays right-aligned in rowActions.
+    row.append(
+      el("div", { class: "add-actions" }, [
+        button(t("tree.addCategory"), () => void onAddCategory(node.id), "btn-mini btn-ghost", "add"),
+        button(t("tree.addItem"), () => void onAddItem(node.id), "btn-mini btn-ghost", "add"),
+      ]),
+    );
+  }
+
   if (node.kind === "expense_item") {
     row.append(itemSummary(node));
     // Clicking the entry opens the editor directly (issue #117). Interactive children
@@ -689,19 +700,11 @@ function itemSummary(node: TreeNode): HTMLElement {
 }
 
 function rowActions(node: TreeNode): HTMLElement {
-  const actions = el("div", { class: "actions" });
-  if (node.kind === "category") {
-    // Add buttons live on the category's own row (hover-revealed like the other row
-    // actions), replacing the former full-size button row below the children (issue #116).
-    actions.append(
-      button(t("tree.addCategory"), () => void onAddCategory(node.id), "btn-mini btn-ghost", "add"),
-      button(t("tree.addItem"), () => void onAddItem(node.id), "btn-mini btn-ghost", "add"),
-    );
-  }
-  actions.append(
+  // Right-aligned, hover-revealed row actions: just the delete button — the category add
+  // buttons sit after the category name instead (issue #145).
+  return el("div", { class: "actions" }, [
     iconButton("trash", t("common.remove"), () => void onRemove(node), "btn-mini btn-danger"),
-  );
-  return actions;
+  ]);
 }
 
 function dropZone(parentId: number | null, position: number): HTMLElement {

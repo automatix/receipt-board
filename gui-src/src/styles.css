@@ -326,7 +326,15 @@ select.input {
   opacity: 0;
 }
 
-.row:hover .actions {
+/* Category add buttons directly after the name (issue #145), hover-revealed like .actions. */
+.add-actions {
+  display: flex;
+  gap: 0.2rem;
+  opacity: 0;
+}
+
+.row:hover .actions,
+.row:hover .add-actions {
   opacity: 1;
 }
 

@@ -87,7 +87,7 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   Ressourcen ohne Wert nur mit dem Typnamen (z. B. `Email`), sonst `Typ:Wert`; **Daten**
   maximal `25` Zeichen, **Anweisungen** maximal `50` Zeichen (jeweils mit `…`).
 - **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
-  Überfahren einer **Kategorie-Zeile** (rechts, bei den Aktionen); auf oberster Ebene sitzt
+  Überfahren einer **Kategorie-Zeile** (direkt hinter dem Kategorienamen); auf oberster Ebene sitzt
   **„+ Kategorie“** neben dem **Checklist-Titel** (Einträge liegen immer unter einer
   Kategorie). **„+ Eintrag“** öffnet denselben Dialog wie *„Eintrag bearbeiten“* — alle
   Felder (Name, Data, Instructions, Resources, Tools) lassen sich direkt in einem Schritt
