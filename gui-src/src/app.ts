@@ -31,6 +31,7 @@ import {
   toast,
 } from "./ui";
 import { checkForUpdatesManually, checkForUpdatesOnStartup } from "./updates";
+import { refreshFind, setupFind } from "./find";
 
 interface State {
   checklists: ChecklistSummary[];
@@ -383,6 +384,7 @@ function render(): void {
     indexParentMap(state.tree);
     main.append(renderTree(state.tree));
   }
+  refreshFind(); // re-apply find highlights over the fresh DOM (issue #127)
 }
 
 function renderToolbar(): void {
@@ -1269,6 +1271,7 @@ function renderStatusbar(): void {
 export async function start(): Promise<void> {
   renderStatusbar();
   setupNavInputs();
+  setupFind();
   try {
     await loadVocab();
     await reload();

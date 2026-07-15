@@ -13,6 +13,10 @@
   --hover: #eceef2;
   --input-bg: #ffffff;
   --btn-bg: #eaecef;
+  --find-bg: #fff3a3;
+  --find-fg: #1c1e21;
+  --find-current-bg: #ffab40;
+  --find-current-fg: #1c1e21;
 }
 
 :root[data-theme="dark"] {
@@ -27,6 +31,10 @@
   --hover: #2f2f2f;
   --input-bg: #1a1a1a;
   --btn-bg: #333333;
+  --find-bg: #8a6d00;
+  --find-fg: #ffffff;
+  --find-current-bg: #b25e00;
+  --find-current-fg: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +50,10 @@
     --hover: #2f2f2f;
     --input-bg: #1a1a1a;
     --btn-bg: #333333;
+    --find-bg: #8a6d00;
+    --find-fg: #ffffff;
+    --find-current-bg: #b25e00;
+    --find-current-fg: #ffffff;
   }
 }
 
@@ -484,6 +496,48 @@ select.input {
 
 .import-issue.warn {
   color: #b8860b;
+}
+
+/* In-page find bar (issue #127): floats top-right below the header; match highlights via
+   the CSS Custom Highlight API. Sits below modal overlays (z 100) by design. */
+.find-bar {
+  position: fixed;
+  top: 0.5rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  z-index: 90;
+}
+
+.find-input {
+  width: 200px;
+}
+
+.find-counter {
+  color: var(--muted);
+  font-size: 0.85rem;
+  min-width: 3ch;
+  text-align: center;
+}
+
+.find-counter.find-none {
+  color: var(--danger);
+}
+
+::highlight(find) {
+  background-color: var(--find-bg);
+  color: var(--find-fg);
+}
+
+::highlight(find-current) {
+  background-color: var(--find-current-bg);
+  color: var(--find-current-fg);
 }
 
 /* Toast */
