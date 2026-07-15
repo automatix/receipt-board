@@ -73,6 +73,8 @@ const en: Catalog = {
   "item.addResource": "Resource",
   "item.tools": "Tools",
   "item.valuePlaceholder": "value (optional)",
+  "item.manually": "manually",
+  "item.manuallyHint": "Cannot be automated — handle manually (import notation: ~manually~)",
 
   "prompt.newChecklist": "New checklist (empty)",
   "prompt.cloneName": "Clone name",
@@ -178,6 +180,9 @@ const de: Catalog = {
   "item.addResource": "Ressource",
   "item.tools": "Werkzeuge",
   "item.valuePlaceholder": "Wert (optional)",
+  "item.manually": "manuell",
+  "item.manuallyHint":
+    "Nicht automatisierbar — manuell zu bearbeiten (Import-Notation: ~manually~)",
 
   "prompt.newChecklist": "Neue Checklist (leer)",
   "prompt.cloneName": "Klon-Name",

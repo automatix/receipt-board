@@ -131,6 +131,8 @@ class ItemResource(Base):
     )
     value: Mapped[str | None] = mapped_column(Text, nullable=True)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
+    # The element cannot be automated / must be handled manually (import marker ~manually~).
+    manually: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     item: Mapped[ExpenseItem] = relationship(back_populates="resources")
     resource_type: Mapped[ResourceType] = relationship()

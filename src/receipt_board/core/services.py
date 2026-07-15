@@ -140,6 +140,7 @@ class ChecklistService:
                         resource_type_id=resource.resource_type_id,
                         value=resource.value,
                         position=resource.position,
+                        manually=resource.manually,
                     )
                 )
             for link in src.tools:
@@ -450,7 +451,12 @@ class ChecklistService:
                     details={"kind": "resource_value", "name": type_name, "value": value},
                 )
             new_links.append(
-                ItemResource(resource_type_id=resource_type.id, value=value, position=position)
+                ItemResource(
+                    resource_type_id=resource_type.id,
+                    value=value,
+                    position=position,
+                    manually=bool(resource.get("manually", False)),
+                )
             )
         item.resources = new_links
 

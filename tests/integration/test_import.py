@@ -44,8 +44,12 @@ def test_imports_valid_fixture_with_typed_fields(session, audit):
 
     one_and_one = _find_item(tree, "1&1")
     assert one_and_one["resources"] == [
-        {"type": "URL", "value": "https://control-center.1und1.de/invoice.html#/current"},
-        {"type": "Email", "value": None},
+        {
+            "type": "URL",
+            "value": "https://control-center.1und1.de/invoice.html#/current",
+            "manually": False,
+        },
+        {"type": "Email", "value": None, "manually": False},
     ]
     assert one_and_one["tools"] == ["Browser", "Thunderbird"]
     assert one_and_one["data"] == "Login 588791127"

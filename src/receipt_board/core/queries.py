@@ -37,7 +37,11 @@ def _serialize_item(item: ExpenseItem) -> dict:
         "data": item.data,
         "instructions": item.instructions,
         "resources": [
-            {"type": resource.resource_type.name, "value": resource.value}
+            {
+                "type": resource.resource_type.name,
+                "value": resource.value,
+                "manually": resource.manually,
+            }
             for resource in item.resources
         ],
         "tools": [link.tool.name for link in item.tools],

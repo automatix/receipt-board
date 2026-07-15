@@ -14,6 +14,8 @@ class SetDoneRequest(BaseModel):
 class ResourceIn(BaseModel):
     type: str
     value: str | None = None
+    # The element cannot be automated / must be handled manually (import marker ~manually~).
+    manually: bool = False
 
 
 class CreateChecklistRequest(BaseModel):

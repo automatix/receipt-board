@@ -130,7 +130,11 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
    `Category`, ADR-0006); `name` = Text vor erster Klammergruppe (getrimmt);
    `done` aus `[x]`/`[ ]`.
 2. **Felder (strikt nach Klammer-Typ):** `(...)`→`resources`, `{...}`→`tools`,
-   `[...]`→`data`, `<...>`→`instructions`; Mehrfachwerte per `|`.
+   `[...]`→`data`, `<...>`→`instructions`; Mehrfachwerte per `|`. Ein resource-Token kann
+   den **Marker `~manually~`** tragen (case-insensitive, Position im Token egal): das
+   Element ist nicht automatisierbar / manuell zu bearbeiten (boolesches `manually` am
+   Resource-Eintrag, Default `false`). Unbekannte `~…~`-Marker und ein ungepaartes `~`
+   sind `syntax`-Fehler.
 3. **Typisierung (D2) — datengetrieben, case-insensitive (kein if-else):** ein
    resource-Token wird generisch gegen die `resource_types` aufgelöst: `Key: value`
    (Key = Typname, `value` muss `value_pattern` erfüllen), ein bloßer `Key` (wenn
@@ -142,9 +146,10 @@ Jede schreibende Operation: eine Transaktion → Mutation + Cascade + **ein** Au
    Fehlern Abbruch **ohne** Schreiben + Report (empfiehlt Vokabular-Erweiterung via GUI);
    sonst Insert in **einer** Transaktion. Import ist GUI-privilegiert.
 
-**Reservierte Kontrollzeichen (strikt):** Die acht Zeichen `(` `)` `[` `]` `{` `}` `<` `>`
-sind **reserviert** (Feld-Delimiter) und im **Freitext** (Namen und Feldwerte) **nicht
-zulässig**. Ein reserviertes Zeichen im Wert (z. B. ein `<…>` innerhalb eines `[...]`) ist
+**Reservierte Kontrollzeichen (strikt):** Die neun Zeichen `(` `)` `[` `]` `{` `}` `<` `>`
+`~` sind **reserviert** (Feld- bzw. Marker-Delimiter) und im **Freitext** (Namen und
+Feldwerte) **nicht zulässig**; `~` ist nur innerhalb einer `(...)`-Ressourcengruppe als
+Marker-Delimiter (`~manually~`) erlaubt. Ein reserviertes Zeichen im Wert (z. B. ein `<…>` innerhalb eines `[...]`) ist
 ein `syntax`-Fehler und bricht den atomaren Import ab. **Felder werden nur für `Expense
 Item`s** geparst; auf einem Knoten, der strukturell zur `Category` wird, werden
 Klammer-Inhalte ignoriert (Warnung). **Konsequenz:** Die reale Referenzdatei

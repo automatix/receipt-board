@@ -1174,7 +1174,14 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
         placeholder: t("item.valuePlaceholder"),
         value: resource?.value ?? "",
       }) as HTMLInputElement;
-      const row = el("div", { class: "resource-row" }, [typeSelect, valueInput]);
+      // "manually" flag (issue #135): the element cannot be automated / is handled manually.
+      const manualBox = el("input", { class: "checkbox", type: "checkbox" }) as HTMLInputElement;
+      manualBox.checked = resource?.manually ?? false;
+      const manualLabel = el("label", { class: "manual-check", title: t("item.manuallyHint") }, [
+        manualBox,
+        document.createTextNode(` ${t("item.manually")}`),
+      ]);
+      const row = el("div", { class: "resource-row" }, [typeSelect, valueInput, manualLabel]);
       row.append(iconButton("trash", t("common.remove"), () => row.remove(), "btn-mini btn-danger"));
       resourceList.append(row);
     };
@@ -1192,8 +1199,9 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
       const resources: ResourceRef[] = [];
       for (const row of Array.from(resourceList.querySelectorAll(".resource-row"))) {
         const select = row.querySelector("select") as HTMLSelectElement;
-        const value = (row.querySelector("input") as HTMLInputElement).value.trim();
-        resources.push({ type: select.value, value: value || null });
+        const value = (row.querySelector("input.input") as HTMLInputElement).value.trim();
+        const manually = (row.querySelector("input.checkbox") as HTMLInputElement).checked;
+        resources.push({ type: select.value, value: value || null, manually });
       }
       const tools: string[] = [];
       for (const label of toolBoxes) {
