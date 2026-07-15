@@ -1,3 +1,3 @@
 """Receipt Board — structured expense-checklist store and local interface."""
 
-__version__ = "1.10.0"
+__version__ = "1.11.0"
