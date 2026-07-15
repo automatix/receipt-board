@@ -1160,10 +1160,13 @@ function itemEditDialog(node: TreeNode, title = t("item.editTitle")): Promise<It
 
     const nameInput = el("input", { class: "input", value: node.name }) as HTMLInputElement;
     const dataInput = el("input", { class: "input", value: node.data ?? "" }) as HTMLInputElement;
-    const instrInput = el("input", {
-      class: "input",
-      value: node.instructions ?? "",
-    }) as HTMLInputElement;
+    // Instructions is a multiline, vertically resizable textarea (issue #147) — the
+    // column is TEXT and the JSON export carries newlines as-is.
+    const instrInput = el("textarea", {
+      class: "textarea textarea-field",
+      rows: 3,
+    }) as HTMLTextAreaElement;
+    instrInput.value = node.instructions ?? "";
 
     const resourceList = el("div", { class: "resource-list" });
     const addResourceRow = (resource?: ResourceRef): void => {

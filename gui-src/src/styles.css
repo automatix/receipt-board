@@ -165,6 +165,14 @@ select.input {
   font-family: ui-monospace, monospace;
 }
 
+/* Form-field textarea (instructions, issue #147): compact, app font, user-resizable
+   vertically (the import textarea above keeps its monospace paste-box styling). */
+.textarea-field {
+  min-height: 4.2rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
 .btn {
   background: var(--btn-bg);
   color: var(--fg);
