@@ -77,7 +77,8 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
 - **Umbenennen (Kategorie):** **Doppelklick** auf den Namen → tippen → `Enter` (`Esc`
   bricht ab). Einträge werden im Bearbeiten-Dialog umbenannt.
 - **Eintrag bearbeiten:** ein **Klick auf die Eintrags-Zeile** öffnet den Dialog *„Eintrag
-  bearbeiten“* für **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem
+  bearbeiten“* für **Name**, **Daten**, **Anweisungen** (mehrzeiliges, in der Höhe
+  vergrößerbares Textfeld), **Ressourcen** (Typ aus dem
   Vokabular + optionaler Wert + Checkbox **„manuell“** = nicht automatisierbar;
   *„+ Ressource“* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
   übernimmt; `Esc`, **Abbrechen** oder ein Klick neben den Dialog verwerfen die Eingaben.
