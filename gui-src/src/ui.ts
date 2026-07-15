@@ -40,7 +40,9 @@ export function clear(node: HTMLElement): void {
   node.replaceChildren();
 }
 
-function mountModal(box: HTMLElement, onCancel: () => void): () => void {
+// Mount a modal box on a fresh overlay. Esc and a click on the backdrop cancel (shared
+// by every dialog, including the item editor — issue #146). Returns the dismiss function.
+export function mountModal(box: HTMLElement, onCancel: () => void): () => void {
   const overlay = el("div", { class: "overlay" });
   overlay.append(box);
   overlay.addEventListener("click", (event) => {

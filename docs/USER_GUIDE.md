@@ -80,7 +80,7 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   bearbeiten“* für **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem
   Vokabular + optionaler Wert + Checkbox **„manuell“** = nicht automatisierbar;
   *„+ Ressource“* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). Der Cursor steht direkt im Feld **Name** (am Ende). **Speichern**
-  übernimmt.
+  übernimmt; `Esc`, **Abbrechen** oder ein Klick neben den Dialog verwerfen die Eingaben.
 - **Feld-Vorschau:** hinter dem Eintrags-Namen fasst eine graue Vorschau die Felder in
   ihrer Import-Notation zusammen (siehe §6): `(Ressourcen)`, `{Werkzeuge}`, `[Daten]`,
   `<Anweisungen>`. Die Inhalte werden abgekürzt: `URL`-Ressourcen als `URL:...`,
