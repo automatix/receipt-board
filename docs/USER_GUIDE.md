@@ -77,7 +77,9 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   übernimmt.
 - **Feld-Vorschau:** hinter dem Eintrags-Namen fasst eine graue Vorschau die Felder in
   ihrer Import-Notation zusammen (siehe §6): `(Ressourcen)`, `{Werkzeuge}`, `[Daten]`,
-  `<Anweisungen>`.
+  `<Anweisungen>`. Die Inhalte werden abgekürzt: `URL`-Ressourcen als `URL:...`,
+  Ressourcen ohne Wert nur mit dem Typnamen (z. B. `Email`), sonst `Typ:Wert`; **Daten**
+  maximal `25` Zeichen, **Anweisungen** maximal `50` Zeichen (jeweils mit `…`).
 - **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
   Überfahren einer **Kategorie-Zeile** (rechts, bei den Aktionen); auf oberster Ebene sitzt
   **„+ Kategorie“** neben dem **Checklist-Titel** (Einträge liegen immer unter einer
