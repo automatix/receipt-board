@@ -46,7 +46,7 @@ Oben die **Werkzeugleiste** (die Buttons tragen jeweils ein **Symbol**):
 | **Import** | Checklist aus Markdown importieren (siehe §6) |
 | **Klonen** | aktive Checklist kopieren (Struktur + Felder, alle Häkchen zurückgesetzt) |
 | **Löschen** | aktive Checklist löschen (mit Bestätigung) |
-| **Export** | aktive Checklist als JSON-Datei herunterladen |
+| **Export** | aktive Checklist als JSON-Datei speichern (öffnet den „Speichern unter“-Dialog) |
 | **Suchfeld** | Freitextsuche (mit `Enter`) |
 | **Vokabular / Checklist** | zwischen Baum- und Vokabular-Ansicht umschalten |
 | **Audit** | das Audit-Log einsehen (siehe §10) |
