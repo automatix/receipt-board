@@ -123,6 +123,26 @@ select.input {
   padding: 0.1rem 0.3rem;
 }
 
+/* Inline rename swaps the name span for this input; keep it metrics-neutral (no border,
+   no padding, no background, same weight) so the row does not jump (issue #128). The
+   focus outline signals editing without affecting layout. Scoped to tree rows — the
+   vocabulary tables keep the regular framed inputs. */
+.row .input.inline {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.row .input.inline:focus {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.row-category .input.inline {
+  font-weight: 600;
+}
+
 .search {
   min-width: 180px;
 }
