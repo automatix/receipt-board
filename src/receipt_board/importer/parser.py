@@ -14,10 +14,11 @@ turns out to be a Category is ignored and reported as a warning.
 The nine characters ``()[]{}<>~`` are **reserved control characters**: they delimit
 fields/markers and are not permitted inside free text (names or field values). A reserved
 character appearing inside a field value is a syntax error (and aborts the atomic import).
-The tilde is the marker delimiter and is only meaningful inside a ``(...)`` resources
-group: a ``~manually~`` marker on a resource token flags that resource as
-not-automatable/manual (issue #135); any other ``~...~`` marker or an unpaired ``~`` is a
-syntax error.
+The tilde is the marker delimiter. Inside a ``(...)`` resources group a ``~manually~``
+marker on a resource token flags that resource as not-automatable/manual (issue #135);
+**outside** the bracket groups — after the name or between groups — it flags the whole
+entry (``- [ ] Taxi ~manually~``, issue #156). Any other ``~...~`` marker or an unpaired
+``~`` is a syntax error.
 """
 
 from __future__ import annotations
@@ -64,6 +65,7 @@ class ParsedNode:
     tools: list[str] = field(default_factory=list)
     data: str | None = None
     instructions: str | None = None
+    manually: bool = False
 
 
 @dataclass
@@ -89,8 +91,10 @@ def extract_fields(text: str) -> tuple[str, list[tuple[str, str]], list[str]]:
 
     ``name`` is the text before the first reserved control character. Each field group is
     ``opener content closer`` whose content must contain **no** reserved character (they
-    delimit fields and are not allowed in free text). A reserved character inside a value,
-    or an unbalanced group, yields a syntax ``problem`` (the import then aborts).
+    delimit fields and are not allowed in free text). A ``~marker~`` token is also legal
+    at this level (after the name / between groups, issue #156) and is returned as a group
+    with opener ``"~"``. A reserved character inside a value, an unbalanced group, or an
+    unpaired ``~`` yields a syntax ``problem`` (the import then aborts).
     """
     first = next((i for i, ch in enumerate(text) if ch in _RESERVED), None)
     if first is None:
@@ -103,6 +107,22 @@ def extract_fields(text: str) -> tuple[str, list[tuple[str, str]], list[str]]:
         ch = text[i]
         if ch.isspace():
             i += 1
+            continue
+        if ch == "~":
+            # A top-level ~marker~ token (e.g. ~manually~ flagging the whole entry).
+            end = text.find("~", i + 1)
+            if end == -1:
+                problems.append(f"unpaired '~' in {text.strip()!r}")
+                break
+            marker = text[i + 1 : end]
+            bad_char = next((c for c in marker if c in _RESERVED), None)
+            if bad_char is not None:
+                problems.append(
+                    f"reserved control character {bad_char!r} is not allowed in free text"
+                )
+                break
+            groups.append(("~", marker.strip()))
+            i = end + 1
             continue
         if ch not in _OPENERS:
             # A stray closer / non-opener reserved char outside any group.
@@ -202,6 +222,20 @@ def _parse_item_fields(
     data_parts: list[str] = []
     instruction_parts: list[str] = []
     for opener, content in groups:
+        if opener == "~":
+            # A top-level marker flags the whole entry (issue #156).
+            if content.strip().lower() == "manually":
+                node.manually = True
+            else:
+                errors.append(
+                    ImportIssue(
+                        line=node.line,
+                        token=f"~{content}~",
+                        kind="syntax",
+                        message=f"unknown marker {f'~{content}~'!r}",
+                    )
+                )
+            continue
         target = _FIELD_BY_OPENER[opener]
         if target == "resources":
             resource_tokens += [t.strip() for t in content.split("|") if t.strip()]
@@ -308,7 +342,7 @@ def parse(
                         node.line,
                         node.raw_body,
                         "structure",
-                        "Bracket fields on a category were ignored (categories have no fields)",
+                        "Fields/markers on a category were ignored (categories have no fields)",
                     )
                 )
             for child in node.children:

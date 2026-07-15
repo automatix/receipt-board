@@ -124,6 +124,7 @@ class ImportService:
                 done=node.done,
                 data=node.data,
                 instructions=node.instructions,
+                manually=node.manually,
             )
             self.session.add(item)
             self.session.flush()

@@ -38,6 +38,8 @@ class AddItemRequest(BaseModel):
     tools: list[str] = []
     data: str | None = None
     instructions: str | None = None
+    # The whole entry is handled manually (import marker ~manually~ outside the groups).
+    manually: bool = False
     position: int | None = None
 
 
@@ -49,6 +51,7 @@ class EditItemRequest(BaseModel):
     name: str | None = None
     data: str | None = None
     instructions: str | None = None
+    manually: bool | None = None
     resources: list[ResourceIn] | None = None
     tools: list[str] | None = None
 

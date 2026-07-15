@@ -171,10 +171,40 @@ def test_unpaired_tilde_in_resource_is_a_syntax_error():
     assert any(e.kind == "syntax" and "unpaired" in e.message for e in result.errors)
 
 
-def test_tilde_is_reserved_outside_resource_groups():
-    # ... in data/instructions/tools group content
+def test_tilde_is_reserved_inside_non_resource_groups():
+    # In data/instructions/tools group content the tilde stays illegal.
     _, _, problems = extract_fields("Name [data ~x~]")
     assert any("reserved control character '~'" in p for p in problems)
-    # ... and in free-text names
+    # An unpaired tilde at top level is a syntax problem.
     _, _, problems = extract_fields("Na~me")
-    assert any("reserved control character '~'" in p for p in problems)
+    assert any("unpaired '~'" in p for p in problems)
+
+
+def test_item_level_manually_marker():
+    # ~manually~ outside the bracket groups flags the whole entry (issue #156).
+    result = _parse("- [ ] Top\n\t- [ ] Taxi ~manually~\n")
+    assert not result.errors
+    taxi = result.roots[0].children[0]
+    assert (taxi.name, taxi.manually) == ("Taxi", True)
+
+
+def test_item_level_manually_marker_with_groups():
+    text = "- [ ] Top\n\t- [ ] Leaf ~Manually~ (URL: https://x) [note]\n"
+    result = _parse(text)
+    assert not result.errors
+    leaf = result.roots[0].children[0]
+    assert leaf.manually is True
+    assert [(r.type, r.manually) for r in leaf.resources] == [("URL", False)]
+    assert leaf.data == "note"
+
+
+def test_item_level_unknown_marker_is_a_syntax_error():
+    result = _parse("- [ ] Top\n\t- [ ] Leaf ~later~\n")
+    assert any(e.kind == "syntax" and "unknown marker" in e.message for e in result.errors)
+
+
+def test_marker_on_a_category_is_ignored_with_a_warning():
+    result = _parse("- [ ] Top ~manually~\n\t- [ ] Leaf\n")
+    assert not result.errors
+    assert any(w.kind == "structure" for w in result.warnings)
+    assert result.roots[0].manually is False

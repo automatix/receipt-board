@@ -436,3 +436,39 @@ def test_resource_manually_roundtrip_rest_and_import(client):
         headers=AUTH,
     )
     assert bad.status_code == 400
+
+
+def test_item_manually_roundtrip_rest_and_import(client):
+    """Item-level manually flag (issue #156): REST add/edit and the marker outside groups."""
+    cid = _blank(client)
+    cat = client.post(f"/checklists/{cid}/categories", json={"name": "Cat"}, headers=AUTH).json()
+    item = client.post(
+        f"/checklists/{cid}/items",
+        json={"category_id": cat["id"], "name": "Taxi", "manually": True},
+        headers=AUTH,
+    ).json()
+    node = client.get(f"/checklists/{cid}").json()["children"][0]["children"][0]
+    assert node["manually"] is True
+
+    # edit toggles the flag off
+    resp = client.patch(f"/items/{item['id']}", json={"manually": False}, headers=AUTH)
+    assert resp.status_code == 200
+    node = client.get(f"/checklists/{cid}").json()["children"][0]["children"][0]
+    assert node["manually"] is False
+
+    # markdown import with the marker outside the bracket groups
+    text = "- [ ] Top\n\t- [ ] Taxi ~manually~\n\t- [ ] Bus\n"
+    created = client.post(
+        "/checklists", json={"mode": "import", "name": "Marked", "text": text}, headers=AUTH
+    )
+    assert created.status_code == 201
+    children = client.get(f"/checklists/{created.json()['id']}").json()["children"][0]["children"]
+    assert [(c["name"], c["manually"]) for c in children] == [("Taxi", True), ("Bus", False)]
+
+    # an unknown top-level marker aborts the import atomically
+    bad = client.post(
+        "/checklists",
+        json={"mode": "import", "name": "Bad2", "text": "- [ ] T\n\t- [ ] L ~nope~\n"},
+        headers=AUTH,
+    )
+    assert bad.status_code == 400

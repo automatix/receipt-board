@@ -224,6 +224,7 @@ def add_item(
         tools=body.tools,
         data=body.data,
         instructions=body.instructions,
+        manually=body.manually,
         position=body.position,
     )
     return {"id": item.id, "kind": EXPENSE_ITEM}

@@ -84,6 +84,9 @@ class ExpenseItem(TimestampMixin, Base):
     done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     data: Mapped[str | None] = mapped_column(Text, nullable=True)
     instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The whole entry cannot be automated / must be handled manually (issue #156);
+    # import marker ~manually~ outside the bracket groups.
+    manually: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     checklist: Mapped[Checklist] = relationship(back_populates="items")
     resources: Mapped[list[ItemResource]] = relationship(
