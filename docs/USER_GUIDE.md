@@ -73,10 +73,12 @@ Ganz unten zeigt eine **schmale graue Info-Leiste** rechts die installierte **Ap
   **Name**, **Daten**, **Anweisungen**, **Ressourcen** (Typ aus dem Vokabular + optionaler
   Wert; *„+ Ressource"* für weitere Zeilen) und **Werkzeuge** (Mehrfachauswahl). **Speichern**
   übernimmt.
-- **Hinzufügen:** unter jeder Kategorie **„+ Kategorie"** / **„+ Eintrag"**; auf oberster
-  Ebene **„+ Kategorie"** (Einträge liegen immer unter einer Kategorie). **„+ Eintrag"**
-  öffnet denselben Dialog wie *„Eintrag bearbeiten"* — alle Felder (Name, Data,
-  Instructions, Resources, Tools) lassen sich direkt in einem Schritt setzen.
+- **Hinzufügen:** die dezenten Buttons **„+ Kategorie“** / **„+ Eintrag“** erscheinen beim
+  Überfahren einer **Kategorie-Zeile** (rechts, bei den Aktionen); auf oberster Ebene sitzt
+  **„+ Kategorie“** neben dem **Checklist-Titel** (Einträge liegen immer unter einer
+  Kategorie). **„+ Eintrag“** öffnet denselben Dialog wie *„Eintrag bearbeiten“* — alle
+  Felder (Name, Data, Instructions, Resources, Tools) lassen sich direkt in einem Schritt
+  setzen.
 - **Entfernen:** das **Papierkorb-Symbol 🗑** (mit Bestätigung).
 - **Verschieben / Umsortieren (Drag & Drop):**
   - einen Knoten auf eine **Kategorie-Zeile** ziehen → **in** diese Kategorie verschieben

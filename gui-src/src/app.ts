@@ -488,7 +488,13 @@ function iconButton(
 }
 
 function renderTree(tree: ChecklistTree): HTMLElement {
-  const root = el("div", { class: "tree" }, [el("h2", { text: tree.name })]);
+  // The top-level "+ Category" sits beside the checklist title (the top level's "parent"),
+  // as a subtle ghost button (issue #116).
+  const head = el("div", { class: "tree-head" }, [
+    el("h2", { text: tree.name }),
+    button(t("tree.addCategory"), () => void onAddCategory(null), "btn-mini btn-ghost", "add"),
+  ]);
+  const root = el("div", { class: "tree" }, [head]);
   const list = el("div", { class: "node-list" });
   list.append(dropZone(null, 0)); // insert at top level, position 0
   for (const node of tree.children) {
@@ -496,11 +502,6 @@ function renderTree(tree: ChecklistTree): HTMLElement {
     list.append(dropZone(null, node.position + 1));
   }
   root.append(list);
-  root.append(
-    el("div", { class: "node-add" }, [
-      button(t("tree.addCategory"), () => void onAddCategory(null), "", "add"),
-    ]),
-  );
   return root;
 }
 
@@ -575,15 +576,6 @@ function renderNode(node: TreeNode): HTMLElement {
     container.append(childList);
   }
 
-  if (isCategory) {
-    container.append(
-      el("div", { class: "node-add" }, [
-        button(t("tree.addCategory"), () => void onAddCategory(node.id), "", "add"),
-        button(t("tree.addItem"), () => void onAddItem(node.id), "", "add"),
-      ]),
-    );
-  }
-
   return container;
 }
 
@@ -651,6 +643,14 @@ function itemSummary(node: TreeNode): HTMLElement {
 
 function rowActions(node: TreeNode): HTMLElement {
   const actions = el("div", { class: "actions" });
+  if (node.kind === "category") {
+    // Add buttons live on the category's own row (hover-revealed like the other row
+    // actions), replacing the former full-size button row below the children (issue #116).
+    actions.append(
+      button(t("tree.addCategory"), () => void onAddCategory(node.id), "btn-mini btn-ghost", "add"),
+      button(t("tree.addItem"), () => void onAddItem(node.id), "btn-mini btn-ghost", "add"),
+    );
+  }
   if (node.kind === "expense_item") {
     actions.append(iconButton("edit", t("common.edit"), () => void onEditItem(node), "btn-mini"));
   }
