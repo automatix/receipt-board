@@ -45,10 +45,19 @@ export function clear(node: HTMLElement): void {
 export function mountModal(box: HTMLElement, onCancel: () => void): () => void {
   const overlay = el("div", { class: "overlay" });
   overlay.append(box);
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) {
+  // Backdrop dismiss requires the press to both start AND end directly on the overlay.
+  // A `click` fires on the common ancestor of its mousedown/mouseup targets, so a drag
+  // that starts inside the dialog (e.g. selecting text right-to-left) and is released on
+  // the backdrop would otherwise close it — unintended (issue #201).
+  let pressedOnOverlay = false;
+  overlay.addEventListener("mousedown", (event) => {
+    pressedOnOverlay = event.target === overlay;
+  });
+  overlay.addEventListener("mouseup", (event) => {
+    if (pressedOnOverlay && event.target === overlay) {
       onCancel();
     }
+    pressedOnOverlay = false;
   });
   const onKey = (event: KeyboardEvent): void => {
     if (event.key === "Escape") {
